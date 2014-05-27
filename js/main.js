@@ -11,6 +11,8 @@
       currentGravityAngle = 0;;
 
   function init() {
+    utils.l10n.init();
+    
     game = new Game({
       'el': elContainer,
       'width': elContainer.offsetWidth,

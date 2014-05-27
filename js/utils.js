@@ -59,6 +59,40 @@ utils = (function() {
         localStorage[key] = JSON.stringify(value);
         callback && callback();
       }
+    },
+
+    l10n: {
+      translations: {},
+
+      DEFAULT_LANGUAGE: 'en',
+
+      init: function init(options) {
+        !options && (options = {});
+
+        this.load(options.language);
+      },
+
+      get: function get(key) {
+        return this.translations[key];
+      },
+
+      load: function load(language) {
+        !language && (language = this.DEFAULT_LANGUAGE);
+
+        var self = this,
+            request = new XMLHttpRequest();
+
+        request.open('GET', 'data/' + language.toLowerCase() + '.json');
+        request.onload = function(data) {
+          if (request.response) {
+            self.translations = request.response;
+          } else if (language !== self.DEFAULT_LANGUAGE) {
+            self.load(self.DEFAULT_LANGUAGE);
+          }
+        };
+        request.responseType = 'json';
+        request.send();
+      }
     }
   };
 }());
