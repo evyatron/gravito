@@ -1,0 +1,184 @@
+body {
+  background: #fff;
+  overflow: hidden;
+  -webkit-transition: all 600ms ease-in-out;
+  transition: all 600ms ease-in-out;
+}
+.game-ready {
+  background: #000;
+}
+#container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 700px;
+  height: 700px;
+  margin: -350px 0 0 -350px;
+  opacity: 0;
+  -webkit-transition: opacity 500ms ease-in-out 300ms;
+  transition: opacity 500ms ease-in-out 300ms;
+}
+.game-ready #container {
+  opacity: 1;
+}
+
+#canvases {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 1) inset;
+  -webkit-transition: -webkit-transform 700ms ease-in-out;
+  transition: transform 700ms ease-in-out;
+}
+  #canvases:after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    background: #000;
+    -webkit-transform: translate(-50%, -50%) rotate(45deg) scale(.3);
+    transform: translate(-50%, -75%) rotate(45deg) scale(.3);
+  }
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+#log {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 10px;
+  background: rgba(0, 0, 0, .8);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, .6);
+  border-bottom-left-radius: 6px;
+  color: #fff;
+  width: 200px;
+  overflow: hidden;
+  font-family: monospace;
+  display: none;
+}
+.debug #log {
+  display: block;
+}
+  #log hr {
+
+  }
+  #log label {
+    display: inline-block;
+    vertical-align: middle;
+    width: 120px;
+  }
+    #log label:after {
+      content: ':';
+    }
+  #log span {
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+#controls {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+  #controls div {
+    position: absolute;
+    top: 0;
+    padding: 0 10px;
+    opacity: 0;
+    pointer-events: none;
+    -webkit-transition: all 600ms ease-in-out;
+    transition: all 600ms ease-in-out;
+  }
+
+  .intro-true #controls .movement {
+    opacity: 1;
+    pointer-events: inherit;
+  }
+  .allowed-rotation-90 #controls .gravity,
+  .allowed-rotation-180 #controls .gravity {
+    opacity: 1;
+    pointer-events: inherit;
+  }
+
+  #controls .gravity {
+    left: 0;
+  }
+    #controls .gravity b {
+      width: 50px;
+      height: 50px;
+      line-height: 50px;
+      margin-right: 5px;
+    }
+    #controls .gravity b.active {
+      line-height: 53px;
+    }
+  #controls .movement {
+    right: 0;
+  }
+    #controls .movement b {
+      font-size: 20px;
+      width: 24px;
+      height: 24px;
+      line-height: 20px;
+      box-shadow: -1px -1px 0 0 rgba(255, 255, 255, .3) inset;
+    }
+    #controls .movement #move-right {
+      margin-left: 2px;
+    }
+    #controls .movement #move-jump {
+      display: block;
+      float: none;
+      margin: 0 auto 2px auto;
+    }
+    #controls .movement b.active {
+      line-height: 27px;
+    }
+
+  #controls b {
+    float: left;
+    font-family: monospace;
+    font-size: 28px;
+    font-weight: 300;
+    text-align: center;
+    -webkit-box-sizing: borderbox;
+    -moz-box-sizing: borderbox;
+    box-sizing: borderbox;
+    box-shadow: -1px -1px 0 0 rgba(255, 255, 255, .7) inset;
+    cursor: pointer;
+    background: rgba(255, 255, 255, .5);
+    border-radius: 6px;
+  }
+  #controls b:hover {
+    background: rgba(255, 255, 255, .6);
+  }
+    #controls b.active {
+      text-indent: 1px;
+      box-shadow: 1px 1px 0 0 rgba(0, 0, 0, .7) inset;
+      background: rgba(255, 255, 255, .4);
+    }
+
+.dialog {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  padding: 10px;
+  font-size: 21px;
+  font-weight: 300;
+  color: #fff;
+  background: rgba(40, 80, 120, 0.8);
+  box-shadow: 0 0 0 4px rgba(20, 60, 100, 0.8);
+  border-radius: 6px;
+  -webkit-transform: translate(-50%, 50%);
+  transform: translate(-50%, 50%);
+}

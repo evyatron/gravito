@@ -82,7 +82,7 @@ utils = (function() {
         var self = this,
             request = new XMLHttpRequest();
 
-        request.open('GET', 'data/' + language.toLowerCase() + '.json');
+        request.open('GET', 'data/localization/' + language.toLowerCase() + '.json');
         request.onload = function(data) {
           if (request.response) {
             self.translations = request.response;

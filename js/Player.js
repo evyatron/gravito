@@ -10,7 +10,8 @@ window.Player = (function() {
     this.isMovingRight = false;
 
     this.data = {
-      'maxRotation': 0
+      'maxRotation': 0,
+      'didIntro': false
     };
 
     this.JUMP_FORCE = 300;
@@ -43,7 +44,8 @@ window.Player = (function() {
       window.addEventListener('keyup', this.onKeyUp.bind(this));
 
       this.loadSettings(function onDataLoaded() {
-        document.body.classList.add('allowed-rotation-' + this.data.maxRotation);
+        document.body.classList.add('allowed-rotation-' + this.get('maxRotation'));
+        document.body.classList.add('intro-' + this.get('didIntro'));
       }.bind(this));
     },
 

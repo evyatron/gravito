@@ -28,8 +28,10 @@ Layer = (function() {
     removeSprite: function removeSprite(spriteToRemove) {
       console.log('[Layer] removeSprite', this, spriteToRemove);
 
+      var spriteId = spriteToRemove.id || spriteToRemove;
+
       for (var i = 0, sprite; sprite = this.sprites[i++];) {
-        if (sprite.id === spriteToRemove.id) {
+        if (sprite.id === spriteId) {
           this.sprites.splice(i - 1, 1);
           break;
         }

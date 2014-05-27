@@ -1,0 +1,29 @@
+{
+  "NOTE": "This is a plain-text file with ALL OF THE GAMES' TEXT",
+  "NOTE": "As such, it will contain MANY SPOILERS and should really not be viewed by anyone",
+
+
+  "intro": [
+    "{d:2500}[INTRO TEXT 1]",
+    "{m:moveRight}[INTRO TEXT 2 - MOVE RIGHT]",
+    "{m:moveLeft}[INTRO TEXT 2 - MOVE LEFT]",
+    "{m:jump}[INTRO TEXT 2 - JUMP]",
+    "[INTRO TEXT FINAL]"
+  ],
+
+  "gravity-1": [
+    "What's this then?",
+    "{d:2500}Hmm... What a weird device.",
+    "{d:3000}I wonder what happens if I click this here--",
+    "{m:gravityCW}Whoaaaaa!",
+    "{d:1500}Woohoo!",
+    "{d:1500}So this other button probably--",
+    "{m:gravityCCW}",
+    "{d:1500}Yeap. That's it.",
+    "Oh I'm going to like this!"
+  ],
+
+
+  "ideas": "is this only 2 dimensions? I need to go back",
+  "ideas": "There seems to be some...force keeps pulling me down"
+}
