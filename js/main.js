@@ -193,22 +193,24 @@
       rotateGravity(-90);
     })
 
-    document.getElementById('move-jump').addEventListener('mousedown', function(e) {
-      e.target.classList.add('active');
-      Player.isJumping = true;
-    });
-
     var elButtons = [
-      [document.getElementById('move-jump'), 'isJumping'],
-      [document.getElementById('move-right'), 'isMovingRight'],
-      [document.getElementById('move-left'), 'isMovingLeft']
+      document.getElementById('move-jump'),
+      document.getElementById('move-right'),
+      document.getElementById('move-left')
     ];
 
+    for (var i = 0, el; el = elButtons[i++];) {
+      el.addEventListener('mousedown', function(e) {
+        e.target.classList.add('active');
+        Player[e.target.dataset.property] = true;
+      });
+    }
+
     window.addEventListener('mouseup', function(e) {
-      for (var i = 0, button; button = elButtons[i++];) {
-        if (button[0].classList.contains('active')) {
-          button[0].classList.remove('active')
-          Player[button[1]] = false;
+      for (var i = 0, el; el = elButtons[i++];) {
+        if (el.classList.contains('active')) {
+          el.classList.remove('active')
+          Player[el.dataset.property] = false;
         }
       }
     });
