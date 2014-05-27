@@ -1,6 +1,10 @@
 body {
+  font: 300 12px 'Oswald', Sans-Serif;
   background: #fff;
   overflow: hidden;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
   -webkit-transition: all 600ms ease-in-out;
   transition: all 600ms ease-in-out;
 }
@@ -87,9 +91,6 @@ canvas {
   top: 100%;
   left: 0;
   right: 0;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  user-select: none;
 }
   #controls div {
     position: absolute;
@@ -168,17 +169,34 @@ canvas {
       background: rgba(255, 255, 255, .4);
     }
 
-.dialog {
+#dialogs {
   position: absolute;
-  bottom: 10px;
+  bottom: -40px;
   left: 50%;
-  padding: 10px;
-  font-size: 21px;
+  width: 400px;
+  margin-left: -200px;
+  height: 100px;
+  text-align: center;
+  font-size: 19px;
+  letter-spacing: 1px;
   font-weight: 300;
   color: #fff;
-  background: rgba(40, 80, 120, 0.8);
-  box-shadow: 0 0 0 4px rgba(20, 60, 100, 0.8);
-  border-radius: 6px;
-  -webkit-transform: translate(-50%, 50%);
-  transform: translate(-50%, 50%);
+  pointer-events: none;
 }
+  #dialogs:before {
+    content: '';
+    height: 100%;
+    width: 0;
+    display: inline-block;
+    vertical-align: middle;
+  }
+  #dialogs > div {
+    display: inline-block;
+    vertical-align: middle;
+    padding: 20px;
+    background: rgba(40, 80, 120, 1);
+    box-shadow: 0 0 0 1px rgba(20, 60, 100, 1),
+                0 0 10px 3px rgba(0, 0, 0, .9),
+                0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+    border-radius: 3px;
+  }
