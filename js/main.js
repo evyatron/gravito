@@ -94,6 +94,13 @@
       }
     });
 
+    document.getElementById('rotate-left').addEventListener('click', function() {
+      rotateGravity(90);
+    })
+    document.getElementById('rotate-right').addEventListener('click', function() {
+      rotateGravity(-90);
+    })
+
     window.setTimeout(function() {
       document.body.classList.add('game-ready');
       game.start();
@@ -105,12 +112,31 @@
 
   // default gravity ("bottom") is 90deg, since it's pointing down
   function rotateGravity(angle) {
+    var elButton;
+    if (angle > 0) {
+      elButton = document.getElementById('rotate-left');
+    } else if (angle < 0) {
+      elButton = document.getElementById('rotate-right');
+    }
+
+    if (elButton.classList.contains('active')) {
+      return;
+    }
+
     currentGravityAngle -= angle;
 
+    // change gravity
     game.setGravity(window.GRAVITY.rotate(angle));
 
+    // rotate game graphics
     elContainer.style.cssText += '-webkit-transform: rotate(' + currentGravityAngle + 'deg);' +
                                  'transform: rotate(' + currentGravityAngle + 'deg);';
+
+    // UI indication
+    elButton.classList.add('active')
+    window.setTimeout(function() {
+      elButton.classList.remove('active')
+    }, 700);
   }
 
   function spawnMovableFromPlayer() {
