@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Gravito</title>
+    <style>
+      body {
+        background: #fff;
+        overflow: hidden;
+        -webkit-transition: all 600ms ease-in-out;
+        transition: all 600ms ease-in-out;
+      }
+      #container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 700px;
+        height: 700px;
+        margin: -350px 0 0 -350px;
+        background: #fff;
+        opacity: 0;
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 1) inset;
+        -webkit-transition: -webkit-transform 700ms ease-in-out,
+                            opacity 500ms ease-in-out 300ms;
+        transition: transform 700ms ease-in-out,
+                    opacity 500ms ease-in-out 300ms;
+      }
+        #container:after {
+          content: '';
+          position: absolute;
+          top: 100%;
+          left: 50%;
+          width: 20px;
+          height: 20px;
+          background: #000;
+          -webkit-transform: translate(-50%, -50%) rotate(45deg) scale(.3);
+          transform: translate(-50%, -75%) rotate(45deg) scale(.3);
+        }
+      canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+      #log {
+        position: absolute;
+        top: 0;
+        right: 0;
+        padding: 10px;
+        background: rgba(0, 0, 0, .8);
+        box-shadow: 0 0 0 3px rgba(0, 0, 0, .6);
+        border-bottom-left-radius: 6px;
+        color: #fff;
+        width: 200px;
+        overflow: hidden;
+        font-family: monospace;
+      }
+        #log hr {
+
+        }
+        #log label {
+          display: inline-block;
+          vertical-align: middle;
+          width: 120px;
+        }
+          #log label:after {
+            content: ':';
+          }
+        #log span {
+          display: inline-block;
+          vertical-align: middle;
+        }
+
+      .game-ready {
+        background: #000;
+      }
+      .game-ready #container {
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body class="game-ready">
+    <div id="container"></div>
+    <div id="log"></div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/Sprite.js"></script>
+    <script src="js/Layer.js"></script>
+    <script src="js/Game.js"></script>
+    <script src="js/Player.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>
