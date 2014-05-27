@@ -5,6 +5,8 @@ Sprite = (function() {
     this.height = 0;
     this.mass = 1;
 
+    this.isPlayer = false;
+
     this.bounce = {};
 
     this.position = new Vector(0, 0);
@@ -14,6 +16,7 @@ Sprite = (function() {
     this.movable = false;
     this.solid = false;
     this.gravity = false;
+    this.collisionable = false;
 
     this.maxVelocity = null;
 
@@ -53,6 +56,8 @@ Sprite = (function() {
       !this.bounce.hasOwnProperty('left') && (this.bounce.left = 0);
       !this.bounce.hasOwnProperty('right') && (this.bounce.right = 0);
 
+      this.collisionable = this.collisionable || this.solid;
+
       this.topLeft = options.position || new Vector(options.x || 0, options.y || 0);
       this.topRight = new Vector(this.topLeft.x + this.width, this.topLeft.y);
       this.bottomRight = new Vector(this.topLeft.x + this.width, this.topLeft.y + this.height);
@@ -79,6 +84,7 @@ Sprite = (function() {
     },
 
     onCollisionWith: function onCollisionWith(spriteWith, callback, callbackEnd) {
+      console.info(spriteWith, callback, callbackEnd)
       var spriteWithId = spriteWith && (spriteWith.id || spriteWith) || '';
 
       if (!this.collisionCallbacks[spriteWithId]) {
@@ -181,7 +187,7 @@ Sprite = (function() {
       (!this.acceleration.x) && (this.acceleration.x = 0);
       (!this.acceleration.y) && (this.acceleration.y = 0);
 
-      if (this.id === 'player') {
+      if (this.id === 'movable_1') {
         Log.add('this.resting', this.resting);
 
         Log.title('before')
@@ -232,7 +238,7 @@ Sprite = (function() {
 
 
 
-      if (this.id === 'player') {
+      if (this.id === 'movable_1') {
         Log.title('after');
         Log.add('acceleration.x', this.acceleration.x);
         Log.add('acceleration.y', this.acceleration.y);

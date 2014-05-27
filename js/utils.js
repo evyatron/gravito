@@ -37,6 +37,28 @@ utils = (function() {
           callback.apply(this, args);
         }
       };
+    },
+
+    Storage: {
+      get: function get(key, callback) {
+        var value = localStorage[key];
+        if (value) {
+          try {
+            value = JSON.parse(value);
+          } catch(ex) {}
+        }
+
+        callback && callback(value && value.value || value);
+      },
+
+      set: function set(key, value, callback) {
+        value = {
+          'value': value
+        };
+
+        localStorage[key] = JSON.stringify(value);
+        callback && callback();
+      }
     }
   };
 }());

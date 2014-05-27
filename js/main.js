@@ -34,42 +34,80 @@
     game.addLayer(layerPlayer);
 
     // player
-    Player.init();
+    Player.init({
+      'x': 50,
+      'y': 500
+    });
     layerPlayer.addSprite(Player.sprite);
 
     // surfaces
-    var platforms = [
-      [0, 0, game.width, 20],
-      [0, game.height - 20, game.width, 20],
-      [0, 0, 20, game.height],
-      [game.width - 20, 0, 20, game.height],
+    var BORDER_WIDTH = 20,
+        platforms = [
+          [0, 0, game.width, BORDER_WIDTH],
+          [0, game.height - BORDER_WIDTH, game.width, BORDER_WIDTH],
+          [0, 0, BORDER_WIDTH, game.height],
+          [game.width - BORDER_WIDTH, 0, BORDER_WIDTH, game.height],
 
-      [200, 620, 100, 20],
-      [620, 470, 80, 10],
-      [520, 410, 50, 10],
-      [420, 350, 50, 10],
-      [320, 290, 50, 10],
-      [220, 230, 50, 10],
-      [120, 170, 50, 10],
-      [60, 110, 740, 10],
-      [150, 370, 150, 10]
-    ];
+          [120, 170, 50, 10],
+          [220, 230, 50, 10],
+          [320, 290, 50, 10],
+          [420, 350, 50, 10],
+          [520, 410, 50, 10],
+          [620, 470, 80, 10],
+          [520, 530, 50, 10],
+          [420, 590, 50, 10],
+
+          [60, 110, 740, 10],
+          [BORDER_WIDTH, 150, 60, 10],
+          [BORDER_WIDTH + 50, 140, 10, 20]
+        ];
 
     for (var i = 0, platform; platform = platforms[i++];) {
-      platform = new Platform({
+      platform = new Sprite({
         'id': 'platform_' + i,
         'x': platform[0],
         'y': platform[1],
         'width': platform[2],
-        'height': platform[3]
+        'height': platform[3],
+        'background': 'rgba(0, 0, 0, 1)',
+        'gravity': false,
+        'solid': true,
+        'movable': false,
+        'friction': new Vector(0.5, 0.5)
       });
 
       layerBackground.addSprite(platform);
     }
 
+
+    var collectibles = [
+      [440, 320, 10, 10, 'rgba(0, 128, 0, 1)', onCollectRotate1]
+    ];
+    for (var i = 0, collectibleData; collectibleData = collectibles[i++];) {
+      var collectible = new Sprite({
+        'id': 'collectibleData_' + i,
+        'x': collectibleData[0],
+        'y': collectibleData[1],
+        'width': collectibleData[2],
+        'height': collectibleData[3],
+        'background': collectibleData[4] || 'rgba(0, 0, 0, 1)',
+        'gravity': false,
+        'solid': false,
+        'movable': false,
+        'collisionable': true,
+        'friction': new Vector(0.5, 0.5)
+      });
+
+      if (collectibleData[5]) {
+        Player.sprite.onCollisionWith(collectible, collectibleData[5]);
+      }
+
+      layerObjects.addSprite(collectible);
+    }
+
     var movables = [
-      [100, 650, 150, 20],
-      //[100, 580, 20, 20],
+      [game.width - BORDER_WIDTH - 60 - Player.sprite.width - 10, 650, 60, 20],
+      //[300, 580, 20, 20],
       //[400, 280, 50, 50],
     ];
     for (var i = 0, movable; movable = movables[i++];) {
@@ -110,8 +148,29 @@
     window.game = game;
   }
 
+  function onCollectRotate1(sprite, direction) {
+    layerObjects.removeSprite(sprite);
+    setPlayerAllowedRotation(90);
+  }
+
+  function setPlayerAllowedRotation(rotation) {
+    var currentAllowedRotation = Player.get('maxRotation');
+    if (currentAllowedRotation >= rotation) {
+      return;
+    }
+
+    document.body.classList.remove('allowed-rotation-' + currentAllowedRotation);
+    document.body.classList.add('allowed-rotation-' + rotation);
+    Player.set('maxRotation', rotation);
+  }
+
   // default gravity ("bottom") is 90deg, since it's pointing down
   function rotateGravity(angle) {
+    if (Math.abs(currentGravityAngle - angle) % 360 > Player.get('maxRotation')) {
+      cantRotate();
+      return;
+    }
+
     var elButton;
     if (angle > 0) {
       elButton = document.getElementById('rotate-left');
@@ -137,6 +196,10 @@
     window.setTimeout(function() {
       elButton.classList.remove('active')
     }, 700);
+  }
+
+  function cantRotate() {
+    console.info('Cant rotate')
   }
 
   function spawnMovableFromPlayer() {
@@ -182,95 +245,12 @@
     }
   }
 
-
-  var Player = {
-    sprite: null,
-
-    isJumping: false,
-    isMovingLeft: false,
-    isMovingRight: false,
-
-    JUMP_FORCE: 300,
-    MOVE_SPEED: 500000,
-
-    init: function init() {
-      this.sprite = new Sprite({
-        'id': 'player',
-        'x': 50,
-        'y': 300,
-        'width': 20,
-        'height': 20,
-        'movable': true,
-        'gravity': true,
-        'bounce': 0,
-        'solid': true,
-        'maxVelocity': new Vector(4, 500000),
-        'background': 'rgba(255, 0, 0, 1)'
-      });
-
-      // just to test collision events
-      this.sprite.onCollision(this.setColorAccordingToCollisions.bind(this), this.setColorAccordingToCollisions.bind(this));
-
-      window.addEventListener('keydown', this.onKeyDown.bind(this));
-      window.addEventListener('keyup', this.onKeyUp.bind(this));
-    },
-
-    setColorAccordingToCollisions: function setColorAccordingToCollisions() {
-      var collisions = this.sprite.collisions,
-          color = 'rgba(255, 0, 0, 1)';
-
-      for (var id in collisions) {
-        if (id.indexOf('movable_') === 0) {
-          color = 'rgba(180, 180, 240, 1)';
-          break;
-        }
-      }
-
-      this.sprite.background = color;
-    },
-
-    onKeyDown: function onKeyDown(e) {
-      var keyCode = e.keyCode;
-
-      switch (keyCode) {
-        case 32:
-        case 38:
-          this.isJumping = true;
-          break;
-        case 37:
-          !this.isMovingRight && (this.isMovingLeft = true);
-          break;
-        case 39:
-          !this.isMovingLeft && (this.isMovingRight = true);
-          break;
-      }
-    },
-
-    onKeyUp: function onKeyUp(e) {
-      var keyCode = e.keyCode;
-
-      switch (keyCode) {
-        case 32:
-        case 38:
-          this.isJumping = false;
-          break;
-        case 37:
-          this.isMovingLeft = false;
-          break;
-        case 39:
-          this.isMovingRight = false;
-          break;
-      }
-    }
-  };
-
-
   function Platform(options) {
     options.gravity = false;
     options.solid = true;
     options.movable = false;
     options.friction = new Vector(0.5, 0.5);
-    options.background = 'rgba(0, 0, 0, 1)';
+    options.background = options.color || 'rgba(0, 0, 0, 1)';
     !options.height && (options.height = 20);
     !options.id && (options.id = 'platform_' + Math.random());
 
@@ -282,7 +262,7 @@
     options.gravity = true;
     options.solid = true;
     options.bounce = 0.5;
-    options.maxVelocity = new Vector(2.2, Infinity);
+    options.maxVelocity = new Vector(4, 50000);
     options.friction = new Vector(0.1, 1); // no X friction, to allow "sliding"
     options.background = 'rgba(60, 90, 120, 1)';
     !options.height && (options.height = 30);

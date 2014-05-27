@@ -25,6 +25,21 @@ Layer = (function() {
       this.trigger('addSprite', this, sprite);
     },
 
+    removeSprite: function removeSprite(spriteToRemove) {
+      console.log('[Layer] removeSprite', this, spriteToRemove);
+
+      for (var i = 0, sprite; sprite = this.sprites[i++];) {
+        if (sprite.id === spriteToRemove.id) {
+          this.sprites.splice(i - 1, 1);
+          break;
+        }
+      }
+
+      this.updated = true;
+
+      this.trigger('removeSprite', this, spriteToRemove);
+    },
+
     update: function update(dt) {
       var sprites = this.sprites,
           updated = this.updated;

@@ -44,7 +44,7 @@ window.Log = {
     this.layers = [];
 
     this.colliders = [];
-    this.solids = [];
+    this.collisionables = [];
 
     this.running = false;
     this.lastUpdate = 0;
@@ -87,6 +87,7 @@ window.Log = {
       console.log('[Game] addLayer', this, layer);
 
       layer.addEventListener('addSprite', this.onLayerSpriteAdd.bind(this));
+      layer.addEventListener('removeSprite', this.onLayerSpriteRemove.bind(this));
 
       layer.createCanvas(this.width, this.height);
 
@@ -95,12 +96,32 @@ window.Log = {
       this.el.appendChild(layer.context.canvas);
     },
 
-    onLayerSpriteAdd: function onLayerSpriteAdd(layer, sprite) {
-      if (sprite.solid) {
-        this.solids.push(sprite);
+    onLayerSpriteAdd: function onLayerSpriteAdd(layer, spriteAdded) {
+      if (spriteAdded.collisionable) {
+        this.collisionables.push(spriteAdded);
 
-        if (sprite.movable) {
-          this.colliders.push(sprite);
+        if (spriteAdded.movable) {
+          this.colliders.push(spriteAdded);
+        }
+      }
+    },
+
+    onLayerSpriteRemove: function onLayerSpriteRemove(layer, spriteRemoved) {
+      if (spriteRemoved.collisionable) {
+        for (var i = 0, sprite; sprite = this.collisionables[i++];) {
+          if (sprite.id === spriteRemoved.id) {
+            this.collisionables.splice(i - 1, 1);
+            break;
+          }
+        }
+
+        if (spriteRemoved.movable) {
+          for (var i = 0, sprite; sprite = this.colliders[i++];) {
+            if (sprite.id === spriteRemoved.id) {
+              this.colliders.splice(i - 1, 1);
+              break;
+            }
+          }
         }
       }
     },
@@ -125,7 +146,7 @@ window.Log = {
 
           layers = this.layers,
           colliders = this.colliders,
-          solids = this.solids,
+          collisionables = this.collisionables,
 
           // make sure sprite is "resting" according to current gravity
           gravityDirection = window.GRAVITY_DIRECTION,
@@ -166,9 +187,11 @@ window.Log = {
       for (i = 0; sprite = colliders[i++];) {
         sprite.resting = false;
 
-        var sCollisions = [];
+        if (sprite.id === 'movable_1') {
+          Log.title('collisions');
+        }
 
-        for (j = 0; spriteWith = solids[j++];) {
+        for (j = 0; spriteWith = collisionables[j++];) {
           // don't compare sprite with itself
           if (sprite.id === spriteWith.id) {
             continue;
@@ -181,6 +204,13 @@ window.Log = {
             continue;
           }
 
+          // report collision to sprite - to propogate to event listeners etc.
+          sprite.collide(spriteWith, collision);
+
+          if (!spriteWith.solid) {
+            continue;
+          }
+
           if (gravity === collision) {
             sprite.resting = true;
           }
@@ -188,33 +218,31 @@ window.Log = {
           var spriteToMove,
               headStuck = false;
 
-          if (sprite.id === 'player') {
-            sCollisions.push(collision + ' (' + spriteWith.id + ')');
+          if (sprite.id === 'movable_1') {
+            Log.add(collision + ' (' + spriteWith.id + ')');
           }
 
 
           if (collision === 'bottom') {
             sprite.set(null, spriteWith.topLeft.y - sprite.height);
-            
+
             if (restOnBottom) {
               sprite.velocity.y = -sprite.velocity.y * Math.min((spriteWith.bounce.top + sprite.bounce.bottom)/2, 0.4);
             } else {
               if (spriteWith.movable) {
-                
+                spriteToMove = sprite.velocity[movementAxis] * gravityDirection[gravityAxis] < 0 && spriteWith;
               } else {
                 restOnTop && (headStuck = true);
               }
             }
           } else if (collision === 'top') {
-            if (!spriteWith.movable) {
-              sprite.set(null, spriteWith.bottomLeft.y);
-            }
+            sprite.set(null, spriteWith.bottomLeft.y);
 
             if (restOnTop) {
               sprite.velocity.y = -sprite.velocity.y * (spriteWith.bounce.bottom + sprite.bounce.top)/2;
             } else {
               if (spriteWith.movable) {
-                
+                spriteToMove = sprite.velocity[movementAxis] * gravityDirection[gravityAxis] > 0 && spriteWith;
               } else {
                 restOnBottom && (headStuck = true);
               }
@@ -226,7 +254,7 @@ window.Log = {
               sprite.velocity.x = -sprite.velocity.x * (spriteWith.bounce.right + sprite.bounce.left)/2;
             } else {
               if (spriteWith.movable) {
-                spriteToMove = spriteWith.movable && sprite.velocity.x < 0 && spriteWith;
+                spriteToMove = sprite.velocity[movementAxis] * gravityDirection[gravityAxis] < 0 && spriteWith;
               } else {
                 restOnRight && (headStuck = true);
               }
@@ -238,15 +266,12 @@ window.Log = {
               sprite.velocity.x = -sprite.velocity.x * (spriteWith.bounce.left + sprite.bounce.right)/2;
             } else {
               if (spriteWith.movable) {
-                spriteToMove = spriteWith.movable && sprite.velocity.x > 0 && spriteWith;
+                spriteToMove = sprite.velocity[movementAxis] * gravityDirection[gravityAxis] > 0 && spriteWith;
               } else {
                 restOnLeft && (headStuck = true);
               }
             }
           }
-
-          // report collision to sprite - to propogate to event listeners etc.
-          sprite.collide(spriteWith, collision);
 
           if (headStuck) {
             // when jumping up and banging head - send back down
@@ -259,7 +284,10 @@ window.Log = {
 
           // apply friction and limit bounce
           if (sprite.resting) {
-            sprite.velocity[movementAxis] -= sprite.velocity[movementAxis] * spriteWith.friction[movementAxis];
+            // only apply friction with the sprite resting-on
+            if (gravity === collision) {
+              sprite.velocity[movementAxis] -= sprite.velocity[movementAxis] * spriteWith.friction[movementAxis];
+            }
 
             if (Math.abs(sprite.velocity[gravityAxis]) <= Math.abs(GRAVITY[gravityAxis] * dt)) {
               sprite.velocity[gravityAxis] = 0;
@@ -267,17 +295,14 @@ window.Log = {
           }
 
           // if need to move the sprite collided with
-          if (spriteToMove) {
+          if (spriteToMove && !spriteToMove.isPlayer) {
             spriteToMove.velocity[movementAxis] = sprite.velocity[movementAxis];
-            if (spriteToMove.resting) {
-              sprite.velocity[movementAxis] -= sprite.velocity[movementAxis] * spriteToMove.friction[movementAxis];
-            }
-          }
-        }
 
-        if (sprite.id === 'player') {
-          Log.separator();
-          Log.add('collision', sCollisions.join(', '));
+            // TODO continue applying moved objects' frictions
+            //if (spriteToMove.resting) {
+            //  sprite.velocity[movementAxis] -= sprite.velocity[movementAxis] * spriteToMove.friction[movementAxis];
+            //}
+          }
         }
       }
 
