@@ -57,9 +57,9 @@
           [520, 530, 50, 10],
           [420, 590, 50, 10],
 
-          [60, 110, 740, 10],
-          [BORDER_WIDTH, 150, 60, 10],
-          [BORDER_WIDTH + 50, 140, 10, 20]
+          [60, 90, 740, 10],
+          [BORDER_WIDTH, 130, 60, 10],
+          [BORDER_WIDTH + 50, 120, 10, 20]
         ];
 
     for (var i = 0, platform; platform = platforms[i++];) {
