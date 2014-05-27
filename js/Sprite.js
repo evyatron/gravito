@@ -84,7 +84,6 @@ Sprite = (function() {
     },
 
     onCollisionWith: function onCollisionWith(spriteWith, callback, callbackEnd) {
-      console.info(spriteWith, callback, callbackEnd)
       var spriteWithId = spriteWith && (spriteWith.id || spriteWith) || '';
 
       if (!this.collisionCallbacks[spriteWithId]) {

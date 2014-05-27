@@ -41,7 +41,7 @@
     layerPlayer.addSprite(Player.sprite);
 
     // surfaces
-    var BORDER_WIDTH = 20,
+    var BORDER_WIDTH = 10,
         platforms = [
           [0, 0, game.width, BORDER_WIDTH],
           [0, game.height - BORDER_WIDTH, game.width, BORDER_WIDTH],
@@ -53,11 +53,11 @@
           [320, 290, 50, 10],
           [420, 350, 50, 10],
           [520, 410, 50, 10],
-          [620, 470, 80, 10],
+          [620, 470, 40, 10],
           [520, 530, 50, 10],
           [420, 590, 50, 10],
 
-          [60, 90, 740, 10],
+          [60, 80, 740, 10],
           [BORDER_WIDTH, 130, 60, 10],
           [BORDER_WIDTH + 50, 120, 10, 20]
         ];
