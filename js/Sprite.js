@@ -186,7 +186,7 @@ Sprite = (function() {
       (!this.acceleration.x) && (this.acceleration.x = 0);
       (!this.acceleration.y) && (this.acceleration.y = 0);
 
-      if (this.id === 'movable_1') {
+      if (this.id === 'player') {
         Log.add('this.resting', this.resting);
 
         Log.title('before')
@@ -237,7 +237,7 @@ Sprite = (function() {
 
 
 
-      if (this.id === 'movable_1') {
+      if (this.id === 'player') {
         Log.title('after');
         Log.add('acceleration.x', this.acceleration.x);
         Log.add('acceleration.y', this.acceleration.y);

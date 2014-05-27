@@ -355,9 +355,10 @@
     // TODO: find a correct formula for gravity/force rotation
     var dir = 0;
     if (Player.isMovingRight) {
-      dir = 1;
-    } else if (Player.isMovingLeft) {
-      dir = -1;
+      dir += 1;
+    }
+    if (Player.isMovingLeft) {
+      dir -= 1;
     }
 
     if (canUserMove && dir) {

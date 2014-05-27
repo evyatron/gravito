@@ -91,10 +91,10 @@ window.Player = (function() {
           this.isJumping = true;
           break;
         case 37:
-          !this.isMovingRight && (this.isMovingLeft = true);
+          this.isMovingLeft = true;
           break;
         case 39:
-          !this.isMovingLeft && (this.isMovingRight = true);
+          this.isMovingRight = true;
           break;
       }
     },
