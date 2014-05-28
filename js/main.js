@@ -1,5 +1,4 @@
 (function() {
-
   var elContainer = document.getElementById('container'),
       elCanvases = document.getElementById('canvases'),
       layerBackground,
@@ -7,6 +6,8 @@
       layerPlayer,
 
       game,
+      currentLevelData,
+      CurrentLevel,
 
       // used for CSS rotation of the game
       currentGravityAngle = 0;;
@@ -25,6 +26,9 @@
       'onBeforeTick': gameTick
     });
 
+    // just for easy debugging
+    window.game = game;
+
 
     layerBackground = new Layer({
       'id': 'background'
@@ -40,127 +44,206 @@
     game.addLayer(layerObjects);
     game.addLayer(layerPlayer);
 
-    // player
-    Player.init({
-      'x': 50,
-      'y': 500
-    });
+    // add player
+    Player.init();
     layerPlayer.addSprite(Player.sprite);
 
-
-    createSprites();
-
-
-
+    // UI controls event listeners etc.
     UIControls.init();
 
+    // first intro text
     if (!Player.get('didIntro')) {
       window.addEventListener('keydown', onKeyIntro);
     }
 
-    window.setTimeout(function() {
-      document.body.classList.add('game-ready');
-      game.start();
+    window.addEventListener('levelReady', onLevelReady);
+
+    // load the level
+    loadLevel();
+  }
+
+  function onLevelReady(e) {
+    var levelObject = (e.detail || {}).level || {};
+    CurrentLevel = levelObject;
+    game.start();
+  }
+
+  function loadLevel(level) {
+    !level && (level = 1);
+
+    var url = 'data/levels/' + level + '.json',
+        request = new XMLHttpRequest();
+
+    request.open('GET', url, true);
+    request.responseType = 'json';
+    request.onload = function onLevelDataLoad() {
+      currentLevelData = request.response;
+      initLevel();
+    };
+    request.send();
+  }
+
+  function initLevel() {
+    if (!currentLevelData) {
+      return;
+    }
+
+    /* --------------- FRAME --------------- */
+    var frameWidth = currentLevelData.frame || {};
+    if (typeof frameWidth === 'number') {
+      frameWidth = {
+        'top': frameWidth,
+        'bottom': frameWidth,
+        'left': frameWidth,
+        'right': frameWidth
+      };
+    }
+    frameWidth.top && createPlatform({
+      'x': 0,
+      'y': 0,
+      'width': game.width,
+      'height': frameWidth.top
+    });
+    frameWidth.bottom && createPlatform({
+      'x': 0,
+      'y': game.height - frameWidth.bottom,
+      'width': game.width,
+      'height': frameWidth.bottom
+    });
+    frameWidth.left && createPlatform({
+      'x': 0,
+      'y': 0,
+      'width': frameWidth.left,
+      'height': game.height
+    });
+    frameWidth.right && createPlatform({
+      'x': game.width - frameWidth.right,
+      'y': 0,
+      'width': frameWidth.right,
+      'height': game.height
     });
 
-    // just for easy debugging
-    window.game = game;
-  }
 
-  function createSprites() {
-    var BORDER_WIDTH = 10;
-
-    // surfaces
-    createPlatforms([
-      [0, 0, game.width, BORDER_WIDTH],
-      [0, game.height - BORDER_WIDTH, game.width, BORDER_WIDTH],
-      [0, 0, BORDER_WIDTH, game.height],
-      [game.width - BORDER_WIDTH, 0, BORDER_WIDTH, game.height],
-
-      [120, 170, 50, 10],
-      [220, 230, 50, 10],
-      [320, 290, 50, 10],
-      [420, 350, 50, 10],
-      [520, 410, 50, 10],
-      [620, 470, 40, 10],
-      [520, 530, 50, 10],
-      [420, 590, 50, 10],
-
-      [60, 80, 740, 10],
-      [BORDER_WIDTH, 130, 60, 10],
-      [BORDER_WIDTH + 50, 120, 10, 20]
-    ]);
-
-    createMovables([
-      [500, 650, 60, 20]
-    ]);
-
-    createCollectibles([
-      [635, 545, 20, 20, 'rgba(0, 138, 0, 1)'],
-      [640, 550, 10, 10, 'rgba(0, 178, 0, 1)', onCollectRotate1]
-    ]);
-  }
-
-  function createCollectibles(data) {
-    for (var i = 0, spriteData; spriteData = data[i++];) {
-      var collectible = new Sprite({
-        'id': 'collectible_' + i,
-        'x': spriteData[0],
-        'y': spriteData[1],
-        'width': spriteData[2],
-        'height': spriteData[3],
-        'background': spriteData[4] || 'rgba(0, 0, 0, 1)',
-        'gravity': false,
-        'solid': false,
-        'movable': false,
-        'collisionable': true,
-        'friction': new Vector(0.5, 0.5)
-      });
-
-      if (spriteData[5]) {
-        Player.sprite.onCollisionWith(collectible, spriteData[5]);
-      }
-
-      layerObjects.addSprite(collectible);
+    /* --------------- PLAYER POSITION --------------- */
+    var playerStartPosition = currentLevelData.start || {};
+    // x = 0
+    if (!playerStartPosition.hasOwnProperty('x')) {
+      playerStartPosition.x = frameWidth;
     }
-  }
-
-  function createMovables(data) {
-    for (var i = 0, spriteData; spriteData = data[i++];) {
-      layerObjects.addSprite(new Sprite({
-        'id': 'movable_' + i,
-        'x': spriteData[0],
-        'y': spriteData[1],
-        'width': spriteData[2] || 30,
-        'height': spriteData[3] || 30,
-        'movable': true,
-        'gravity': true,
-        'solid': true,
-        'bounce': 0.5,
-        'background': 'rgba(100, 150, 200, 1)',
-        'maxVelocity': new Vector(4, 50000),
-        'friction': new Vector(0.1, 1)
-      }));
+    // y = on top of the bottom frame
+    if (!playerStartPosition.hasOwnProperty('y')) {
+      playerStartPosition.y = game.height - frameWidth.bottom - Player.sprite.height;
     }
-  }
-
-  function createPlatforms(data) {
-    for (var i = 0, spriteData; spriteData = data[i++];) {
-      layerBackground.addSprite(new Sprite({
-        'id': 'platform_' + i,
-        'x': spriteData[0],
-        'y': spriteData[1],
-        'width': spriteData[2],
-        'height': spriteData[3],
-        'background': 'rgba(0, 0, 0, 1)',
-        'gravity': false,
-        'solid': true,
-        'movable': false,
-        'friction': new Vector(0.5, 0.5)
-      }));
+    if (/%/.test(playerStartPosition.x)) {
+      var percent = ('' + playerStartPosition.x).match(/(\d+)%/)[1];
+      playerStartPosition.x = (game.width * percent / 100) - Player.sprite.width / 2;
     }
+    if (/%/.test(playerStartPosition.y)) {
+      var percent = ('' + playerStartPosition.y).match(/(\d+)%/)[1];
+      playerStartPosition.y = (game.height * percent / 100) - Player.sprite.height / 2;
+    }
+    Player.sprite.set(playerStartPosition.x, playerStartPosition.y);
+
+
+    /* --------------- PLATFORMS --------------- */
+    for (var i = 0, spriteData; spriteData = currentLevelData.platforms[i++];) {
+      createPlatform(spriteData);
+    }
+
+    /* --------------- MOVABLES --------------- */
+    for (var i = 0, spriteData; spriteData = currentLevelData.movables[i++];) {
+      createMovable(spriteData);
+    }
+
+    /* --------------- COLLECTIBLES --------------- */
+    for (var i = 0, spriteData; spriteData = currentLevelData.collectibles[i++];) {
+      createCollectible(spriteData);
+    }
+
+
+    /* --------------- LOAD SPECIAL GAME SCRIPT --------------- */
+    if (currentLevelData.script) {
+      var elScript = document.createElement('script');
+      elScript.src = currentLevelData.script;
+      document.body.appendChild(elScript);
+      return;
+    }
+
+
+    // Game Ready!
+    var eventReady = new CustomEvent('levelReady');
+    window.dispatchEvent(eventReady);
   }
 
+  function createPlatform(spriteData) {
+    var data = {
+      'id': 'platform_' + Math.random(),
+      'x': 0,
+      'y': 0,
+      'width': 100,
+      'height': 20,
+      'background': 'rgba(0, 0, 0, 1)',
+      'gravity': false,
+      'solid': true,
+      'movable': false,
+      'friction': new Vector(0.5, 0.5)
+    };
+    fillWith(data, spriteData);
+
+    layerBackground.addSprite(new Sprite(data));
+  }
+
+  function createMovable(spriteData) {
+    var data = {
+      'id': 'movable_' + Math.random(),
+      'x': 0,
+      'y': 0,
+      'width': 30,
+      'height': 30,
+      'movable': true,
+      'gravity': true,
+      'solid': true,
+      'bounce': 0.5,
+      'background': 'rgba(100, 150, 200, 1)',
+      'maxVelocity': new Vector(4, 50000),
+      'friction': new Vector(0.1, 1)
+    };
+    fillWith(data, spriteData);
+
+    layerObjects.addSprite(new Sprite(data));
+  }
+
+  function createCollectible(spriteData) {
+    var data = {
+      'id': 'collectible_' + Math.random(),
+      'x': 0,
+      'y': 0,
+      'width': 20,
+      'height': 20,
+      'background': 'rgba(0, 0, 0, 1)',
+      'gravity': false,
+      'solid': false,
+      'movable': false,
+      'collisionable': true
+    };
+
+    fillWith(data, spriteData);
+
+    var collectible = new Sprite(data);
+
+    // done like this so the callback will only get parsed once it's called
+    // since the callback method might not exist yet (async loading of level script)
+    if (spriteData.onCollision) {
+      (function(collisionCallback) {
+        Player.sprite.onCollisionWith(collectible, function() {
+          var onCollision = ((CurrentLevel || {}).actions || {})[collisionCallback];
+          onCollision.apply(WRAPPER, arguments);
+        });
+      }(spriteData.onCollision));
+    }
+
+    layerObjects.addSprite(collectible);
+  }
 
 
   var UIControls = {
@@ -258,38 +341,6 @@
     }
   }
 
-  function onCollectRotate1(sprite, direction) {
-    layerObjects.removeSprite('collectible_1');
-    layerObjects.removeSprite(sprite);
-
-    var currentAllowedRotation = Player.get('maxRotation');
-    if (currentAllowedRotation >= 90) {
-      //return;
-    }
-
-    Player.disableControl();
-    Player.stopAllMovement();
-
-    Dialog.show({
-      'id': 'gravity1',
-      'text': utils.l10n.get('gravity-1'),
-      'sprite': Player.sprite,
-      'onMethod': function onMethod(method, onDone) {
-        if (method === 'gravityCCW') {
-          rotateGravity(-90);
-          window.setTimeout(onDone, 2500);
-        } else if (method === 'gravityCW') {
-          rotateGravity(90);
-          window.setTimeout(onDone, 1800);
-        }
-      },
-      'onEnd': function onDialogEnd() {
-        setPlayerAllowedRotation(90);
-        Player.enableControl();
-      }
-    });
-  }
-
   function setPlayerAllowedRotation(rotation) {
     var currentAllowedRotation = Player.get('maxRotation');
     if (currentAllowedRotation >= rotation) {
@@ -306,7 +357,7 @@
   // default gravity ("bottom") is 90deg, since it's pointing down
   function userRotateGravity(angle) {
     if (Math.abs(currentGravityAngle - angle) % 360 > Player.get('maxRotation')) {
-      cantRotate();
+      console.info('Cant rotate')
       return;
     }
 
@@ -341,10 +392,6 @@
     }, 700);
   }
 
-  function cantRotate() {
-    console.info('Cant rotate')
-  }
-
   function gameTick(dt) {
     var gravityDirection = window.GRAVITY_DIRECTION;
 
@@ -375,4 +422,21 @@
   }
 
   init();
+
+  // this is just an object used to expose some internal methods and objects
+  // used as a scope inside level scripts
+  var WRAPPER = {
+    loadLevel: loadLevel,
+    initLevel: initLevel,
+    createPlatform: createPlatform,
+    createCollectible: createCollectible,
+    setPlayerAllowedRotation: setPlayerAllowedRotation,
+    userRotateGravity: userRotateGravity,
+    rotateGravity: rotateGravity,
+    game: game,
+    layerBackground: layerBackground,
+    layerObjects: layerObjects,
+    layerPlayer: layerPlayer
+  };
+
 }());

@@ -127,7 +127,7 @@ window.Log = {
     },
 
     start: function start() {
-      if (this.running == true) {
+      if (this.running) {
         return false;
       }
 

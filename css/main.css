@@ -32,8 +32,6 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: #fff;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 1) inset;
   -webkit-transition: -webkit-transform 700ms ease-in-out;
   transition: transform 700ms ease-in-out;
 }
@@ -42,48 +40,19 @@ body {
     position: absolute;
     top: 100%;
     left: 50%;
-    width: 20px;
-    height: 20px;
-    background: #000;
-    -webkit-transform: translate(-50%, -50%) rotate(45deg) scale(.3);
-    transform: translate(-50%, -75%) rotate(45deg) scale(.3);
+    width: 0;
+    height: 0;
+    margin: -10px 0 0 -16px;
+    border: 16px solid transparent;
+    border-color: #333 transparent transparent transparent;
   }
-canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-#log {
-  position: absolute;
-  top: 0;
-  right: 0;
-  padding: 10px;
-  background: rgba(0, 0, 0, .8);
-  box-shadow: 0 0 0 3px rgba(0, 0, 0, .6);
-  border-bottom-left-radius: 6px;
-  color: #fff;
-  width: 200px;
-  overflow: hidden;
-  font-family: monospace;
-  display: none;
-}
-.debug #log {
-  display: block;
-}
-  #log hr {
-
+  #canvases canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
   }
-  #log label {
-    display: inline-block;
-    vertical-align: middle;
-    width: 120px;
-  }
-    #log label:after {
-      content: ':';
-    }
-  #log span {
-    display: inline-block;
-    vertical-align: middle;
+  #canvases canvas:first-child {
+    background: #fff;
   }
 
 #controls {
@@ -199,4 +168,49 @@ canvas {
                 0 0 10px 3px rgba(0, 0, 0, .9),
                 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
     border-radius: 3px;
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+#log {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 10px;
+  background: rgba(0, 0, 0, .8);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, .6);
+  border-bottom-left-radius: 6px;
+  color: #fff;
+  width: 200px;
+  overflow: hidden;
+  font-family: monospace;
+  display: none;
+}
+.debug #log {
+  display: block;
+}
+  #log hr {
+
+  }
+  #log label {
+    display: inline-block;
+    vertical-align: middle;
+    width: 120px;
+  }
+    #log label:after {
+      content: ':';
+    }
+  #log span {
+    display: inline-block;
+    vertical-align: middle;
   }

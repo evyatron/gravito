@@ -27,8 +27,8 @@ window.Player = (function() {
       this.sprite = new Sprite({
         'id': 'player',
         'isPlayer': true,
-        'x': options.x || 100,
-        'y': options.y || 100,
+        'x': options.x || 0,
+        'y': options.y || 0,
         'width': options.width || 20,
         'height': options.height || 20,
         'movable': true,
