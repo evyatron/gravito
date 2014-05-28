@@ -13,7 +13,8 @@ window.Player = (function() {
 
     this.data = {
       'maxRotation': 0,
-      'didIntro': false
+      'didIntro': false,
+      'didIntroTutorial': false
     };
 
     this.JUMP_FORCE = 300;
@@ -47,7 +48,7 @@ window.Player = (function() {
 
       this.loadSettings(function onDataLoaded() {
         document.body.classList.add('allowed-rotation-' + this.get('maxRotation'));
-        document.body.classList.add('intro-' + this.get('didIntro'));
+        document.body.classList.add('intro-' + this.get('didIntroTutorial'));
       }.bind(this));
     },
 

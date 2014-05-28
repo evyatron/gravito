@@ -4,17 +4,15 @@
       'onCollectRotate1': function onCollectRotate1(sprite, direction) {
         var game = this;
 
+        // remove the device from the game
         game.layerObjects.removeSprite('rotation-device-wrapper');
         game.layerObjects.removeSprite(sprite);
 
-        var currentAllowedRotation = Player.get('maxRotation');
-        if (currentAllowedRotation >= 90) {
-          return;
-        }
-
+        // stop player
         Player.disableControl();
         Player.stopAllMovement();
 
+        // show the dialog
         Dialog.show({
           'id': 'gravity1',
           'text': utils.l10n.get('gravity-1'),

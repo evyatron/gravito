@@ -13,6 +13,8 @@
       DEFAULT_WIDTH = 0,
       DEFAULT_HEIGHT = 0,
 
+      FINAL_LEVEL = 2,
+
       // used for CSS rotation of the game
       currentGravityAngle = 0;;
 
@@ -62,8 +64,9 @@
     UIControls.init();
 
     // first intro text
-    if (!Player.get('didIntro')) {
-      window.addEventListener('keydown', onKeyIntro);
+    
+    if (!Player.get('didIntroTutorial')) {
+      window.addEventListener('keydown', onKeyIntroTutorial);
     }
 
     window.addEventListener('levelReady', onLevelReady);
@@ -94,6 +97,10 @@
     document.body.classList.remove('level-ready');
 
     !level && (level = currentLevel);
+    if (level > FINAL_LEVEL) {
+      level = 1;
+    }
+
     currentLevel = level;
 
     layerBackground.clear();
@@ -106,11 +113,7 @@
     request.responseType = 'json';
     request.onload = function onLevelDataLoad() {
       currentLevelData = request.response;
-      if (currentLevelData) {
-        initLevel();
-      } else {
-        alert('no more levels! please refresh');
-      }
+      initLevel();
     };
 
     request.send();
@@ -119,6 +122,17 @@
   function initLevel() {
     if (!currentLevelData) {
       return;
+    }
+
+    if (!Player.get('didIntro')) {
+      Dialog.show({
+        'id': 'intro',
+        'text': utils.l10n.get('intro'),
+        'onEnd': function onDialogEnd() {
+          Player.set('didIntro', true);
+          initLevel();
+        }
+      });
     }
 
     /* --------------- LEVEL SIZE --------------- */
@@ -426,7 +440,7 @@
     }
   }
 
-  function onKeyIntro(e) {
+  function onKeyIntroTutorial(e) {
     if (Player.isMovingRight || Player.isMovingLeft || Player.isJumping) {
       Player.stopAllMovement();
 
@@ -455,10 +469,10 @@
           }, 800);
         },
         'onEnd': function onDialogEnd() {
-          Player.set('didIntro', true);
+          Player.set('didIntroTutorial', true);
           document.body.classList.remove('intro-false');
           document.body.classList.add('intro-true');
-          window.removeEventListener('keydown', onKeyIntro);
+          window.removeEventListener('keydown', onKeyIntroTutorial);
         }
       });
     }
