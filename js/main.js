@@ -140,7 +140,7 @@
     }
     if (/%/.test(playerStartPosition.y)) {
       var percent = ('' + playerStartPosition.y).match(/(\d+)%/)[1];
-      playerStartPosition.y = (game.height * percent / 100) - Player.sprite.height / 2;
+      playerStartPosition.y = (game.height * percent / 100) - Player.sprite.height;
     }
     Player.sprite.set(playerStartPosition.x, playerStartPosition.y);
 
