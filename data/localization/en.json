@@ -25,5 +25,11 @@
 
 
   "ideas": "is this only 2 dimensions? I need to go back",
-  "ideas": "There seems to be some...force keeps pulling me down"
+  "ideas": "There seems to be some...force keeps pulling me down",
+  "levels": [
+    "tutorial, just steps to reach the next level",
+    "get gravity controller - need to reach the top but no stairs, need to rotate",
+    "movables - need to push to block a hole",
+    "slippery - holes with slippery platforms in between"
+  ]
 }
