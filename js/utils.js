@@ -1,4 +1,38 @@
 utils = (function() {
+  window.Log = {
+    el: document.getElementById('log'),
+    message: [],
+
+    clear: function() {
+      this.message = [];
+      this.draw();
+    },
+
+    add: function add() {
+      var label = arguments.length > 1? arguments[0] : '',
+          message = (arguments.length > 1? arguments[1] : arguments[0]);
+
+      this.message.push('<div>' +
+                          (label? '<label>' + label + '</label>' : '') +
+                          (message !== undefined? '<span>' + message + '</span>' : '') +
+                        '</div>');
+    },
+
+    title: function title(s) {
+      this.separator();
+      this.add(s.toUpperCase());
+      this.separator();
+    },
+
+    separator: function separator() {
+      this.message.push('<hr />');
+    },
+
+    draw: function draw() {
+      this.el.innerHTML = this.message.join('');
+    }
+  };
+
   return {
     addEventsSupport: function addEventsSupport(obj) {
       var proto = obj.prototype || obj;
@@ -37,6 +71,13 @@ utils = (function() {
           callback.apply(this, args);
         }
       };
+    },
+
+    rectIntersect: function rectIntersect(r1, r2) {
+      return !(r2.x > r1.x + r1.width || 
+               r2.x + r2.width < r1.x || 
+               r2.y > r1.bottom + r1.height ||
+               r2.y + r2.height < r1.y);
     },
 
     Storage: {

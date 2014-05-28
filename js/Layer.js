@@ -42,6 +42,14 @@ Layer = (function() {
       this.trigger('removeSprite', this, spriteToRemove);
     },
 
+    clear: function clear() {
+      for (var i = 0, sprite; sprite = this.sprites[i++];) {
+        this.trigger('removeSprite', this, sprite);
+      }
+
+      this.sprites = [];
+    },
+
     update: function update(dt) {
       var sprites = this.sprites,
           updated = this.updated;
@@ -73,12 +81,19 @@ Layer = (function() {
     },
 
     createCanvas: function createCanvas(width, height) {
-      var elCanvas = document.createElement('canvas');
+      var elCanvas;
+
+      if (this.context) {
+        elCanvas = this.context.canvas;
+      } else {
+        elCanvas = document.createElement('canvas');
+
+        this.context = elCanvas.getContext('2d');
+      }
 
       elCanvas.width = width;
       elCanvas.height = height;
-
-      this.context = elCanvas.getContext('2d');
+      elCanvas.style.cssText += ';margin: ' + -height/2 + 'px 0px 0px ' + -width/2 + 'px;'
     }
   }
 

@@ -1,38 +1,4 @@
 Game = (function() {
-
-window.Log = {
-  el: document.getElementById('log'),
-  message: [],
-
-  clear: function() {
-    this.message = [];
-    this.draw();
-  },
-  add: function add() {
-    var label = arguments.length > 1? arguments[0] : '',
-        message = (arguments.length > 1? arguments[1] : arguments[0]);
-
-    this.message.push('<div>' +
-                        (label? '<label>' + label + '</label>' : '') +
-                        (message !== undefined? '<span>' + message + '</span>' : '') +
-                      '</div>');
-  },
-  title: function title(s) {
-    this.separator();
-    this.add(s.toUpperCase());
-    this.separator();
-  },
-
-  separator: function separator() {
-    this.message.push('<hr />');
-  },
-
-  draw: function draw() {
-    this.el.innerHTML = this.message.join('');
-  }
-};
-
-
   var DEFAULT_GRAVITY = new Vector(0, 40);
 
   function Game(options) {
@@ -69,6 +35,19 @@ window.Log = {
       this.setGravity(options.gravity || DEFAULT_GRAVITY);
 
       console.log('[Game] init', this);
+    },
+
+    setSize: function setSize(width, height) {
+      if (width === this.width && height === this.height) {
+        return;
+      }
+
+      this.width = width;
+      this.height = height;
+
+      for (var i = 0, layer; layer = this.layers[i++];) {
+        layer.createCanvas(width, height);
+      }
     },
 
     setGravity: function setGravity(gravity) {
@@ -126,6 +105,18 @@ window.Log = {
       }
     },
 
+    stop: function stop() {
+      if (!this.running) {
+        return false;
+      }
+
+      console.log('[Game] stop', this);
+
+      this.running = false;
+
+      return true;
+    },
+
     start: function start() {
       if (this.running) {
         return false;
@@ -141,6 +132,10 @@ window.Log = {
     },
 
     tick: function tick() {
+      if (!this.running) {
+        return;
+      }
+
       var now = Date.now(),
           dt = (now - this.lastUpdate) / 1000,
 
@@ -166,7 +161,7 @@ window.Log = {
           gravityAxis = gravityDirY? 'y' : 'x',
           movementAxis = gravityDirY? 'x' : 'y',
 
-          i = 0, layer, sprite, spriteWith, collision;
+          i = 0, layer, sprite, spriteWith, collision, appliedFriction;
 
 
       // limit tick interval to 60FPS
@@ -186,6 +181,7 @@ window.Log = {
       // collisions
       for (i = 0; sprite = colliders[i++];) {
         sprite.resting = false;
+        appliedFriction = false;
 
         if (sprite.id === 'movable_1') {
           Log.title('collisions');
@@ -285,7 +281,8 @@ window.Log = {
           // apply friction and limit bounce
           if (sprite.resting) {
             // only apply friction with the sprite resting-on
-            if (gravity === collision) {
+            if (!appliedFriction && gravity === collision) {
+              appliedFriction = true;
               sprite.velocity[movementAxis] -= sprite.velocity[movementAxis] * spriteWith.friction[movementAxis];
             }
 

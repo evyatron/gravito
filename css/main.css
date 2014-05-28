@@ -1,15 +1,10 @@
 body {
   font: 300 12px 'Oswald', Sans-Serif;
-  background: #fff;
+  background: #000;
   overflow: hidden;
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
-  -webkit-transition: all 600ms ease-in-out;
-  transition: all 600ms ease-in-out;
-}
-.game-ready {
-  background: #000;
 }
 #container {
   position: absolute;
@@ -18,38 +13,26 @@ body {
   width: 700px;
   height: 700px;
   margin: -350px 0 0 -350px;
-  opacity: 0;
-  -webkit-transition: opacity 500ms ease-in-out 300ms;
-  transition: opacity 500ms ease-in-out 300ms;
 }
-.game-ready #container {
-  opacity: 1;
-}
-
 #canvases {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  -webkit-transition: -webkit-transform 700ms ease-in-out;
-  transition: transform 700ms ease-in-out;
+  opacity: 0;
+  -webkit-transition: opacity 1500ms ease-in-out,
+                      -webkit-transform 700ms ease-in-out;
+  transition: opacity 1500ms ease-in-out,
+              transform 700ms ease-in-out;
 }
-  #canvases:after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    margin: -10px 0 0 -16px;
-    border: 16px solid transparent;
-    border-color: #333 transparent transparent transparent;
-  }
+.level-ready #canvases {
+  opacity: 1;
+}
   #canvases canvas {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 50%;
+    left: 50%;
   }
   #canvases canvas:first-child {
     background: #fff;

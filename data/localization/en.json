@@ -4,11 +4,17 @@
 
 
   "intro": [
-    "{d:2500}[INTRO TEXT 1]",
-    "{m:moveRight}[INTRO TEXT 2 - MOVE RIGHT]",
-    "{m:moveLeft}[INTRO TEXT 2 - MOVE LEFT]",
-    "{m:jump}[INTRO TEXT 2 - JUMP]",
-    "[INTRO TEXT FINAL]"
+    "[INTRO TEXT 1]",
+    "[INTRO TEXT ...]"
+  ],
+
+  "intro-tutorial": [
+    "[TUTORIAL TEXT 1]",
+    "[TUTORIAL TEXT ...]",
+    "{m:moveRight}[TUTORIAL TEXT - MOVE RIGHT]",
+    "{m:moveLeft}[TUTORIAL TEXT - MOVE LEFT]",
+    "{m:jump}[TUTORIAL TEXT - JUMP]",
+    "[TUTORIAL TEXT FINAL]"
   ],
 
   "gravity-1": [

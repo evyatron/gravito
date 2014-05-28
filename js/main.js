@@ -1,18 +1,28 @@
 (function() {
-  var elContainer = document.getElementById('container'),
-      elCanvases = document.getElementById('canvases'),
+  var elContainer,
+      elCanvases,
       layerBackground,
       layerObjects,
       layerPlayer,
 
       game,
+      currentLevel = 1,
       currentLevelData,
       CurrentLevel,
+
+      DEFAULT_WIDTH = 0,
+      DEFAULT_HEIGHT = 0,
 
       // used for CSS rotation of the game
       currentGravityAngle = 0;;
 
   function init() {
+    elContainer = document.getElementById('container');
+    elCanvases = document.getElementById('canvases');
+
+    DEFAULT_WIDTH = elCanvases.offsetWidth;
+    DEFAULT_HEIGHT = elCanvases.offsetHeight;
+
     utils.l10n.init();
 
     Dialog.init({
@@ -21,8 +31,8 @@
 
     game = new Game({
       'el': elCanvases,
-      'width': elCanvases.offsetWidth,
-      'height': elCanvases.offsetHeight,
+      'width': DEFAULT_WIDTH,
+      'height': DEFAULT_HEIGHT,
       'onBeforeTick': gameTick
     });
 
@@ -59,17 +69,35 @@
     window.addEventListener('levelReady', onLevelReady);
 
     // load the level
-    loadLevel();
+    loadLevel((window.location.href.match(/LEVEL=(\d+)/) || [])[1]);
   }
 
   function onLevelReady(e) {
     var levelObject = (e.detail || {}).level || {};
     CurrentLevel = levelObject;
+
     game.start();
+
+    document.body.classList.remove('level-loading');
+    document.body.classList.add('level-ready');
+  }
+
+  function loadNextLevel() {
+    currentLevel++;
+    loadLevel();
   }
 
   function loadLevel(level) {
-    !level && (level = 1);
+    game.stop();
+
+    document.body.classList.add('level-loading');
+    document.body.classList.remove('level-ready');
+
+    !level && (level = currentLevel);
+    currentLevel = level;
+
+    layerBackground.clear();
+    layerObjects.clear();
 
     var url = 'data/levels/' + level + '.json',
         request = new XMLHttpRequest();
@@ -78,8 +106,13 @@
     request.responseType = 'json';
     request.onload = function onLevelDataLoad() {
       currentLevelData = request.response;
-      initLevel();
+      if (currentLevelData) {
+        initLevel();
+      } else {
+        alert('no more levels! please refresh');
+      }
     };
+
     request.send();
   }
 
@@ -87,6 +120,25 @@
     if (!currentLevelData) {
       return;
     }
+
+    /* --------------- LEVEL SIZE --------------- */
+    var size = {
+      'width': DEFAULT_WIDTH,
+      'height': DEFAULT_HEIGHT
+    };
+    fillWith(size, currentLevelData.size);
+
+    game.setSize(size.width, size.height);
+
+    var finishData = {
+      'x': null,
+      'y': null,
+      'width': 0,
+      'height': 0,
+      'background': 'rgba(255, 255, 0, 1)',
+      'onCollision': finishLevel
+    };
+    fillWith(finishData, currentLevelData.finish);
 
     /* --------------- FRAME --------------- */
     var frameWidth = currentLevelData.frame || {};
@@ -98,30 +150,12 @@
         'right': frameWidth
       };
     }
-    frameWidth.top && createPlatform({
-      'x': 0,
-      'y': 0,
-      'width': game.width,
-      'height': frameWidth.top
-    });
-    frameWidth.bottom && createPlatform({
-      'x': 0,
-      'y': game.height - frameWidth.bottom,
-      'width': game.width,
-      'height': frameWidth.bottom
-    });
-    frameWidth.left && createPlatform({
-      'x': 0,
-      'y': 0,
-      'width': frameWidth.left,
-      'height': game.height
-    });
-    frameWidth.right && createPlatform({
-      'x': game.width - frameWidth.right,
-      'y': 0,
-      'width': frameWidth.right,
-      'height': game.height
-    });
+
+    if (finishData.width && finishData.height) {
+      createCollectible(finishData, frameWidth);
+    }
+
+    createFrame(frameWidth, finishData);
 
 
     /* --------------- PLAYER POSITION --------------- */
@@ -147,17 +181,17 @@
 
     /* --------------- PLATFORMS --------------- */
     for (var i = 0, spriteData; spriteData = currentLevelData.platforms[i++];) {
-      createPlatform(spriteData);
+      createPlatform(spriteData, frameWidth);
     }
 
     /* --------------- MOVABLES --------------- */
     for (var i = 0, spriteData; spriteData = currentLevelData.movables[i++];) {
-      createMovable(spriteData);
+      createMovable(spriteData, frameWidth);
     }
 
     /* --------------- COLLECTIBLES --------------- */
     for (var i = 0, spriteData; spriteData = currentLevelData.collectibles[i++];) {
-      createCollectible(spriteData);
+      createCollectible(spriteData, frameWidth);
     }
 
 
@@ -175,7 +209,12 @@
     window.dispatchEvent(eventReady);
   }
 
-  function createPlatform(spriteData) {
+  function finishLevel() {
+    console.info('finish level!', arguments)
+    loadNextLevel();
+  }
+
+  function createPlatform(spriteData, frameWidth) {
     var data = {
       'id': 'platform_' + Math.random(),
       'x': 0,
@@ -190,10 +229,15 @@
     };
     fillWith(data, spriteData);
 
+    if (frameWidth) {
+      data.x += frameWidth.left;
+      data.y += frameWidth.top;
+    }
+
     layerBackground.addSprite(new Sprite(data));
   }
 
-  function createMovable(spriteData) {
+  function createMovable(spriteData, frameWidth) {
     var data = {
       'id': 'movable_' + Math.random(),
       'x': 0,
@@ -210,39 +254,118 @@
     };
     fillWith(data, spriteData);
 
+    data.x += frameWidth.left;
+    data.y += frameWidth.top;
+
     layerObjects.addSprite(new Sprite(data));
   }
 
-  function createCollectible(spriteData) {
+  function createCollectible(spriteData, frameWidth) {
     var data = {
       'id': 'collectible_' + Math.random(),
       'x': 0,
       'y': 0,
       'width': 20,
       'height': 20,
-      'background': 'rgba(0, 0, 0, 1)',
+      'background': 'rgba(255, 128, 0, 1)',
       'gravity': false,
       'solid': false,
       'movable': false,
-      'collisionable': true
+      'collisionable': true,
+      'friction': new Vector(0, 0)
     };
 
     fillWith(data, spriteData);
+
+    data.x += frameWidth.left;
+    data.y += frameWidth.top;
 
     var collectible = new Sprite(data);
 
     // done like this so the callback will only get parsed once it's called
     // since the callback method might not exist yet (async loading of level script)
     if (spriteData.onCollision) {
-      (function(collisionCallback) {
-        Player.sprite.onCollisionWith(collectible, function() {
-          var onCollision = ((CurrentLevel || {}).actions || {})[collisionCallback];
-          onCollision.apply(WRAPPER, arguments);
-        });
-      }(spriteData.onCollision));
+      if (spriteData.onCollision instanceof Function) {
+        Player.sprite.onCollisionWith(collectible, spriteData.onCollision);
+      } else {
+        (function(collisionCallback) {
+          Player.sprite.onCollisionWith(collectible, function() {
+            var onCollision = ((CurrentLevel || {}).actions || {})[collisionCallback];
+            onCollision.apply(WRAPPER, arguments);
+          });
+        }(spriteData.onCollision));
+      }
     }
 
     layerObjects.addSprite(collectible);
+  }
+
+  function createFrame(frameWidth, finishData) {
+    var platforms = [],
+        data;
+
+    if (frameWidth.top) {
+      platforms.push({
+        'x': 0,
+        'y': 0,
+        'width': game.width,
+        'height': frameWidth.top
+      });
+    }
+
+    if (frameWidth.bottom) {
+      platforms.push({
+        'x': 0,
+        'y': game.height - frameWidth.bottom,
+        'width': game.width,
+        'height': frameWidth.bottom
+      });
+    }
+
+    if (frameWidth.left) {
+      data = {
+        'x': 0,
+        'y': 0,
+        'width': frameWidth.left,
+        'height': game.height
+      };
+
+      if (finishData.width > finishData.height && utils.rectIntersect(finishData, data)) {
+
+      } else {
+        platforms.push(data);
+      }
+    }
+
+    if (frameWidth.right) {
+      data = {
+        'x': game.width - frameWidth.right,
+        'y': 0,
+        'width': frameWidth.right,
+        'height': game.height
+      };
+
+      if (utils.rectIntersect(finishData, data)) {
+        platforms.push({
+          'x': game.width - frameWidth.right,
+          'y': frameWidth.top,
+          'width': frameWidth.right,
+          'height': finishData.y
+        });
+        platforms.push({
+          'x': game.width - frameWidth.right,
+          'y': finishData.y + finishData.height,
+          'width': frameWidth.right,
+          'height': game.height - data.y
+        });
+      } else {
+        platforms.push(data);
+      }
+    }
+
+    for (var i = 0, data; data = platforms[i++];) {
+      createPlatform(data);
+    }
   }
 
 
@@ -308,8 +431,8 @@
       Player.stopAllMovement();
 
       Dialog.show({
-        'id': 'intro',
-        'text': utils.l10n.get('intro'),
+        'id': 'intro-tutorial',
+        'text': utils.l10n.get('intro-tutorial'),
         'sprite': Player.sprite,
         'onMethod': function onMethod(method, onDone) {
           window.setTimeout(function() {
@@ -434,9 +557,9 @@
     userRotateGravity: userRotateGravity,
     rotateGravity: rotateGravity,
     game: game,
+    finishLevel: finishLevel,
     layerBackground: layerBackground,
     layerObjects: layerObjects,
     layerPlayer: layerPlayer
   };
-
 }());
