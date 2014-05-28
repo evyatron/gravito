@@ -110,7 +110,7 @@ Game = (function() {
         return false;
       }
 
-      console.log('[Game] stop', this);
+      console.info('[Game] stop', this);
 
       this.running = false;
 
@@ -122,7 +122,7 @@ Game = (function() {
         return false;
       }
 
-      console.log('[Game] start', this);
+      console.info('[Game] start', this);
 
       this.running = true;
       this.lastUpdate = Date.now();
@@ -183,7 +183,7 @@ Game = (function() {
         sprite.resting = false;
         appliedFriction = false;
 
-        if (sprite.id === 'movable_1') {
+        if (sprite.id === 'player') {
           Log.title('collisions');
         }
 
@@ -214,7 +214,7 @@ Game = (function() {
           var spriteToMove,
               headStuck = false;
 
-          if (sprite.id === 'movable_1') {
+          if (sprite.id === 'player') {
             Log.add(collision + ' (' + spriteWith.id + ')');
           }
 
@@ -271,7 +271,7 @@ Game = (function() {
 
           if (headStuck) {
             // when jumping up and banging head - send back down
-            sprite.velocity[gravityAxis] *= -0.1;
+            sprite.velocity[gravityAxis] = 1.5;
 
             if (Math.abs(sprite.velocity[gravityAxis]) < Math.abs(GRAVITY[gravityAxis] * dt)) {
               sprite.velocity[gravityAxis] = GRAVITY[gravityAxis] * dt;

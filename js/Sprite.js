@@ -66,7 +66,7 @@ Sprite = (function() {
       this.halfWidth = this.width / 2;
       this.halfHeight = this.height / 2;
 
-      console.log('[Sprite] init', this);
+      console.log('[Sprite] init', this, options);
       this.trigger('init', this);
     },
 

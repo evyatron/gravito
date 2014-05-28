@@ -1,6 +1,22 @@
 window.Player = (function() {
 
-  var DATA_KEY = 'settings';
+  var DATA_KEY = 'settings',
+      DEFAULT_SETTINGS = {
+        'id': 'player',
+        'isPlayer': true,
+        'x': 0,
+        'y': 0,
+        'width': 20,
+        'height': 20,
+        'movable': true,
+        'gravity': true,
+        'bounce': 0,
+        'solid': true,
+        'maxVelocity': new Vector(4, 500000),
+        'velocity': new Vector(0, 0),
+        'acceleration': new Vector(0, 0),
+        'background': 'rgba(255, 0, 0, 1)'
+      };
 
   function Player() {
     this.sprite = null;
@@ -25,24 +41,6 @@ window.Player = (function() {
     init: function init(options) {
       !options && (options = {});
 
-      this.sprite = new Sprite({
-        'id': 'player',
-        'isPlayer': true,
-        'x': options.x || 0,
-        'y': options.y || 0,
-        'width': options.width || 20,
-        'height': options.height || 20,
-        'movable': true,
-        'gravity': true,
-        'bounce': 0,
-        'solid': true,
-        'maxVelocity': new Vector(4, 500000),
-        'background': 'rgba(255, 0, 0, 1)'
-      });
-
-      // just to test collision events
-      this.sprite.onCollision(this.setColorAccordingToCollisions.bind(this), this.setColorAccordingToCollisions.bind(this));
-
       window.addEventListener('keydown', this.onKeyDown.bind(this));
       window.addEventListener('keyup', this.onKeyUp.bind(this));
 
@@ -50,6 +48,17 @@ window.Player = (function() {
         document.body.classList.add('allowed-rotation-' + this.get('maxRotation'));
         document.body.classList.add('intro-' + this.get('didIntroTutorial'));
       }.bind(this));
+    },
+
+    createSprite: function createSprite(layer, options) {
+      !options && (options = {});
+
+      var data = {};
+      fillWith(data, options, DEFAULT_SETTINGS);
+
+      this.sprite = new Sprite(data);
+
+      layer.addSprite(this.sprite);
     },
 
     loadSettings: function loadSettings(callback) {
@@ -83,20 +92,6 @@ window.Player = (function() {
       this.isMovingRight = false;
       this.isMovingLeft = false;
       this.isJumping = false;
-    },
-
-    setColorAccordingToCollisions: function setColorAccordingToCollisions() {
-      var collisions = this.sprite.collisions,
-          color = 'rgba(255, 0, 0, 1)';
-
-      for (var id in collisions) {
-        if (id.indexOf('movable_') === 0) {
-          color = 'rgba(180, 180, 240, 1)';
-          break;
-        }
-      }
-
-      this.sprite.background = color;
     },
 
     onKeyDown: function onKeyDown(e) {

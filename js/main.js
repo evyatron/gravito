@@ -58,7 +58,6 @@
 
     // add player
     Player.init();
-    layerPlayer.addSprite(Player.sprite);
 
     // UI controls event listeners etc.
     UIControls.init();
@@ -79,10 +78,10 @@
     var levelObject = (e.detail || {}).level || {};
     CurrentLevel = levelObject;
 
-    game.start();
-
     document.body.classList.remove('level-loading');
     document.body.classList.add('level-ready');
+
+    window.setTimeout(game.start.bind(game), 50);
   }
 
   function loadNextLevel() {
@@ -105,6 +104,7 @@
 
     layerBackground.clear();
     layerObjects.clear();
+    layerPlayer.clear();
 
     var url = 'data/levels/' + level + '.json',
         request = new XMLHttpRequest();
@@ -144,6 +144,8 @@
 
     game.setSize(size.width, size.height);
 
+
+    /* --------------- FRAME & FINISH POINT--------------- */
     var finishData = {
       'x': null,
       'y': null,
@@ -154,7 +156,6 @@
     };
     fillWith(finishData, currentLevelData.finish);
 
-    /* --------------- FRAME --------------- */
     var frameWidth = currentLevelData.frame || {};
     if (typeof frameWidth === 'number') {
       frameWidth = {
@@ -164,12 +165,6 @@
         'right': frameWidth
       };
     }
-
-    if (finishData.width && finishData.height) {
-      createCollectible(finishData, frameWidth);
-    }
-
-    createFrame(frameWidth, finishData);
 
 
     /* --------------- PLAYER POSITION --------------- */
@@ -184,13 +179,33 @@
     }
     if (/%/.test(playerStartPosition.x)) {
       var percent = ('' + playerStartPosition.x).match(/(\d+)%/)[1];
-      playerStartPosition.x = (game.width * percent / 100) - Player.sprite.width / 2;
+      playerStartPosition.x = (game.width * percent / 100);
     }
     if (/%/.test(playerStartPosition.y)) {
       var percent = ('' + playerStartPosition.y).match(/(\d+)%/)[1];
-      playerStartPosition.y = (game.height * percent / 100) - Player.sprite.height;
+      playerStartPosition.y = (game.height * percent / 100);
     }
-    Player.sprite.set(playerStartPosition.x, playerStartPosition.y);
+
+    var userCreationData = {
+      'x': playerStartPosition.x,
+      'y': playerStartPosition.y
+    };
+    if (Player.sprite) {
+      userCreationData.velocity = Player.sprite.velocity;
+      userCreationData.acceleration = Player.sprite.acceleration;
+    }
+
+    Player.createSprite(layerPlayer, userCreationData);
+
+
+    /* --------------- LEVEL FINISH POINT --------------- */
+    if (finishData.width && finishData.height) {
+      createCollectible(finishData, frameWidth);
+    }
+
+
+    /* --------------- LEVEL FRAME BORDER --------------- */
+    createFrame(frameWidth, finishData);
 
 
     /* --------------- PLATFORMS --------------- */
@@ -552,7 +567,8 @@
         dir *= -1;
       }
 
-      Player.sprite.accelerate(gravityDirection.flip().scale(Player.MOVE_SPEED * dir));
+      var newAcceleration = gravityDirection.flip().scale(Player.MOVE_SPEED * dir);
+      Player.sprite.accelerate(newAcceleration);
     } else {
       Player.sprite.accelerate();
     }

@@ -205,9 +205,7 @@ Vector = (function() {
 
 function fillWith(to, from, defaults) {
   for (var k in defaults) {
-    if (!from.hasOwnProperty(k)) {
-      to[k] = from[k];
-    }
+    to[k] = defaults[k];
   }
 
   for (var k in from) {
