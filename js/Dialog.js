@@ -1,7 +1,7 @@
 Dialog = (function() {
   var DEFAULT_DURATION = 2000,
-      DURATION_REGEX = /^\{d:(\d+)\}/,
-      METHOD_REGEX = /^\{m:([^\}]+)\}/;
+      DURATION_REGEX = /\{d:(\d+)\}/,
+      METHOD_REGEX = /\{m:([^\}]+)\}/;
 
   function Dialog() {
 

@@ -8,8 +8,6 @@
 
       game,
 
-      canUserMove = true,
-
       // used for CSS rotation of the game
       currentGravityAngle = 0;;
 
@@ -53,22 +51,12 @@
     createSprites();
 
 
-    window.addEventListener('keydown', function onKeyUp(e) {
-      if (e.keyCode === 68) { // A
-        userRotateGravity(-90);
-      } else if (e.keyCode === 65) { // D
-        userRotateGravity(90);
-      } else if (e.keyCode === 70) { //F
-        layerObjects.addSprite(new Movable({
-          x: Player.sprite.topLeft.x,
-          y: Player.sprite.topLeft.y,
-          width: Player.sprite.width,
-          height: Player.sprite.height
-        }));
-      }
-    });
 
-    bindControlEvents();
+    UIControls.init();
+
+    if (!Player.get('didIntro')) {
+      window.addEventListener('keydown', onKeyIntro);
+    }
 
     window.setTimeout(function() {
       document.body.classList.add('game-ready');
@@ -173,54 +161,68 @@
     }
   }
 
-  function disableUserMovement() {
-    canUserMove = false;
-  }
 
-  function enableUserMovement() {
-    canUserMove = true;
-  }
 
-  function bindControlEvents() {
-    if (!Player.get('didIntro')) {
-      window.addEventListener('keydown', onKeyIntro);
-    }
+  var UIControls = {
+    elButtons: [],
 
-    document.getElementById('rotate-left').addEventListener('click', function() {
-      rotateGravity(90);
-    })
-    document.getElementById('rotate-right').addEventListener('click', function() {
-      rotateGravity(-90);
-    })
+    init: function init() {
+      this.elButtons = document.querySelectorAll('*[data-property]');
 
-    var elButtons = [
-      document.getElementById('move-jump'),
-      document.getElementById('move-right'),
-      document.getElementById('move-left')
-    ];
-
-    for (var i = 0, el; el = elButtons[i++];) {
-      el.addEventListener('mousedown', function(e) {
-        e.target.classList.add('active');
-        Player[e.target.dataset.property] = true;
+      document.getElementById('rotate-left').addEventListener('click', function() {
+        rotateGravity(90);
       });
-    }
+      document.getElementById('rotate-right').addEventListener('click', function() {
+        rotateGravity(-90);
+      });
 
-    window.addEventListener('mouseup', function(e) {
-      for (var i = 0, el; el = elButtons[i++];) {
+      for (var i = 0, el; el = this.elButtons[i++];) {
+        el.addEventListener('mousedown', this.onControlButtonClick);
+      }
+
+      window.addEventListener('mouseup', this.stopAllControls.bind(this));
+
+      window.addEventListener('keydown', this.onKeyPress);
+    },
+
+    onControlButtonClick: function onControlButtonClick(e) {
+      e.target.classList.add('active');
+      Player[e.target.dataset.property] = true;
+    },
+
+    stopAllControls: function stopAllControls(e) {
+      for (var i = 0, el; el = this.elButtons[i++];) {
         if (el.classList.contains('active')) {
           el.classList.remove('active')
           Player[el.dataset.property] = false;
         }
       }
-    });
+    },
+
+    onKeyPress: function onKeyPress(e) {
+      var keyCode = e.keyCode;
+      switch (keyCode) {
+        case 68: // A
+          userRotateGravity(-90);
+          break;
+        case 65: // D
+          userRotateGravity(90);
+          break;
+        case 70: //F
+          layerObjects.addSprite(new Movable({
+            x: Player.sprite.topLeft.x,
+            y: Player.sprite.topLeft.y,
+            width: Player.sprite.width,
+            height: Player.sprite.height
+          }));
+          break;
+      }
+    }
   }
 
   function onKeyIntro(e) {
     if (Player.isMovingRight || Player.isMovingLeft || Player.isJumping) {
-      Player.isMovingRight = false;
-      Player.isMovingLeft = false;
-      Player.isJumping = false;
+      Player.stopAllMovement();
 
       Dialog.show({
         'id': 'intro',
@@ -240,10 +242,7 @@
             }
 
             window.setTimeout(function() {
-              Player.isMovingRight = false;
-              Player.isMovingLeft = false;
-              Player.isJumping = false;
-
+              Player.stopAllMovement();
               
               window.setTimeout(onDone, 400);
             }, duration);
@@ -265,10 +264,11 @@
 
     var currentAllowedRotation = Player.get('maxRotation');
     if (currentAllowedRotation >= 90) {
-      return;
+      //return;
     }
 
-    disableUserMovement();
+    Player.disableControl();
+    Player.stopAllMovement();
 
     Dialog.show({
       'id': 'gravity1',
@@ -277,15 +277,15 @@
       'onMethod': function onMethod(method, onDone) {
         if (method === 'gravityCCW') {
           rotateGravity(-90);
-          window.setTimeout(onDone, 2000);
+          window.setTimeout(onDone, 2500);
         } else if (method === 'gravityCW') {
           rotateGravity(90);
-          window.setTimeout(onDone, 1200);
+          window.setTimeout(onDone, 1800);
         }
       },
       'onEnd': function onDialogEnd() {
         setPlayerAllowedRotation(90);
-        enableUserMovement();
+        Player.enableControl();
       }
     });
   }
@@ -349,7 +349,7 @@
     var gravityDirection = window.GRAVITY_DIRECTION;
 
     // jump according to gravity
-    if (canUserMove && Player.isJumping && Player.sprite.resting) {
+    if (Player.isJumping && Player.sprite.resting) {
       Player.sprite.applyForce(gravityDirection.scale(-Player.JUMP_FORCE * dt));
     }
 
@@ -363,7 +363,7 @@
       dir -= 1;
     }
 
-    if (canUserMove && dir) {
+    if (dir) {
       if (gravityDirection.x) {
         dir *= -1;
       }

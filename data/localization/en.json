@@ -14,12 +14,12 @@
   "gravity-1": [
     "What's this then?",
     "{d:2500}Hmm... What a weird device.",
-    "{d:3000}I wonder what happens if I click this here--",
+    "{d:3000}I wonder what happens if I press this here--",
     "{m:gravityCW}Whoaaaaa!",
-    "{d:1500}Woohoo!",
-    "{d:1500}So this other button probably--",
-    "{m:gravityCCW}",
-    "{d:1500}Yeap. That's it.",
+    "{d:1800}Woohoo!",
+    "{d:2000}So this other button probably....",
+    "{m:gravityCCW}{d:2500}",
+    "{d:1800}Yeap. That's it.",
     "Oh I'm going to like this!"
   ],
 

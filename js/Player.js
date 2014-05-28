@@ -5,6 +5,8 @@ window.Player = (function() {
   function Player() {
     this.sprite = null;
 
+    this.canControl = true;
+
     this.isJumping = false;
     this.isMovingLeft = false;
     this.isMovingRight = false;
@@ -68,6 +70,20 @@ window.Player = (function() {
       return this.data[key];
     },
 
+    disableControl: function disableControl() {
+      this.canControl = false;
+    },
+
+    enableControl: function disableControl() {
+      this.canControl = true;
+    },
+
+    stopAllMovement: function stopAllMovement() {
+      this.isMovingRight = false;
+      this.isMovingLeft = false;
+      this.isJumping = false;
+    },
+
     setColorAccordingToCollisions: function setColorAccordingToCollisions() {
       var collisions = this.sprite.collisions,
           color = 'rgba(255, 0, 0, 1)';
@@ -83,6 +99,10 @@ window.Player = (function() {
     },
 
     onKeyDown: function onKeyDown(e) {
+      if (!this.canControl) {
+        return;
+      }
+
       var keyCode = e.keyCode;
 
       switch (keyCode) {
@@ -100,6 +120,10 @@ window.Player = (function() {
     },
 
     onKeyUp: function onKeyUp(e) {
+      if (!this.canControl) {
+        return;
+      }
+
       var keyCode = e.keyCode;
 
       switch (keyCode) {
