@@ -6,16 +6,13 @@ window.Player = (function() {
         'isPlayer': true,
         'x': 0,
         'y': 0,
-        'width': 20,
-        'height': 20,
         'movable': true,
         'gravity': true,
         'bounce': 0,
         'solid': true,
         'maxVelocity': new Vector(4, 500000),
         'velocity': new Vector(0, 0),
-        'acceleration': new Vector(0, 0),
-        'background': 'rgba(255, 0, 0, 1)'
+        'acceleration': new Vector(0, 0)
       };
 
   function Player() {
@@ -35,13 +32,21 @@ window.Player = (function() {
       'didIntroTutorial': false
     };
 
-    this.JUMP_FORCE = 300;
-    this.MOVE_SPEED = 500000;
+    // from config
+    this.JUMP_FORCE;
+    this.MOVE_SPEED;
+    this.WIDTH;
+    this.HEIGHT;
+    this.BACKGROUND;
   }
 
   Player.prototype = {
     init: function init(options) {
       !options && (options = {});
+
+      DEFAULT_SETTINGS.width = this.WIDTH;
+      DEFAULT_SETTINGS.height = this.HEIGHT;
+      DEFAULT_SETTINGS.background = this.BACKGROUND;
 
       this.onCollision = options.onCollision;
 

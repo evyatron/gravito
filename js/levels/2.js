@@ -20,7 +20,7 @@
           'onMethod': function onMethod(method, onDone) {
             if (method === 'gravityCCW') {
               game.rotateGravity(-90);
-              window.setTimeout(onDone, 2500);
+              window.setTimeout(onDone, 2000);
             } else if (method === 'gravityCW') {
               game.rotateGravity(90);
               window.setTimeout(onDone, 1800);

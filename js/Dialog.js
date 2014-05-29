@@ -1,11 +1,11 @@
 Dialog = (function() {
-  var DEFAULT_DURATION = 2000,
-      DISTANCE_FROM_SPRITE = 5,
-      DURATION_REGEX = /\{d:(\d+)\}/,
+  var DURATION_REGEX = /\{d:(\d+)\}/,
       METHOD_REGEX = /\{m:([^\}]+)\}/;
 
   function Dialog() {
-
+    this.DEFAULT_DURATION;
+    this.DISTANCE_FROM_SPRITE_X;
+    this.DISTANCE_FROM_SPRITE_Y;
   }
 
   Dialog.prototype = {
@@ -40,7 +40,7 @@ Dialog = (function() {
 
       function showText() {
         var text = texts.shift(),
-            duration = DEFAULT_DURATION,
+            duration = this.DEFAULT_DURATION,
             durationFromText = (text || '').match(DURATION_REGEX),
             methodFromText = (text || '').match(METHOD_REGEX);
 
@@ -102,13 +102,14 @@ Dialog = (function() {
       x += offset.left;
       y += offset.top;
 
-      x += DISTANCE_FROM_SPRITE;
-      y -= DISTANCE_FROM_SPRITE;
+      x += this.DISTANCE_FROM_SPRITE_X;
+      y += this.DISTANCE_FROM_SPRITE_Y;
 
       x = Math.round(x);
       y = Math.round(y);
 
-      this.el.style.cssText += '-webkit-transform: translate(' + x + 'px, ' + y + 'px);';
+      this.el.style.cssText += '-webkit-transform: translate(' + x + 'px, ' + y + 'px);' +
+                               'transform: translate(' + x + 'px, ' + y + 'px);';
 
       window.setTimeout(this.stickToSprite.bind(this), 60/1000);
     },

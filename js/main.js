@@ -12,21 +12,93 @@
 
       DEFAULT_WIDTH = 0,
       DEFAULT_HEIGHT = 0,
-      DEFAULT_BACKGROUND = 'rgba(255, 255, 255, 1)',
-      DEFAULT_FINISH_LIGHT = 'rgba(255, 255, 0, .08)',
-      DEFAULT_FINISH_COLOR = 'rgba(255, 255, 0, .5)',
+      DEFAULT_BACKGROUND = '',
+      DEFAULT_FINISH_LIGHT = '',
+      DEFAULT_FINISH_COLOR = '',
+      DEFAULT_DEATH_COLOR = '',
 
-      FINAL_LEVEL = 3,
+      DEFAULT_PLATFORM_COLOR = '',
+      DEFAULT_PLATFORM_HEIGHT = 0,
+      DEFAULT_PLATFORM_FRICTION_X = 0,
+      DEFAULT_PLATFORM_FRICTION_Y = 0,
+
+      DEFAULT_MOVABLE_WIDTH = 0;
+      DEFAULT_MOVABLE_HEIGHT = 0;
+      DEFAULT_MOVABLE_BOUNCE = 0;
+      DEFAULT_MOVABLE_FRICTION_X = 0;
+      DEFAULT_MOVABLE_FRICTION_Y = 0;
+      DEFAULT_MOVABLE_COLOR = '';
+
+      DEFAULT_COLLECTIBLE_WIDTH = 0;
+      DEFAULT_COLLECTIBLE_HEIGHT = 0;
+      DEFAULT_COLLECTIBLE_COLOR = '';
+
+      NUMBER_OF_LEVELS = 0,
 
       // used for CSS rotation of the game
-      currentGravityAngle = 0;;
+      currentGravityAngle = 0;
 
+  // load external game config file before starting anything
+  function loadGameConfig() {
+    var request = new XMLHttpRequest();
+    request.open('GET', 'data/game.json', true);
+    request.responseType = 'json';
+    request.onload = function onGameConfigLoad() {
+      populateFromConfig(request.response);
+      init();
+    };
+    request.send();
+  }
+
+  // load all game config into local variables
+  function populateFromConfig(config) {
+    document.body.style.background = config.BACKGROUND;
+    NUMBER_OF_LEVELS = config.NUMBER_OF_LEVELS;
+
+    DEFAULT_WIDTH = config.WIDTH;
+    DEFAULT_HEIGHT = config.HEIGHT;
+
+    DEFAULT_BACKGROUND = config.DEFAULT_BACKGROUND;
+    DEFAULT_FINISH_LIGHT = config.DEFAULT_FINISH_LIGHT;
+    DEFAULT_FINISH_COLOR = config.DEFAULT_FINISH_COLOR;
+    DEFAULT_DEATH_COLOR = config.DEFAULT_DEATH_COLOR;
+
+    DEFAULT_PLATFORM_COLOR = config.DEFAULT_PLATFORM_COLOR;
+    DEFAULT_PLATFORM_HEIGHT = config.DEFAULT_PLATFORM_HEIGHT;
+    DEFAULT_PLATFORM_FRICTION_X = config.DEFAULT_PLATFORM_FRICTION_X;
+    DEFAULT_PLATFORM_FRICTION_Y = config.DEFAULT_PLATFORM_FRICTION_Y;
+
+    DEFAULT_MOVABLE_WIDTH = config.DEFAULT_MOVABLE_WIDTH;
+    DEFAULT_MOVABLE_HEIGHT = config.DEFAULT_MOVABLE_HEIGHT;
+    DEFAULT_MOVABLE_BOUNCE = config.DEFAULT_MOVABLE_BOUNCE;
+    DEFAULT_MOVABLE_FRICTION_X = config.DEFAULT_MOVABLE_FRICTION_X;
+    DEFAULT_MOVABLE_FRICTION_Y = config.DEFAULT_MOVABLE_FRICTION_Y;
+    DEFAULT_MOVABLE_COLOR = config.DEFAULT_MOVABLE_COLOR;
+
+    DEFAULT_COLLECTIBLE_WIDTH = config.DEFAULT_COLLECTIBLE_WIDTH;
+    DEFAULT_COLLECTIBLE_HEIGHT = config.DEFAULT_COLLECTIBLE_HEIGHT;
+    DEFAULT_COLLECTIBLE_COLOR = config.DEFAULT_COLLECTIBLE_COLOR;
+
+    for (var k in config.BUBBLES) {
+      Bubbles[k] = config.BUBBLES[k];
+    }
+    for (var k in config.PLAYER) {
+      Player[k] = config.PLAYER[k];
+    }
+    for (var k in config.DIALOG) {
+      Dialog[k] = config.DIALOG[k];
+    }
+  }
+
+  // initialize game components
   function init() {
     elContainer = document.getElementById('container');
     elCanvases = document.getElementById('canvases');
 
-    DEFAULT_WIDTH = elCanvases.offsetWidth;
-    DEFAULT_HEIGHT = elCanvases.offsetHeight;
+    elContainer.style.cssText += 
+      'width:' + DEFAULT_WIDTH + 'px;' +
+      'height:' + DEFAULT_HEIGHT + 'px;' +
+      'margin:' + -DEFAULT_HEIGHT/2 + 'px 0 0 ' + -DEFAULT_WIDTH/2 + 'px;';
 
     utils.l10n.init();
 
@@ -67,6 +139,7 @@
     loadLevel((window.location.href.match(/LEVEL=(\d+)/) || [])[1]);
   }
 
+  // create the sprite layers - ordered by z-index
   function createLayers() {
     layerBackground = new Layer({
       'id': 'background'
@@ -81,8 +154,14 @@
     game.addLayer(layerBackground);
     game.addLayer(layerPlayer);
     game.addLayer(layerObjects);
+
+    WRAPPER.layerBackground = layerBackground;
+    WRAPPER.layerPlayer = layerPlayer;
+    WRAPPER.layerObjects = layerObjects;
   }
 
+  // an event called when a level is ready to begin
+  // if a level loads an external script - it should fire this event
   function onLevelReady(e) {
     var levelObject = (e.detail || {}).level || {};
     CurrentLevel = levelObject;
@@ -93,11 +172,13 @@
     window.setTimeout(game.start.bind(game), 50);
   }
 
+  // next level
   function loadNextLevel() {
     currentLevel++;
     loadLevel();
   }
 
+  // load the current level's data and create it
   function loadLevel(level) {
     game.stop();
 
@@ -105,7 +186,7 @@
     document.body.classList.remove('level-ready');
 
     !level && (level = currentLevel);
-    if (level > FINAL_LEVEL) {
+    if (level > NUMBER_OF_LEVELS) {
       level = 1;
     }
 
@@ -128,6 +209,8 @@
     request.send();
   }
 
+  // after loading a level, create everything - platforms, sprites,
+  // position player, etc.
   function initLevel() {
     if (!currentLevelData) {
       return;
@@ -152,7 +235,7 @@
       'y': null,
       'width': 0,
       'height': 0,
-      'background': 'rgba(255, 255, 0, 1)',
+      'background': DEFAULT_FINISH_COLOR,
       'type': 'finish'
     };
     fillWith(finishData, currentLevelData.finish);
@@ -240,7 +323,7 @@
       Dialog.show({
         'id': 'intro',
         'text': utils.l10n.get('intro'),
-        'sprite': Player.spritea,
+        'sprite': Player.sprite,
         'onEnd': function onDialogEnd() {
           Player.set('didIntro', true);
           Player.enableControl();
@@ -253,16 +336,20 @@
     window.dispatchEvent(eventReady);
   }
 
+  // restart current level - return everything to its original place
   function restartLevel() {
     loadLevel();
   }
 
+  // complete level
   function finishLevel() {
     console.info('finish level!', arguments)
     rotateGravity(currentGravityAngle)
     loadNextLevel();
   }
 
+  // whenever a player collides with a different sprite
+  // checks for general things - death, win, points, etc.
   function onPlayerCollision(sprite, direction) {
     var type = sprite.type;
     if (onPlayerCollisionWith[type]) {
@@ -270,6 +357,7 @@
     }
   }
 
+  // general collisions handler
   var onPlayerCollisionWith = {
     'finish': function onPlayerCollisionWithFinish(sprite, direction) {
       finishLevel();
@@ -290,13 +378,13 @@
       'id': 'platform_' + Math.random(),
       'x': 0,
       'y': 0,
-      'width': 100,
-      'height': 20,
-      'background': 'rgba(0, 0, 0, 1)',
+      'width': 0,
+      'height': DEFAULT_PLATFORM_HEIGHT,
+      'background': DEFAULT_PLATFORM_COLOR,
       'gravity': false,
       'solid': true,
       'movable': false,
-      'friction': new Vector(0.5, 0.5)
+      'friction': new Vector(DEFAULT_PLATFORM_FRICTION_X, DEFAULT_PLATFORM_FRICTION_Y)
     };
     fillWith(data, spriteData);
 
@@ -313,15 +401,15 @@
       'id': 'movable_' + Math.random(),
       'x': 0,
       'y': 0,
-      'width': 30,
-      'height': 30,
+      'width': DEFAULT_MOVABLE_WIDTH,
+      'height': DEFAULT_MOVABLE_HEIGHT,
       'movable': true,
       'gravity': true,
       'solid': true,
-      'bounce': 0.5,
-      'background': 'rgba(100, 150, 200, 1)',
+      'bounce': DEFAULT_MOVABLE_BOUNCE,
+      'background': DEFAULT_MOVABLE_COLOR,
       'maxVelocity': new Vector(4, 50000),
-      'friction': new Vector(0.1, 1)
+      'friction': new Vector(DEFAULT_MOVABLE_FRICTION_X, DEFAULT_MOVABLE_FRICTION_Y)
     };
     fillWith(data, spriteData);
 
@@ -336,10 +424,10 @@
       'id': 'collectible_' + Math.random(),
       'x': 0,
       'y': 0,
-      'width': 20,
-      'height': 20,
+      'width': DEFAULT_COLLECTIBLE_WIDTH,
+      'height': DEFAULT_COLLECTIBLE_HEIGHT,
       'type': 'collectible',
-      'background': 'rgba(255, 128, 0, 1)',
+      'background': DEFAULT_COLLECTIBLE_COLOR,
       'gravity': false,
       'solid': false,
       'movable': false,
@@ -372,6 +460,7 @@
     layerObjects.addSprite(collectible);
 
     if (data.type === 'death') {
+      !collectible.background && (collectible.background = DEFAULT_DEATH_COLOR);
       collectible.update = Bubbles.update;
       collectible.draw = Bubbles.draw;
     }
@@ -435,6 +524,12 @@
           'width': frameWidth.right,
           'height': game.height - data.y
         });
+        platforms.push({
+          'x': finishData.x + finishData.width + frameWidth.left,
+          'y': finishData.y + frameWidth.top,
+          'width': frameWidth.right,
+          'height': finishData.height
+        });
       } else {
         platforms.push(data);
       }
@@ -458,10 +553,6 @@
     };
 
     layerObjects.addSprite(finishLight);
-
-    if (!finishData.color) {
-      finishData.background = DEFAULT_FINISH_COLOR;
-    }
 
     createCollectible(finishData, frameWidth);
   }
@@ -520,10 +611,10 @@
       var keyCode = e.keyCode;
       switch (keyCode) {
         case 68: // A
-          userRotateGravity(-90);
+          playerRotateGravity(-90);
           break;
         case 65: // D
-          userRotateGravity(90);
+          playerRotateGravity(90);
           break;
         case 70: //F
           layerObjects.addSprite(new Movable({
@@ -589,7 +680,7 @@
   }
 
   // default gravity ("bottom") is 90deg, since it's pointing down
-  function userRotateGravity(angle) {
+  function playerRotateGravity(angle) {
     var newAngle = (currentGravityAngle - angle) % 360;
 
     // if player just can't do it yet - don't show a message
@@ -679,26 +770,26 @@
     }
   }
 
-  init();
+  loadGameConfig();
 
-
+  // for death areas
   var Bubbles = {
-    SIZE_MIN: 1,
-    SIZE_MAX: 3,
-    SPEED_MIN: 20,
-    SPEED_MAX: 50,
-    MARGIN_MIN: 5,
-    MARGIN_MAX: 30,
-    COLOR_MIN: 120,
-    COLOR_MAX: 190,
+    SIZE_MIN: 0,
+    SIZE_MAX: 0,
+    SPEED_MIN: 0,
+    SPEED_MAX: 0,
+    MARGIN_MIN: 0,
+    MARGIN_MAX: 0,
+    COLOR_MIN: 0,
+    COLOR_MAX: 0,
 
-    POP_MIN: 0.5,
-    POP_MAX: 2,
-    POP_OPACITY_STEP_MIN: 0.25,
-    POP_OPACITY_STEP_MAX: 0.5,
+    POP_MIN: 0,
+    POP_MAX: 0,
+    POP_OPACITY_STEP_MIN: 0,
+    POP_OPACITY_STEP_MAX: 0,
 
-    GENERATION_MIN: 0.3,
-    GENERATION_MAX: 2,
+    GENERATION_MIN: 0,
+    GENERATION_MAX: 0,
 
     update: function updateBubble(dt) {
       !this.bubblesConfig && (this.bubblesConfig = {
@@ -790,7 +881,7 @@
     createPlatform: createPlatform,
     createCollectible: createCollectible,
     setPlayerAllowedRotation: setPlayerAllowedRotation,
-    userRotateGravity: userRotateGravity,
+    playerRotateGravity: playerRotateGravity,
     rotateGravity: rotateGravity,
     game: game,
     finishLevel: finishLevel,
