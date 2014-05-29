@@ -10,9 +10,9 @@ body {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 700px;
-  height: 700px;
-  margin: -350px 0 0 -350px;
+  width: 600px;
+  height: 600px;
+  margin: -300px 0 0 -300px;
 }
 #canvases {
   position: absolute;
@@ -35,8 +35,8 @@ body {
     left: 50%;
   }
   #canvases #background {
-    -webkit-transition: background 1000ms linear;
-    transition: background 1000ms linear;
+    -webkit-transition: background 500ms linear;
+    transition: background 500ms linear;
   }
 
 #controls {

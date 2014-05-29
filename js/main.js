@@ -14,7 +14,7 @@
       DEFAULT_WIDTH = 0,
       DEFAULT_HEIGHT = 0,
       DEFAULT_BACKGROUND = 'rgba(255, 255, 255, 1)',
-      DEFAULT_FINISH_LIGHT = 'rgba(255, 255, 0, .1)',
+      DEFAULT_FINISH_LIGHT = 'rgba(255, 255, 0, .08)',
       DEFAULT_FINISH_COLOR = 'rgba(255, 255, 0, .5)',
 
       FINAL_LEVEL = 2,
@@ -45,7 +45,7 @@
     // just for easy debugging
     window.game = game;
 
-
+    // create all sprite layers - background, player, etc.
     createLayers();
 
     // add player
@@ -55,17 +55,16 @@
     UIControls.init();
 
     // first intro text
-    
     if (!Player.get('didIntroTutorial')) {
       window.addEventListener('keydown', onKeyIntroTutorial);
     }
 
+    // when a level is ready - start the game loop
     window.addEventListener('levelReady', onLevelReady);
 
-    // load the level
+    // load the first level
     loadLevel((window.location.href.match(/LEVEL=(\d+)/) || [])[1]);
   }
-
 
   function createLayers() {
     layerBackground = new Layer({
