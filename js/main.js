@@ -606,6 +606,10 @@
   }
 
   function rotateGravity(angle) {
+    if (!angle) {
+      return;
+    }
+
     var elButton;
     if (angle > 0) {
       elButton = document.getElementById('rotate-left');
