@@ -34,6 +34,10 @@ utils = (function() {
   };
 
   return {
+    random: function random(min, max) {
+      return (Math.random() * (max - min)) + min;
+    },
+
     addEventsSupport: function addEventsSupport(obj) {
       var proto = obj.prototype || obj;
       

@@ -40,6 +40,8 @@ Sprite = (function() {
 
   Sprite.prototype = {
     init: function init(options) {
+      !options && (options = {});
+
       fillWith(this, options);
 
       if (!this.id) {

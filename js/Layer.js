@@ -57,7 +57,7 @@ Layer = (function() {
           updated = this.updated;
 
       for (var i = 0, sprite; sprite = sprites[i++];) {
-        updated = sprite.movable && sprite.update(dt) || updated;
+        updated = sprite.update(dt) || updated;
       }
 
       this.updated = updated;
