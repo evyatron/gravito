@@ -124,17 +124,6 @@
       return;
     }
 
-    if (!Player.get('didIntro')) {
-      Dialog.show({
-        'id': 'intro',
-        'text': utils.l10n.get('intro'),
-        'onEnd': function onDialogEnd() {
-          Player.set('didIntro', true);
-          initLevel();
-        }
-      });
-    }
-
     /* --------------- LEVEL SIZE --------------- */
     var size = {
       'width': DEFAULT_WIDTH,
@@ -197,7 +186,6 @@
 
     Player.createSprite(layerPlayer, userCreationData);
 
-
     /* --------------- LEVEL FINISH POINT --------------- */
     if (finishData.width && finishData.height) {
       createCollectible(finishData, frameWidth);
@@ -232,6 +220,21 @@
       return;
     }
 
+
+
+    // game's first introduction
+    if (!Player.get('didIntro')) {
+      Player.disableControl();
+      Dialog.show({
+        'id': 'intro',
+        'text': utils.l10n.get('intro'),
+        'sprite': Player.spritea,
+        'onEnd': function onDialogEnd() {
+          Player.set('didIntro', true);
+          Player.enableControl();
+        }
+      });
+    }
 
     // Game Ready!
     var eventReady = new CustomEvent('levelReady');

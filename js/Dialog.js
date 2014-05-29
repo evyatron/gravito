@@ -1,5 +1,6 @@
 Dialog = (function() {
   var DEFAULT_DURATION = 2000,
+      DISTANCE_FROM_SPRITE = 5,
       DURATION_REGEX = /\{d:(\d+)\}/,
       METHOD_REGEX = /\{m:([^\}]+)\}/;
 
@@ -10,6 +11,8 @@ Dialog = (function() {
   Dialog.prototype = {
     init: function init(options) {
       this.elContainer = options.elContainer;
+      this.el = null;
+      this.stickTo = null;
     },
 
     show: function show(options) {
@@ -60,12 +63,14 @@ Dialog = (function() {
           elDialog.id = 'dialog-' + id;
           self.elContainer.appendChild(elDialog);
 
-          /*
+          self.el = elDialog;
+
           if (sprite) {
-            elDialog.style.cssText += 'top: ' + (sprite.topRight.y - elDialog.offsetHeight) + 'px;' +
-                                      'left: ' + sprite.topRight.x + 'px;';
+            self.stickTo = sprite;
+            self.stickToSprite();
+          } else {
+            elDialog.classList.add('global');
           }
-          */
         }
 
         if (methodFromText) {
@@ -75,12 +80,37 @@ Dialog = (function() {
         }
 
         function nextStep() {
+          self.el = null;
           elDialog && elDialog.parentNode.removeChild(elDialog);
           showText();
         }
       }
 
       showText();
+    },
+
+    // TODO: handle rotation :(
+    stickToSprite: function stickToSprite() {
+      if (!this.el) {
+        return;
+      }
+
+      var x = this.stickTo.topRight.x,
+          y = this.stickTo.topRight.y - this.el.offsetHeight,
+          offset = this.stickTo.layer.context.canvas.getBoundingClientRect();
+
+      x += offset.left;
+      y += offset.top;
+
+      x += DISTANCE_FROM_SPRITE;
+      y -= DISTANCE_FROM_SPRITE;
+
+      x = Math.round(x);
+      y = Math.round(y);
+
+      this.el.style.cssText += '-webkit-transform: translate(' + x + 'px, ' + y + 'px);';
+
+      window.setTimeout(this.stickToSprite.bind(this), 60/1000);
     },
 
     getElement: function getElement(text) {

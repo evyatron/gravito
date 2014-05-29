@@ -19,6 +19,7 @@ Layer = (function() {
       console.log('[Layer] addSprite', this, sprite);
 
       this.sprites.push(sprite);
+      sprite.layer = this;
 
       this.updated = true;
 
@@ -33,6 +34,7 @@ Layer = (function() {
       for (var i = 0, sprite; sprite = this.sprites[i++];) {
         if (sprite.id === spriteId) {
           this.sprites.splice(i - 1, 1);
+          sprite.layer = null;
           break;
         }
       }
