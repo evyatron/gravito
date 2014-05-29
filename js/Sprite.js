@@ -6,12 +6,11 @@ Sprite = (function() {
     this.height = 0;
     this.mass = 1;
 
+    this.data = {};
+
     this.isPlayer = false;
 
     this.bounce = {};
-
-    this.position = new Vector(0, 0);
-
 
     this.resting = false;
     this.movable = false;
@@ -84,7 +83,7 @@ Sprite = (function() {
       return new Vector(tlX + (brX - tlX)/2, tlY + (brY - tlY)/2);
     },
 
-    onCollision: function onCollisionWith(callback, callbackEnd) {
+    onCollision: function onCollision(callback, callbackEnd) {
       this.onCollisionWith(null, callback, callbackEnd);
     },
 
@@ -160,7 +159,7 @@ Sprite = (function() {
 
     accelerate: function accelerate(vector) {
       if (vector) {
-        // Handle NaNs or Nulls etc.
+        // Handle NaNs, nulls, etc.
         !vector.x && (vector.x = 0);
         !vector.y && (vector.y = 0);
 
@@ -168,12 +167,10 @@ Sprite = (function() {
       } else {
         this.acceleration = new Vector(0, 0);
       }
-      
-      //console.log('[Sprite] accelerate:', vector);
     },
 
     update: function update(dt) {
-      if (!this.movable) {
+      if (!(this.movable || this.collisionable)) {
         return;
       }
 
@@ -184,7 +181,6 @@ Sprite = (function() {
       var gravityDirection = window.GRAVITY_DIRECTION,
           gravityX = Math.abs(gravityDirection.x),
           gravityY = Math.abs(gravityDirection.y);
-
 
       (!this.velocity.x) && (this.velocity.x = 0);
       (!this.velocity.y) && (this.velocity.y = 0);

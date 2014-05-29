@@ -22,16 +22,21 @@
       DEFAULT_PLATFORM_FRICTION_X = 0,
       DEFAULT_PLATFORM_FRICTION_Y = 0,
 
-      DEFAULT_MOVABLE_WIDTH = 0;
-      DEFAULT_MOVABLE_HEIGHT = 0;
-      DEFAULT_MOVABLE_BOUNCE = 0;
-      DEFAULT_MOVABLE_FRICTION_X = 0;
-      DEFAULT_MOVABLE_FRICTION_Y = 0;
-      DEFAULT_MOVABLE_COLOR = '';
+      DEFAULT_MOVABLE_WIDTH = 0,
+      DEFAULT_MOVABLE_HEIGHT = 0,
+      DEFAULT_MOVABLE_BOUNCE = 0,
+      DEFAULT_MOVABLE_FRICTION_X = 0,
+      DEFAULT_MOVABLE_FRICTION_Y = 0,
+      DEFAULT_MOVABLE_COLOR = '',
 
-      DEFAULT_COLLECTIBLE_WIDTH = 0;
-      DEFAULT_COLLECTIBLE_HEIGHT = 0;
-      DEFAULT_COLLECTIBLE_COLOR = '';
+      DEFAULT_COLLECTIBLE_WIDTH = 0,
+      DEFAULT_COLLECTIBLE_HEIGHT = 0,
+      DEFAULT_COLLECTIBLE_COLOR = '',
+
+      DEATH_AREA_SOUND = '',
+      DEATH_SOUND_COLOR = '',
+      DEATH_SOUND_NUMBER_OF_STEPS = 0,
+      DEATH_SOUND_DISTANCE_STEP = 0,
 
       NUMBER_OF_LEVELS = 0,
 
@@ -79,6 +84,11 @@
     DEFAULT_COLLECTIBLE_HEIGHT = config.DEFAULT_COLLECTIBLE_HEIGHT;
     DEFAULT_COLLECTIBLE_COLOR = config.DEFAULT_COLLECTIBLE_COLOR;
 
+    DEATH_AREA_SOUND = config.DEATH_AREA_SOUND;
+    DEATH_SOUND_COLOR = config.DEATH_SOUND_COLOR;
+    DEATH_SOUND_NUMBER_OF_STEPS = config.DEATH_SOUND_NUMBER_OF_STEPS;
+    DEATH_SOUND_DISTANCE_STEP = config.DEATH_SOUND_DISTANCE_STEP;
+
     for (var k in config.BUBBLES) {
       Bubbles[k] = config.BUBBLES[k];
     }
@@ -102,6 +112,8 @@
 
     utils.l10n.init();
 
+    SoundManager.init();
+
     Dialog.init({
       'elContainer': document.getElementById('dialogs')
     });
@@ -121,7 +133,8 @@
 
     // add player
     Player.init({
-      'onCollision': onPlayerCollision
+      'onCollisionStart': onPlayerCollisionStart,
+      'onCollisionEnd': onPlayerCollisionEnd
     });
 
     // UI controls event listeners etc.
@@ -134,6 +147,13 @@
 
     // when a level is ready - start the game loop
     window.addEventListener('levelReady', onLevelReady);
+
+    SoundManager.load({
+      'water': {
+        'src': 'sounds/water',
+        'loop': true
+      }
+    });
 
     // load the first level
     loadLevel((window.location.href.match(/LEVEL=(\d+)/) || [])[1]);
@@ -350,28 +370,71 @@
 
   // whenever a player collides with a different sprite
   // checks for general things - death, win, points, etc.
-  function onPlayerCollision(sprite, direction) {
+  function onPlayerCollisionStart(sprite, direction) {
     var type = sprite.type;
-    if (onPlayerCollisionWith[type]) {
-      onPlayerCollisionWith[type].apply(this, arguments)
+    if (onPlayerCollisionWithStart[type]) {
+      onPlayerCollisionWithStart[type].apply(this, arguments)
+    }
+  }
+
+  function onPlayerCollisionEnd(sprite, direction) {
+    var type = sprite.type;
+    if (onPlayerCollisionWithEnd[type]) {
+      onPlayerCollisionWithEnd[type].apply(this, arguments)
     }
   }
 
   // general collisions handler
-  var onPlayerCollisionWith = {
+  var onPlayerCollisionWithStart = {
     'finish': function onPlayerCollisionWithFinish(sprite, direction) {
       finishLevel();
     },
     'death': function onPlayerCollisionWithDeath(sprite, direction) {
+      SoundManager.setVolume('water', 1);
       Player.disableControl();
       Player.stopAllMovement();
-      window.setTimeout(restartLevel, 600);
+      window.setTimeout(function() {
+        SoundManager.stop('water');
+        restartLevel();
+      }, 1500);
     },
     'score': function onPlayerCollisionWithScore(sprite, direction) {
       sprite.layer.removeSprite(sprite);
       console.info('score++')
+    },
+    'sound': function onPlayerCollisionWithScore(sprite, direction) {
+      if (!sprite.data.sound) {
+        return;
+      }
+
+      SoundManager.setVolume(sprite.data.sound, sprite.data.volume || 1);
+      SoundManager.play(sprite.data.sound);
     }
-  }
+  };
+
+  var onPlayerCollisionWithEnd = {
+    'sound': function onPlayerCollisionWithScore(sprite, direction) {
+      if (!sprite.data || !sprite.data.sound) {
+        return;
+      }
+
+      var sounds = {},
+          soundToStop = sprite.data.sound,
+          collisions = Player.sprite.collisions,
+          collisionSprite;
+
+      for (var id in collisions) {
+        collisionSprite = collisions[id].sprite;
+
+        if (collisionSprite.data.sound && collisionSprite.data.sound === soundToStop) {
+          SoundManager.setVolume(soundToStop, collisionSprite.data.volume);
+          return;
+        }
+      }
+
+      SoundManager.stop(sprite.data.sound);
+    }
+  };
 
   function createPlatform(spriteData, frameWidth) {
     var data = {
@@ -428,9 +491,6 @@
       'height': DEFAULT_COLLECTIBLE_HEIGHT,
       'type': 'collectible',
       'background': DEFAULT_COLLECTIBLE_COLOR,
-      'gravity': false,
-      'solid': false,
-      'movable': false,
       'collisionable': true,
       'friction': new Vector(0, 0)
     };
@@ -457,13 +517,33 @@
       }
     }
 
-    layerObjects.addSprite(collectible);
-
     if (data.type === 'death') {
       !collectible.background && (collectible.background = DEFAULT_DEATH_COLOR);
       collectible.update = Bubbles.update;
       collectible.draw = Bubbles.draw;
+
+      if (DEATH_AREA_SOUND) {
+        for (var i = 1, sizeStep; i <= DEATH_SOUND_NUMBER_OF_STEPS; i++) {
+          sizeStep = DEATH_SOUND_DISTANCE_STEP * i;
+
+          layerObjects.addSprite(new Sprite({
+            'x': data.x - sizeStep,
+            'y': data.y - sizeStep,
+            'width': data.width + sizeStep * 2,
+            'height': data.height + sizeStep * 2,
+            'type': 'sound',
+            'collisionable': true,
+            'background': DEATH_SOUND_COLOR,
+            'data': {
+              'sound': DEATH_AREA_SOUND,
+              'volume': 1 - (i / (DEATH_SOUND_NUMBER_OF_STEPS + 1))
+            }
+          }));
+        }
+      }
     }
+
+    layerObjects.addSprite(collectible);
   }
 
   function createFrame(frameWidth, finishData) {

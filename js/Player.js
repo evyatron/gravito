@@ -24,7 +24,8 @@ window.Player = (function() {
     this.isMovingLeft = false;
     this.isMovingRight = false;
 
-    this.onCollision = null;
+    this.onCollisionStart = null;
+    this.onCollisionEnd = null;
 
     this.data = {
       'maxRotation': 0,
@@ -48,7 +49,8 @@ window.Player = (function() {
       DEFAULT_SETTINGS.height = this.HEIGHT;
       DEFAULT_SETTINGS.background = this.BACKGROUND;
 
-      this.onCollision = options.onCollision;
+      this.onCollisionStart = options.onCollisionStart;
+      this.onCollisionEnd = options.onCollisionEnd;
 
       window.addEventListener('keydown', this.onKeyDown.bind(this));
       window.addEventListener('keyup', this.onKeyUp.bind(this));
@@ -67,8 +69,8 @@ window.Player = (function() {
 
       this.sprite = new Sprite(data);
 
-      if (this.onCollision) {
-        this.sprite.onCollision(this.onCollision);
+      if (this.onCollisionStart || this.onCollisionEnd) {
+        this.sprite.onCollision(this.onCollisionStart, this.onCollisionEnd);
       }
 
       layer.addSprite(this.sprite);
