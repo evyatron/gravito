@@ -232,7 +232,7 @@
       return;
     }
 
-
+    Player.enableControl();
 
     // game's first introduction
     if (!Player.get('didIntro')) {
@@ -274,7 +274,9 @@
       finishLevel();
     },
     'death': function onPlayerCollisionWithDeath(sprite, direction) {
-      restartLevel();
+      Player.disableControl();
+      Player.stopAllMovement();
+      window.setTimeout(restartLevel, 600);
     },
     'score': function onPlayerCollisionWithScore(sprite, direction) {
       sprite.layer.removeSprite(sprite);
@@ -575,7 +577,7 @@
     if (Math.abs(newAngle) > Player.get('maxRotation')) {
       return;
     }
-    
+
     if (currentLevelData.rotationLimit) {
       var max = currentLevelData.rotationLimit.max,
           min = currentLevelData.rotationLimit.min;
