@@ -450,7 +450,7 @@
     finishLight.draw = function drawMethod(context) {
       context.beginPath();
       context.moveTo(finishData.x + frameWidth.left, finishData.y + finishData.height + frameWidth.top);
-      context.lineTo(finishData.x + frameWidth.left - 50, finishData.y + finishData.height + frameWidth.top);
+      context.lineTo(finishData.x + frameWidth.left - finishData.height*1.25, finishData.y + finishData.height + frameWidth.top);
       context.lineTo(finishData.x + frameWidth.left, finishData.y + frameWidth.top);
       context.fillStyle = finishData.light || DEFAULT_FINISH_LIGHT;
       context.fill();
@@ -679,13 +679,18 @@
 
   var Bubbles = {
     SIZE_MIN: 1,
-    SIZE_MAX: 2,
+    SIZE_MAX: 3,
     SPEED_MIN: 20,
     SPEED_MAX: 50,
     MARGIN_MIN: 5,
     MARGIN_MAX: 30,
     COLOR_MIN: 120,
     COLOR_MAX: 190,
+
+    POP_MIN: 0.5,
+    POP_MAX: 2,
+    POP_OPACITY_STEP_MIN: 0.25,
+    POP_OPACITY_STEP_MAX: 0.5,
 
     GENERATION_MIN: 0.3,
     GENERATION_MAX: 2,
@@ -709,11 +714,20 @@
 
 
       for (var i = 0, bubble; bubble = bubbles[i++];) {
-        bubble.y -= bubble.speed * dt;
+        if (bubble.pop) {
+          bubble.size += bubble.popIncrement;
+          bubble.opacity -= bubble.popOpacityStep;
 
-        if (bubble.y < this.topLeft.y - bubble.margin) {
-          bubbles.splice(i - 1, 1);
-          i--;
+          if (bubble.opacity < 0) {
+            bubbles.splice(i - 1, 1);
+            i--;
+          }
+        } else {
+          bubble.y -= bubble.speed * dt;
+
+          if (bubble.y < this.topLeft.y - bubble.margin) {
+            bubble.pop = true;
+          }
         }
       }
 
@@ -728,11 +742,12 @@
 
       var bubbles = (this.bubblesConfig || {}).bubbles;
       for (var i = 0, bubble; bubble = bubbles[i++];) {
-        context.beginPath();
+        var size = bubble.size;
+
+        context.globalAlpha = bubble.opacity;
         context.strokeStyle = bubble.color;
-        context.arc(bubble.x, bubble.y, bubble.size, 0, Math.PI * 180, false);
-        context.stroke();
-        context.closePath();
+        context.strokeRect(bubble.x - size/2, bubble.y - size/2, bubble.size, bubble.size);
+        context.globalAlpha = 1;
       }
     },
 
@@ -740,17 +755,22 @@
       var size = utils.random(Bubbles.SIZE_MIN, Bubbles.SIZE_MAX),
           speed = utils.random(Bubbles.SPEED_MIN, Bubbles.SPEED_MAX),
           margin = utils.random(Bubbles.MARGIN_MIN, Bubbles.MARGIN_MAX),
+          popIncrement = utils.random(Bubbles.POP_MIN, Bubbles.POP_MAX),
+          popOpacityStep = utils.random(Bubbles.POP_OPACITY_STEP_MIN, Bubbles.POP_OPACITY_STEP_MAX),
           color = 'rgba(0, ' + Math.round(utils.random(Bubbles.COLOR_MIN, Bubbles.COLOR_MAX)) + ', 0, 1)';
 
       margin = Math.min(margin, sprite.height / 2);
 
       var bubble = {
         'x': (Math.random() * (sprite.width - size*2)) + sprite.topLeft.x + size,
-        'y': sprite.bottomLeft.y - size / 2,
+        'y': (Math.random() * (sprite.height - size*2)) + sprite.topLeft.y + size,
         'size': size,
         'speed': speed,
         'margin': margin,
-        'color': color
+        'color': color,
+        'popIncrement': popIncrement,
+        'popOpacityStep': popOpacityStep,
+        'opacity': 1
       };
 
       return bubble;
