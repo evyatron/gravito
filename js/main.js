@@ -461,6 +461,14 @@
     createCollectible(finishData, frameWidth);
   }
 
+  function showCantRotateMessage() {
+    Dialog.show({
+      'id': 'cant-rotate',
+      'text': utils.l10n.get('cant-rotate'),
+      'sprite': Player.sprite
+    });
+  }
+
 
   var UIControls = {
     elButtons: [],
@@ -574,18 +582,21 @@
   function userRotateGravity(angle) {
     var newAngle = (currentGravityAngle - angle) % 360;
 
+    // if player just can't do it yet - don't show a message
     if (Math.abs(newAngle) > Player.get('maxRotation')) {
       return;
     }
 
+    // if player is limited by something - show a message
     if (currentLevelData.rotationLimit) {
       var max = currentLevelData.rotationLimit.max,
           min = currentLevelData.rotationLimit.min;
 
-      if (max !== undefined && newAngle > currentLevelData.rotationLimit.max) {
-        return;
-      }
-      if (min !== undefined && newAngle < currentLevelData.rotationLimit.min) {
+      if (
+          (max !== undefined && newAngle > currentLevelData.rotationLimit.max) ||
+          (min !== undefined && newAngle < currentLevelData.rotationLimit.min)
+         ) {
+        showCantRotateMessage();
         return;
       }
     }
