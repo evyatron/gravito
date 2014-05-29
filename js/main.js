@@ -259,6 +259,7 @@
 
   function finishLevel() {
     console.info('finish level!', arguments)
+    rotateGravity(currentGravityAngle)
     loadNextLevel();
   }
 
