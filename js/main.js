@@ -14,6 +14,8 @@
       DEFAULT_WIDTH = 0,
       DEFAULT_HEIGHT = 0,
       DEFAULT_BACKGROUND = 'rgba(255, 255, 255, 1)',
+      DEFAULT_FINISH_LIGHT = 'rgba(255, 255, 0, .1)',
+      DEFAULT_FINISH_COLOR = 'rgba(255, 255, 0, .5)',
 
       FINAL_LEVEL = 2,
 
@@ -401,7 +403,7 @@
         });
         platforms.push({
           'x': game.width - frameWidth.right,
-          'y': finishData.y + finishData.height,
+          'y': finishData.y + finishData.height + frameWidth.top,
           'width': frameWidth.right,
           'height': game.height - data.y
         });
@@ -422,13 +424,17 @@
         context.moveTo(finishData.x + frameWidth.left, finishData.y + finishData.height + frameWidth.top);
         context.lineTo(finishData.x + frameWidth.left - 50, finishData.y + finishData.height + frameWidth.top);
         context.lineTo(finishData.x + frameWidth.left, finishData.y + frameWidth.top);
-        context.fillStyle = 'rgba(255, 255, 0, .1)';
+        context.fillStyle = finishData.light || DEFAULT_FINISH_LIGHT;
         context.fill();
         context.closePath();
       }
     });
 
     layerFront.addSprite(finishLight);
+
+    if (!finishData.color) {
+      finishData.background = DEFAULT_FINISH_COLOR;
+    }
 
     createCollectible(finishData, frameWidth);
   }
@@ -574,8 +580,11 @@
                                  'transform: rotate(' + currentGravityAngle + 'deg);';
 
     // UI indication
+    Player.stopAllMovement();
+    Player.disableControl();
     elButton.classList.add('active')
     window.setTimeout(function() {
+      Player.enableControl();
       elButton.classList.remove('active')
     }, 700);
   }
