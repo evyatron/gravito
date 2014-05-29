@@ -93,6 +93,7 @@ Layer = (function() {
         this.context = elCanvas.getContext('2d');
       }
 
+      elCanvas.id = this.id;
       elCanvas.width = width;
       elCanvas.height = height;
       elCanvas.style.cssText += ';margin: ' + -height/2 + 'px 0px 0px ' + -width/2 + 'px;'

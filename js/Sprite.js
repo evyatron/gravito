@@ -32,6 +32,8 @@ Sprite = (function() {
     this.collisions = {};
     this.collisionCallbacks = {};
 
+    this.drawMethod = null;
+
     this.init(options);
   }
 
@@ -249,6 +251,11 @@ Sprite = (function() {
     },
 
     draw: function draw(context) {
+      if (this.drawMethod) {
+        this.drawMethod.call(this, context);
+        return;
+      }
+
       var pos = this.topLeft;
 
       context.fillStyle = this.background;

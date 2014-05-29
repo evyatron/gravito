@@ -4,6 +4,7 @@
       layerBackground,
       layerObjects,
       layerPlayer,
+      layerFront,
 
       game,
       currentLevel = 1,
@@ -12,6 +13,7 @@
 
       DEFAULT_WIDTH = 0,
       DEFAULT_HEIGHT = 0,
+      DEFAULT_BACKGROUND = 'rgba(255, 255, 255, 1)',
 
       FINAL_LEVEL = 2,
 
@@ -42,19 +44,7 @@
     window.game = game;
 
 
-    layerBackground = new Layer({
-      'id': 'background'
-    }),
-    layerObjects = new Layer({
-      'id': 'objects'
-    }),
-    layerPlayer = new Layer({
-      'id': 'player'
-    });
-
-    game.addLayer(layerBackground);
-    game.addLayer(layerObjects);
-    game.addLayer(layerPlayer);
+    createLayers();
 
     // add player
     Player.init();
@@ -72,6 +62,27 @@
 
     // load the level
     loadLevel((window.location.href.match(/LEVEL=(\d+)/) || [])[1]);
+  }
+
+
+  function createLayers() {
+    layerBackground = new Layer({
+      'id': 'background'
+    }),
+    layerObjects = new Layer({
+      'id': 'objects'
+    }),
+    layerPlayer = new Layer({
+      'id': 'player'
+    });
+    layerFront = new Layer({
+      'id': 'front'
+    });
+
+    game.addLayer(layerBackground);
+    game.addLayer(layerObjects);
+    game.addLayer(layerPlayer);
+    game.addLayer(layerFront);
   }
 
   function onLevelReady(e) {
@@ -105,6 +116,7 @@
     layerBackground.clear();
     layerObjects.clear();
     layerPlayer.clear();
+    layerFront.clear();
 
     var url = 'data/levels/' + level + '.json',
         request = new XMLHttpRequest();
@@ -123,6 +135,9 @@
     if (!currentLevelData) {
       return;
     }
+
+    var background = currentLevelData.background || DEFAULT_BACKGROUND;
+    layerBackground.context.canvas.style.background = background;
 
     /* --------------- LEVEL SIZE --------------- */
     var size = {
@@ -188,7 +203,7 @@
 
     /* --------------- LEVEL FINISH POINT --------------- */
     if (finishData.width && finishData.height) {
-      createCollectible(finishData, frameWidth);
+      createFinishArea(finishData, frameWidth);
     }
 
 
@@ -400,6 +415,24 @@
     }
   }
 
+  function createFinishArea(finishData, frameWidth) {
+    var finishLight = new Sprite({
+      'drawMethod': function drawMethod(context) {
+        context.beginPath();
+        context.moveTo(finishData.x + frameWidth.left, finishData.y + finishData.height + frameWidth.top);
+        context.lineTo(finishData.x + frameWidth.left - 50, finishData.y + finishData.height + frameWidth.top);
+        context.lineTo(finishData.x + frameWidth.left, finishData.y + frameWidth.top);
+        context.fillStyle = 'rgba(255, 255, 0, .1)';
+        context.fill();
+        context.closePath();
+      }
+    });
+
+    layerFront.addSprite(finishLight);
+
+    createCollectible(finishData, frameWidth);
+  }
+
 
   var UIControls = {
     elButtons: [],
@@ -482,7 +515,7 @@
             window.setTimeout(function() {
               Player.stopAllMovement();
               
-              window.setTimeout(onDone, 400);
+              window.setTimeout(onDone, 500);
             }, duration);
           }, 800);
         },

@@ -34,8 +34,9 @@ body {
     top: 50%;
     left: 50%;
   }
-  #canvases canvas:first-child {
-    background: #fff;
+  #canvases #background {
+    -webkit-transition: background 1000ms linear;
+    transition: background 1000ms linear;
   }
 
 #controls {

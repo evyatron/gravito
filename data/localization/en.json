@@ -4,17 +4,21 @@
 
 
   "intro": [
-    "[INTRO TEXT 1]",
-    "[INTRO TEXT ...]"
+    "{d:3500}Where... Where am I?",
+    "{d:2500}What's going on?",
+    "{d:3000}Am I... Am I in 2D?",
+    "{d:3500}I need to find a way out of here. I Guess I better get moving.",
+    "{d:5000}There seems to be some light coming in from over there, if I could just reach it."
   ],
 
   "intro-tutorial": [
-    "[TUTORIAL TEXT 1]",
-    "[TUTORIAL TEXT ...]",
-    "{m:moveRight}[TUTORIAL TEXT - MOVE RIGHT]",
-    "{m:moveLeft}[TUTORIAL TEXT - MOVE LEFT]",
-    "{m:jump}[TUTORIAL TEXT - JUMP]",
-    "[TUTORIAL TEXT FINAL]"
+    "Okay, moving in 2D. I know this one.",
+    "{m:moveRight}This is right...",
+    "{m:moveLeft}And that's left...",
+    "{d:1200}Can I...",
+    "{m:jump}",
+    "{d:2000}Yeap, that's jumping.",
+    "I think I got it!"
   ],
 
   "gravity-1": [
@@ -32,6 +36,11 @@
 
   "ideas": "is this only 2 dimensions? I need to go back",
   "ideas": "There seems to be some...force keeps pulling me down",
+  "story": [
+    "2d need to get back - players thing to 3d, but actually to 1d",
+    "end of game - flatten to a single line, can do all levels in 1d",
+    "for each level need to plot a course of points to translate to a plain"
+  ],
   "levels": [
     "tutorial, just steps to reach the next level",
     "get gravity controller - need to reach the top but no stairs, need to rotate",

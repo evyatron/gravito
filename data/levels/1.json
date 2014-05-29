@@ -1,5 +1,6 @@
 {
   "frame": 10,
+  "background": "rgba(50, 50, 50, 1)",
   "size": {
     "width": 500,
     "height": 250
