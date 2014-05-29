@@ -467,10 +467,15 @@
   }
 
   function showCantRotateMessage() {
+    document.body.classList.add('cant-rotate');
+
     Dialog.show({
       'id': 'cant-rotate',
       'text': utils.l10n.get('cant-rotate'),
-      'sprite': Player.sprite
+      'sprite': Player.sprite,
+      'onEnd': function onEnd() {
+        document.body.classList.remove('cant-rotate');
+      }
     });
   }
 
