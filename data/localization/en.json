@@ -7,18 +7,18 @@
     "{d:3500}Where... Where am I?",
     "{d:2500}What's going on?",
     "{d:3000}Am I... Am I in 2D?",
-    "{d:3500}I need to find a way out of here. I Guess I better get moving.",
+    "{d:3500}I better find a way to get back...",
     "{d:5000}There seems to be some light coming in from over there, if I could just reach it."
   ],
 
   "intro-tutorial": [
-    "Okay, moving in 2D. I know this one.",
+    "Right, moving in 2D. I know this one.",
     "{m:moveRight}This is right...",
     "{m:moveLeft}And that's left...",
     "{d:1200}Can I...",
     "{m:jump}",
     "{d:2000}Yeap, that's jumping.",
-    "I think I got it!"
+    "Okay, I think I got it!"
   ],
 
   "gravity-1": [

@@ -1,6 +1,7 @@
 Sprite = (function() {
   function Sprite(options) {
     this.id = '';
+    this.type = '';
     this.width = 0;
     this.height = 0;
     this.mass = 1;

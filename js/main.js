@@ -4,7 +4,6 @@
       layerBackground,
       layerObjects,
       layerPlayer,
-      layerFront,
 
       game,
       currentLevel = 1,
@@ -17,7 +16,7 @@
       DEFAULT_FINISH_LIGHT = 'rgba(255, 255, 0, .08)',
       DEFAULT_FINISH_COLOR = 'rgba(255, 255, 0, .5)',
 
-      FINAL_LEVEL = 2,
+      FINAL_LEVEL = 3,
 
       // used for CSS rotation of the game
       currentGravityAngle = 0;;
@@ -49,7 +48,9 @@
     createLayers();
 
     // add player
-    Player.init();
+    Player.init({
+      'onCollision': onPlayerCollision
+    });
 
     // UI controls event listeners etc.
     UIControls.init();
@@ -70,20 +71,16 @@
     layerBackground = new Layer({
       'id': 'background'
     }),
-    layerObjects = new Layer({
-      'id': 'objects'
-    }),
     layerPlayer = new Layer({
       'id': 'player'
     });
-    layerFront = new Layer({
-      'id': 'front'
-    });
+    layerObjects = new Layer({
+      'id': 'objects'
+    }),
 
     game.addLayer(layerBackground);
-    game.addLayer(layerObjects);
     game.addLayer(layerPlayer);
-    game.addLayer(layerFront);
+    game.addLayer(layerObjects);
   }
 
   function onLevelReady(e) {
@@ -117,7 +114,6 @@
     layerBackground.clear();
     layerObjects.clear();
     layerPlayer.clear();
-    layerFront.clear();
 
     var url = 'data/levels/' + level + '.json',
         request = new XMLHttpRequest();
@@ -157,11 +153,11 @@
       'width': 0,
       'height': 0,
       'background': 'rgba(255, 255, 0, 1)',
-      'onCollision': finishLevel
+      'type': 'finish'
     };
     fillWith(finishData, currentLevelData.finish);
 
-    var frameWidth = currentLevelData.frame || {};
+    var frameWidth = currentLevelData.frame || 0;
     if (typeof frameWidth === 'number') {
       frameWidth = {
         'top': frameWidth,
@@ -257,9 +253,33 @@
     window.dispatchEvent(eventReady);
   }
 
+  function restartLevel() {
+    loadLevel();
+  }
+
   function finishLevel() {
     console.info('finish level!', arguments)
     loadNextLevel();
+  }
+
+  function onPlayerCollision(sprite, direction) {
+    var type = sprite.type;
+    if (onPlayerCollisionWith[type]) {
+      onPlayerCollisionWith[type].apply(this, arguments)
+    }
+  }
+
+  var onPlayerCollisionWith = {
+    'finish': function onPlayerCollisionWithFinish(sprite, direction) {
+      finishLevel();
+    },
+    'death': function onPlayerCollisionWithDeath(sprite, direction) {
+      restartLevel();
+    },
+    'score': function onPlayerCollisionWithScore(sprite, direction) {
+      sprite.layer.removeSprite(sprite);
+      console.info('score++')
+    }
   }
 
   function createPlatform(spriteData, frameWidth) {
@@ -315,6 +335,7 @@
       'y': 0,
       'width': 20,
       'height': 20,
+      'type': 'collectible',
       'background': 'rgba(255, 128, 0, 1)',
       'gravity': false,
       'solid': false,
@@ -429,7 +450,7 @@
       }
     });
 
-    layerFront.addSprite(finishLight);
+    layerObjects.addSprite(finishLight);
 
     if (!finishData.color) {
       finishData.background = DEFAULT_FINISH_COLOR;
@@ -549,9 +570,22 @@
 
   // default gravity ("bottom") is 90deg, since it's pointing down
   function userRotateGravity(angle) {
-    if (Math.abs(currentGravityAngle - angle) % 360 > Player.get('maxRotation')) {
-      console.info('Cant rotate')
+    var newAngle = (currentGravityAngle - angle) % 360;
+
+    if (Math.abs(newAngle) > Player.get('maxRotation')) {
       return;
+    }
+    
+    if (currentLevelData.rotationLimit) {
+      var max = currentLevelData.rotationLimit.max,
+          min = currentLevelData.rotationLimit.min;
+
+      if (max !== undefined && newAngle > currentLevelData.rotationLimit.max) {
+        return;
+      }
+      if (min !== undefined && newAngle < currentLevelData.rotationLimit.min) {
+        return;
+      }
     }
 
     rotateGravity(angle);
