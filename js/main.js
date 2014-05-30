@@ -444,7 +444,6 @@
 
     game.setSize(size.width, size.height);
 
-
     /* --------------- FRAME & FINISH POINT--------------- */
     var finishData = {
       'x': null,
@@ -1041,11 +1040,12 @@
   }
 
   function gameTick(dt) {
-    var gravityDirection = window.GRAVITY_DIRECTION;
+    var gravityDirection = window.GRAVITY_DIRECTION,
+        playerSprite = Player.sprite;
 
     // jump according to gravity
     if (Player.isJumping && Player.sprite.resting) {
-      Player.sprite.applyForce(gravityDirection.scale(-Player.JUMP_FORCE * dt));
+      playerSprite.applyForce(gravityDirection.scale(-Player.JUMP_FORCE * dt));
     }
 
     // move player according to gravity
@@ -1064,9 +1064,16 @@
       }
 
       var newAcceleration = gravityDirection.flip().scale(Player.MOVE_SPEED * dir);
-      Player.sprite.accelerate(newAcceleration);
+      playerSprite.accelerate(newAcceleration);
     } else {
-      Player.sprite.accelerate();
+      playerSprite.accelerate();
+    }
+
+    if (playerSprite.bottomLeft.y < 0 ||
+        playerSprite.topLeft.y > game.height ||
+        playerSprite.bottomRight.x < 0 ||
+        playerSprite.topLeft.x > game.width) {
+      restartLevel();
     }
   }
 
