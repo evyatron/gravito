@@ -227,10 +227,19 @@
           'type': 'toggle',
           'value': 'off',
           'onChange': function onFullscreenSettingChange(value) {
-            if (value === 'on') {
-              document.body.webkitRequestFullScreen(document.body.ALLOW_KEYBOARD_INPUT);
-            } else {
-              document.webkitCancelFullScreen();
+            try {
+              if (value === 'on') {
+                (document.body.webkitRequestFullScreen ||
+                 document.body.mozRequestFullScreen ||
+                 document.body.requestFullScreen
+                  )(document.body.ALLOW_KEYBOARD_INPUT);
+              } else {
+                (document.webkitCancelFullScreen ||
+                 document.mozCancelFullScreen ||
+                 document.cancelFullScreen)();
+              }
+            } catch(ex) {
+              console.error('fullscreen error', ex);
             }
           }
         }
