@@ -542,6 +542,7 @@
   // checks for general things - death, win, points, etc.
   function onPlayerCollisionStart(sprite, direction) {
     var type = sprite.type;
+
     if (onPlayerCollisionWithStart[type]) {
       onPlayerCollisionWithStart[type].apply(this, arguments)
     }
@@ -549,6 +550,15 @@
     if (sprite.data.sound) {
       SoundManager.setVolume(sprite.data.sound, sprite.data.volume);
       SoundManager.play(sprite.data.sound);
+    }
+
+    if (sprite.data.collisionCallback) {
+      var onCollision = ((CurrentLevel || {}).actions || {})[sprite.data.collisionCallback];
+      if (onCollision) {
+        onCollision.apply(WRAPPER, arguments);
+      } else {
+        console.warn('CANT FIND CALLBACK FOR COLLISION', arguments)
+      }
     }
   }
 
@@ -658,21 +668,6 @@
     data.y += frameWidth.top;
 
     var collectible = new Sprite(data);
-
-    // done like this so the callback will only get parsed once it's called
-    // since the callback method might not exist yet (async loading of level script)
-    if (spriteData.onCollision) {
-      if (spriteData.onCollision instanceof Function) {
-        Player.sprite.onCollisionWith(collectible, spriteData.onCollision);
-      } else {
-        (function(collisionCallback) {
-          Player.sprite.onCollisionWith(collectible, function() {
-            var onCollision = ((CurrentLevel || {}).actions || {})[collisionCallback];
-            onCollision.apply(WRAPPER, arguments);
-          });
-        }(spriteData.onCollision));
-      }
-    }
 
     if (data.type === 'death') {
       collectible.update = Bubbles.update;

@@ -131,7 +131,11 @@ utils = (function() {
       },
 
       get: function get(key, args) {
-        return (this.translations[key] || '').format(args);
+        var text = this.translations[key];
+        if (text && typeof text === 'string') {
+          text = text.format(args);
+        }
+        return text;
       },
 
       load: function load(language, callback) {
