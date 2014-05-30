@@ -160,17 +160,20 @@
   }
 
   function onKeyToggleMenu(e) {
-    var keyCode = e.keyCode;
-    if (keyCode !== 27) {
-      return;
-    }
+    var key = e.keyCode;
 
-    if (MainMenu.isVisible) {
-      if (currentLevelData) {
-        MainMenu.hide();
+    if (key === 27) {
+      if (MainMenu.isVisible) {
+        if (currentLevelData) {
+          MainMenu.hide();
+        }
+      } else {
+        MainMenu.show();
       }
-    } else {
-      MainMenu.show();
+    } else if (key === 13) {
+      if (MainMenu.isVisible) {
+        MainMenu.clickOn('new');
+      }
     }
   }
 
