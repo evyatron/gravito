@@ -3,6 +3,13 @@ Dialog = (function() {
       METHOD_REGEX = /\{m:([^\}]+)\}/;
 
   function Dialog() {
+    this.elContainer;
+    this.el;
+    this.id;
+    this.sprite;
+    this.onEnd;
+    this.onMethod;
+
     this.DEFAULT_DURATION;
     this.DISTANCE_FROM_SPRITE_X;
     this.DISTANCE_FROM_SPRITE_Y;
@@ -11,20 +18,13 @@ Dialog = (function() {
   Dialog.prototype = {
     init: function init(options) {
       this.elContainer = options.elContainer;
-      this.el = null;
-      this.stickTo = null;
+
+      window.addEventListener('keydown', this.onKeyPress.bind(this));
     },
 
     show: function show(options) {
-      var self = this,
-          texts = options.text,
-          id = options.id,
-          sprite = options.sprite,
-          onMethod = options.onMethod || function(method, onDone){
-            console.warn('Method handler (for "' + method + '") not implemented, setting timeout 500ms');
-            window.setTimeout(onDone, 500);
-          },
-          onEnd = options.onEnd || function(){};
+      var texts = options.text,
+          id = options.id;
 
       !id && (id = text.replace(/[^a-zA-Z]/g, '').toLowerCase());
 
@@ -32,61 +32,74 @@ Dialog = (function() {
         return;
       }
 
-      if (Array.isArray(texts)) {
-        texts = texts.slice(0);
-      } else {
+      if (!Array.isArray(texts)) {
         texts = [texts];
       }
 
-      function showText() {
-        var text = texts.shift(),
-            duration = self.DEFAULT_DURATION,
-            durationFromText = (text || '').match(DURATION_REGEX),
-            methodFromText = (text || '').match(METHOD_REGEX);
+      this.id = id;
+      this.texts = texts.slice(0);
+      this.onMethod = options.onMethod || this.defaultOnMethod
+      this.onEnd = options.onEnd || function() {};;
+      this.sprite = options.sprite;
 
-        if (text === undefined) {
-          onEnd();
-          return;
-        }
+      this.showText();
+    },
 
-        if (durationFromText) {
-          duration = durationFromText[1] * 1;
-          text = text.replace(durationFromText[0], '');
-        }
-        if (methodFromText) {
-          text = text.replace(methodFromText[0], '');
-          methodFromText = methodFromText[1];
-        }
+    showText: function showText() {
+      if (!this.texts) {
+        return;
+      }
 
-        if (text) {
-          var elDialog = self.getElement(text);
-          elDialog.id = 'dialog-' + id;
-          self.elContainer.appendChild(elDialog);
+      var text = this.texts.shift(),
+          duration = this.DEFAULT_DURATION,
+          durationFromText = (text || '').match(DURATION_REGEX),
+          methodFromText = (text || '').match(METHOD_REGEX);
 
-          self.el = elDialog;
+      if (text === undefined) {
+        this.onEnd();
+        return;
+      }
 
-          if (sprite) {
-            self.stickTo = sprite;
-            self.stickToSprite();
-          } else {
-            elDialog.classList.add('global');
-          }
-        }
+      if (durationFromText) {
+        duration = durationFromText[1] * 1;
+        text = text.replace(durationFromText[0], '');
+      }
+      if (methodFromText) {
+        text = text.replace(methodFromText[0], '');
+        methodFromText = methodFromText[1];
+      }
 
-        if (methodFromText) {
-          onMethod(methodFromText, nextStep);
+      if (text) {
+        this.el = this.getElement(text);
+        this.el.id = 'dialog-' + this.id;
+        this.elContainer.appendChild(this.el);
+
+        if (this.sprite) {
+          this.stickToSprite();
         } else {
-          window.setTimeout(nextStep, duration);
-        }
-
-        function nextStep() {
-          self.el = null;
-          elDialog && elDialog.parentNode.removeChild(elDialog);
-          showText();
+          this.el.classList.add('global');
         }
       }
 
-      showText();
+      if (methodFromText) {
+        this.onMethod(methodFromText, this.nextStep.bind(this));
+      } else {
+        this.timeoutNextStep = window.setTimeout(this.nextStep.bind(this), duration);
+      }
+    },
+
+    nextStep: function nextStep() {
+      this.el && this.el.parentNode.removeChild(this.el);
+      this.el = null;
+      this.showText();
+    },
+
+    onKeyPress: function onKeyPress() {
+      if (this.timeoutNextStep) {
+        window.clearTimeout(this.timeoutNextStep);
+        this.timeoutNextStep = null;
+        window.setTimeout(this.nextStep.bind(this), 200);
+      }
     },
 
     // TODO: handle rotation :(
@@ -95,9 +108,9 @@ Dialog = (function() {
         return;
       }
 
-      var x = this.stickTo.topRight.x,
-          y = this.stickTo.topRight.y - this.el.offsetHeight,
-          offset = this.stickTo.layer.context.canvas.getBoundingClientRect();
+      var x = this.sprite.topRight.x,
+          y = this.sprite.topRight.y - this.el.offsetHeight,
+          offset = this.sprite.layer.context.canvas.getBoundingClientRect();
 
       x += offset.left;
       y += offset.top;
@@ -112,6 +125,11 @@ Dialog = (function() {
                                'transform: translate(' + x + 'px, ' + y + 'px);';
 
       window.setTimeout(this.stickToSprite.bind(this), 60/1000);
+    },
+
+    defaultOnMethod: function defaultOnMethod(method, onDone) {
+      console.warn('Default Method handler (for "' + method + '") not implemented, setting timeout 500ms');
+      window.setTimeout(onDone, 500);
     },
 
     getElement: function getElement(text) {

@@ -529,6 +529,7 @@
     var levelText = utils.l10n.get('level-' + currentLevel);
     // game's first introduction
     if (levelText && !seenLevelIntro) {
+      Player.stopAllMovement();
       Player.disableControl();
 
       window.setTimeout(function() {
