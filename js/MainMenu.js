@@ -193,6 +193,7 @@ var MainMenu = (function() {
     createHTML: function createHTML() {
       var el = document.createElement('div');
       el.innerHTML = '<h1>' + utils.l10n.get('menu-title') + '</h1>' +
+                     '<h2>' + utils.l10n.get('menu-subtitle') + '</h2>' +
                      '<ul class="options"></ul>';
 
       el.id = 'menu';
@@ -206,26 +207,4 @@ var MainMenu = (function() {
   utils.addEventsSupport(MainMenu);
 
   return new MainMenu();
-}());
-
-var SettingsManager = (function() {
-  function SettingsManager() {
-
-  }
-
-  SettingsManager.prototype = {
-    init: function init() {
-
-    },
-    
-    get: function get() {
-
-    },
-    
-    set: function set(key, value) {
-
-    }
-  };
-
-  return new SettingsManager();
 }());

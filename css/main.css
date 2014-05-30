@@ -253,9 +253,10 @@ body:full-screen #container {
 }
   #menu h1 {
     position: absolute;
-    font-size: 2.5em;
     top: 50px;
     left: 50px;
+    font-size: 2.5em;
+    font-weight: 700;
     letter-spacing: 0.1em;
   }
     /* avatar */
@@ -268,6 +269,18 @@ body:full-screen #container {
       width: 20px;
       height: 20px;
     }
+  #menu h2 {
+    position: absolute;
+    top: 158px;
+    left: 89px;
+    font-size: 1.1em;
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: 0.117em;
+    text-transform: lowercase;
+    opacity: .3;
+    border-top: 1px solid #fff;
+  }
   #menu .options {
     position: absolute;
     bottom: 50px;

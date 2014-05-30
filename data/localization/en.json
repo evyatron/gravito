@@ -3,6 +3,7 @@
   "NOTE": "As such, it will contain MANY SPOILERS and should really not be viewed by anyone",
 
   "menu-title": "[GAME]",
+  "menu-subtitle": "By Evyatar Amitay",
   "menu-option-new": "New Game",
   "menu-option-continue": "Continue <span>(level {{level}})</span>",
   "menu-option-sound": "Sound Enabled",
