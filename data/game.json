@@ -15,23 +15,46 @@
   "DEFAULT_PLATFORM_FRICTION_X": 0.5,
   "DEFAULT_PLATFORM_FRICTION_Y": 0.5,
 
-  "DEFAULT_MOVABLE_WIDTH": 100,
-  "DEFAULT_MOVABLE_HEIGHT": 30,
-  "DEFAULT_MOVABLE_BOUNCE": 0.5,
   "DEFAULT_MOVABLE_FRICTION_X": 0.1,
   "DEFAULT_MOVABLE_FRICTION_Y": 1,
-  "DEFAULT_MOVABLE_COLOR": "rgba(100, 150, 200, 1)",
 
-  "DEFAULT_COLLECTIBLE_WIDTH": 8,
-  "DEFAULT_COLLECTIBLE_HEIGHT": 8,
-  "DEFAULT_COLLECTIBLE_COLOR": "rgba(255, 128, 0, 1)",
-
-  "DEFAULT_DEATH_COLOR": "rgba(50, 180, 0, .7)",
   "DEATH_AREA_SOUND": "water",
   "DEATH_SOUND_COLOR": "transparent",
   "DEATH_SOUND_NUMBER_OF_STEPS": 5,
   "DEATH_SOUND_DISTANCE_STEP": 15,
-  "DEATH_SOUND_COLOR": "rgba(30, 120, 0, .05)",
+
+  "SPRITE_PRESETS": {
+    "platform": {
+      "width": 0,
+      "height": 10,
+      "background": "rgba(0, 0, 0, 1)",
+      "gravity": false,
+      "solid": true,
+      "movable": false
+    },
+    "movable": {
+      "width": 100,
+      "height": 39,
+      "movable": true,
+      "gravity": true,
+      "solid": true,
+      "bounce": 0.5,
+      "background": "rgba(100, 150, 200, 1)"
+    },
+    "collectible": {
+      "density": 0,
+      "width": 8,
+      "height": 8,
+      "background": "rgba(255, 128, 0, 1)"
+    },
+    "death": {
+      "background": "rgba(50, 180, 0, .7)",
+      "density": 0.5
+    },
+    "death-ambient": {
+      "background": "rgba(30, 120, 0, .05)"      
+    }
+  },
 
   "BUBBLES": {
     "SIZE_MIN": 1,

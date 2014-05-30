@@ -15,32 +15,22 @@
       DEFAULT_BACKGROUND = '',
       DEFAULT_FINISH_LIGHT = '',
       DEFAULT_FINISH_COLOR = '',
-      DEFAULT_DEATH_COLOR = '',
 
-      DEFAULT_PLATFORM_COLOR = '',
-      DEFAULT_PLATFORM_HEIGHT = 0,
       DEFAULT_PLATFORM_FRICTION_X = 0,
       DEFAULT_PLATFORM_FRICTION_Y = 0,
 
-      DEFAULT_MOVABLE_WIDTH = 0,
-      DEFAULT_MOVABLE_HEIGHT = 0,
-      DEFAULT_MOVABLE_BOUNCE = 0,
       DEFAULT_MOVABLE_FRICTION_X = 0,
       DEFAULT_MOVABLE_FRICTION_Y = 0,
-      DEFAULT_MOVABLE_COLOR = '',
-
-      DEFAULT_COLLECTIBLE_WIDTH = 0,
-      DEFAULT_COLLECTIBLE_HEIGHT = 0,
-      DEFAULT_COLLECTIBLE_COLOR = '',
 
       DEATH_AREA_SOUND = '',
-      DEATH_SOUND_COLOR = '',
       DEATH_SOUND_NUMBER_OF_STEPS = 0,
       DEATH_SOUND_DISTANCE_STEP = 0,
 
       TIME_BEFORE_SHOWING_INTRO = 0,
 
       NUMBER_OF_LEVELS = 0,
+
+      SPRITE_PRESETS = {},
 
       // used for CSS rotation of the game
       currentGravityAngle = 0;
@@ -68,31 +58,22 @@
     DEFAULT_BACKGROUND = config.DEFAULT_BACKGROUND;
     DEFAULT_FINISH_LIGHT = config.DEFAULT_FINISH_LIGHT;
     DEFAULT_FINISH_COLOR = config.DEFAULT_FINISH_COLOR;
-    DEFAULT_DEATH_COLOR = config.DEFAULT_DEATH_COLOR;
 
-    DEFAULT_PLATFORM_COLOR = config.DEFAULT_PLATFORM_COLOR;
-    DEFAULT_PLATFORM_HEIGHT = config.DEFAULT_PLATFORM_HEIGHT;
     DEFAULT_PLATFORM_FRICTION_X = config.DEFAULT_PLATFORM_FRICTION_X;
     DEFAULT_PLATFORM_FRICTION_Y = config.DEFAULT_PLATFORM_FRICTION_Y;
 
-    DEFAULT_MOVABLE_WIDTH = config.DEFAULT_MOVABLE_WIDTH;
-    DEFAULT_MOVABLE_HEIGHT = config.DEFAULT_MOVABLE_HEIGHT;
-    DEFAULT_MOVABLE_BOUNCE = config.DEFAULT_MOVABLE_BOUNCE;
     DEFAULT_MOVABLE_FRICTION_X = config.DEFAULT_MOVABLE_FRICTION_X;
     DEFAULT_MOVABLE_FRICTION_Y = config.DEFAULT_MOVABLE_FRICTION_Y;
-    DEFAULT_MOVABLE_COLOR = config.DEFAULT_MOVABLE_COLOR;
-
-    DEFAULT_COLLECTIBLE_WIDTH = config.DEFAULT_COLLECTIBLE_WIDTH;
-    DEFAULT_COLLECTIBLE_HEIGHT = config.DEFAULT_COLLECTIBLE_HEIGHT;
-    DEFAULT_COLLECTIBLE_COLOR = config.DEFAULT_COLLECTIBLE_COLOR;
 
     DEATH_AREA_SOUND = config.DEATH_AREA_SOUND;
-    DEATH_SOUND_COLOR = config.DEATH_SOUND_COLOR;
     DEATH_SOUND_NUMBER_OF_STEPS = config.DEATH_SOUND_NUMBER_OF_STEPS;
     DEATH_SOUND_DISTANCE_STEP = config.DEATH_SOUND_DISTANCE_STEP;
 
     TIME_BEFORE_SHOWING_INTRO = config.TIME_BEFORE_SHOWING_INTRO;
 
+    for (var k in config.SPRITE_PRESETS) {
+      SPRITE_PRESETS[k] = config.SPRITE_PRESETS[k];
+    }
     for (var k in config.BUBBLES) {
       Bubbles[k] = config.BUBBLES[k];
     }
@@ -219,8 +200,8 @@
           'id': 'sound',
           'type': 'toggle',
           'value': Player.get('settings-sound'),
-          'onChange': function onSoundSettingChange(newValue, oldValue) {
-            if (newValue === 'on') {
+          'onChange': function onSoundSettingChange(value) {
+            if (value === 'on') {
               SoundManager.enable();
             } else {
               SoundManager.disable();
@@ -234,14 +215,21 @@
           'max': 1,
           'step': 0.01,
           'value': Player.get('settings-volume'),
-          'onChange': function onVolumeSettingChange(newValue, oldValue) {
-            SoundManager.setGlobalVolume(newValue);
+          'onChange': function onVolumeSettingChange(value) {
+            SoundManager.setGlobalVolume(value);
           }
         },
         {
           'id': 'fullscreen',
           'type': 'toggle',
-          'value': Player.get('settings-fullscreen')
+          'value': 'off',
+          'onChange': function onFullscreenSettingChange(value) {
+            if (value === 'on') {
+              document.body.webkitRequestFullScreen(document.body.ALLOW_KEYBOARD_INPUT);
+            } else {
+              document.webkitCancelFullScreen();
+            }
+          }
         }
       ],
       // whenever changing any setting - update the user's storage
@@ -474,12 +462,35 @@
     if (onPlayerCollisionWithStart[type]) {
       onPlayerCollisionWithStart[type].apply(this, arguments)
     }
+
+    if (sprite.data.sound) {
+      SoundManager.setVolume(sprite.data.sound, sprite.data.volume);
+      SoundManager.play(sprite.data.sound);
+    }
   }
 
   function onPlayerCollisionEnd(sprite, direction) {
     var type = sprite.type;
     if (onPlayerCollisionWithEnd[type]) {
       onPlayerCollisionWithEnd[type].apply(this, arguments)
+    }
+
+    if (sprite.data.sound) {
+      var sounds = {},
+          soundToStop = sprite.data.sound,
+          collisions = Player.sprite.collisions,
+          collisionSprite;
+
+      for (var id in collisions) {
+        collisionSprite = collisions[id].sprite;
+
+        if (collisionSprite.data.sound && collisionSprite.data.sound === soundToStop) {
+          SoundManager.setVolume(soundToStop, collisionSprite.data.volume);
+          return;
+        }
+      }
+
+      SoundManager.stop(sprite.data.sound);
     }
   }
 
@@ -498,7 +509,7 @@
 
         if (volume <= 0) {
           SoundManager.stop('water');
-          restartLevel();
+          window.setTimeout(restartLevel, 250);
         } else {
           SoundManager.setVolume('water', volume);
           window.setTimeout(lowerVolume, 30);
@@ -510,55 +521,21 @@
     'score': function onPlayerCollisionWithScore(sprite, direction) {
       sprite.layer.removeSprite(sprite);
       console.info('score++')
-    },
-    'sound': function onPlayerCollisionWithScore(sprite, direction) {
-      if (!sprite.data.sound) {
-        return;
-      }
-
-      SoundManager.setVolume(sprite.data.sound, sprite.data.volume || 1);
-      SoundManager.play(sprite.data.sound);
     }
   };
 
   var onPlayerCollisionWithEnd = {
-    'sound': function onPlayerCollisionWithScore(sprite, direction) {
-      if (!sprite.data || !sprite.data.sound) {
-        return;
-      }
 
-      var sounds = {},
-          soundToStop = sprite.data.sound,
-          collisions = Player.sprite.collisions,
-          collisionSprite;
-
-      for (var id in collisions) {
-        collisionSprite = collisions[id].sprite;
-
-        if (collisionSprite.data.sound && collisionSprite.data.sound === soundToStop) {
-          SoundManager.setVolume(soundToStop, collisionSprite.data.volume);
-          return;
-        }
-      }
-
-      SoundManager.stop(sprite.data.sound);
-    }
   };
 
   function createPlatform(spriteData, frameWidth) {
-    var data = {
+    var data = getSpriteData(spriteData, {
       'id': 'platform_' + Math.random(),
       'x': 0,
       'y': 0,
-      'width': 0,
-      'height': DEFAULT_PLATFORM_HEIGHT,
-      'background': DEFAULT_PLATFORM_COLOR,
-      'gravity': false,
-      'solid': true,
-      'movable': false,
+      'type': 'platform',
       'friction': new Vector(DEFAULT_PLATFORM_FRICTION_X, DEFAULT_PLATFORM_FRICTION_Y)
-    };
-    fillWith(data, spriteData);
+    });
 
     if (frameWidth) {
       data.x += frameWidth.left;
@@ -569,21 +546,14 @@
   }
 
   function createMovable(spriteData, frameWidth) {
-    var data = {
+    var data = getSpriteData(spriteData, {
       'id': 'movable_' + Math.random(),
       'x': 0,
       'y': 0,
-      'width': DEFAULT_MOVABLE_WIDTH,
-      'height': DEFAULT_MOVABLE_HEIGHT,
-      'movable': true,
-      'gravity': true,
-      'solid': true,
-      'bounce': DEFAULT_MOVABLE_BOUNCE,
-      'background': DEFAULT_MOVABLE_COLOR,
+      'type': 'movable',
       'maxVelocity': new Vector(4, 50000),
       'friction': new Vector(DEFAULT_MOVABLE_FRICTION_X, DEFAULT_MOVABLE_FRICTION_Y)
-    };
-    fillWith(data, spriteData);
+    });
 
     data.x += frameWidth.left;
     data.y += frameWidth.top;
@@ -592,20 +562,14 @@
   }
 
   function createCollectible(spriteData, frameWidth) {
-    var data = {
+    var data = getSpriteData(spriteData, {
       'id': 'collectible_' + Math.random(),
       'x': 0,
       'y': 0,
-      'density': 0.5,
-      'width': DEFAULT_COLLECTIBLE_WIDTH,
-      'height': DEFAULT_COLLECTIBLE_HEIGHT,
       'type': 'collectible',
-      'background': DEFAULT_COLLECTIBLE_COLOR,
       'collisionable': true,
       'friction': new Vector(0, 1)
-    };
-
-    fillWith(data, spriteData);
+    });
 
     data.x += frameWidth.left;
     data.y += frameWidth.top;
@@ -628,7 +592,6 @@
     }
 
     if (data.type === 'death') {
-      !collectible.background && (collectible.background = DEFAULT_DEATH_COLOR);
       collectible.update = Bubbles.update;
       collectible.draw = Bubbles.draw;
 
@@ -636,19 +599,20 @@
         for (var i = 1, sizeStep; i <= DEATH_SOUND_NUMBER_OF_STEPS; i++) {
           sizeStep = DEATH_SOUND_DISTANCE_STEP * i;
 
-          layerObjects.addSprite(new Sprite({
+          var spriteData = getSpriteData({
             'x': data.x - sizeStep,
             'y': data.y - sizeStep,
             'width': data.width + sizeStep * 2,
             'height': data.height + sizeStep * 2,
-            'type': 'sound',
+            'type': 'death-ambient',
             'collisionable': true,
-            'background': DEATH_SOUND_COLOR,
             'data': {
               'sound': DEATH_AREA_SOUND,
               'volume': 1 - (i / (DEATH_SOUND_NUMBER_OF_STEPS + 1))
             }
-          }));
+          });
+
+          layerObjects.addSprite(new Sprite(spriteData));
         }
       }
     }
@@ -758,6 +722,32 @@
         document.body.classList.remove('cant-rotate');
       }
     });
+  }
+
+
+  function getSpriteData(data, defaults) {
+    var newData = {};
+
+    // take the defaults passed to the function
+    if (defaults) {
+      for (var k in defaults) {
+        newData[k] = defaults[k];
+      }
+    }
+
+    // override/add from the preset for the type
+    var type = data.type || newData.type,
+        typePreset = SPRITE_PRESETS[type];
+    if (typePreset) {
+      for (var k in typePreset) {
+        newData[k] = typePreset[k];
+      }
+    }
+
+    // lastly override everything with the actual data for the sprite
+    fillWith(newData, {}, data);
+
+    return newData;
   }
 
 

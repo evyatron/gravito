@@ -9,6 +9,20 @@ body {
   -moz-user-select: none;
   user-select: none;
 }
+/* TODO : PROPER handling of fullscreen */
+body:-webkit-full-screen #container {
+  -webkit-transform: scale(2);
+  transform: scale(2);
+}
+body:-moz-full-screen #container {
+  -webkit-transform: scale(2);
+  transform: scale(2);
+}
+body:full-screen #container {
+  -webkit-transform: scale(2);
+  transform: scale(2);
+}
+
 #container {
   position: absolute;
   top: 50%;
