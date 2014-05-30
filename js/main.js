@@ -168,10 +168,8 @@
     if (MainMenu.isVisible) {
       if (currentLevelData) {
         MainMenu.hide();
-        game.start();
       }
     } else {
-      game.stop();
       MainMenu.show();
     }
   }
@@ -179,6 +177,8 @@
   function initMenu() {
     MainMenu.init({
       'elContainer': document.body,
+      'onShow': onMenuShown,
+      'onHide': onMenuHidden,
       'options': [
         {
           'id': Player.isNew? 'new' : 'continue',
@@ -239,8 +239,79 @@
       }
     });
 
+    var elBubbling = document.createElement('div');
+    elBubbling.className = 'bubbling';
+    elBubbling.innerHTML = '<canvas></canvas>';
+    MainMenu.el.appendChild(elBubbling);
+
     // ESC key to toggle menu
     window.addEventListener('keydown', onKeyToggleMenu);
+  }
+
+  function onMenuShown() {
+    game.stop();
+
+    var elBubbling = MainMenu.el.querySelector('.bubbling');
+    if (!elBubbling) {
+      return;
+    }
+    var elCanvas = elBubbling.querySelector('canvas');
+    if (!elCanvas) {
+      return;
+    }
+
+    MainMenu.drawOn = {
+      context: elCanvas.getContext('2d'),
+      lastUpdate: Date.now(),
+
+      background: SPRITE_PRESETS.death.background,
+      topLeft: {
+        x: 0,
+        y: 0
+      },
+      update: Bubbles.update,
+      draw: Bubbles.draw
+    };
+
+    onResizeWhileMenuVisible();
+
+    window.addEventListener('resize', onResizeWhileMenuVisible);
+
+    window.requestAnimationFrame(menuLoop);
+  }
+
+  function onMenuHidden() {
+    window.removeEventListener('resize', onResizeWhileMenuVisible);
+
+    if (currentLevelData) {
+      game.start();
+    }
+  }
+
+  function onResizeWhileMenuVisible() {
+    var elCanvas = (MainMenu.drawOn || {}).context.canvas,
+        elBubbling = elCanvas.parentNode;
+
+    elCanvas.width = MainMenu.drawOn.width = elBubbling.offsetWidth;
+    elCanvas.height = MainMenu.drawOn.height = elBubbling.offsetHeight;
+    MainMenu.drawOn.topLeft.y = MainMenu.drawOn.height - 10;
+
+  }
+
+  function menuLoop() {
+    if (!MainMenu.isVisible) {
+      return;
+    }
+
+    var now = Date.now(),
+        dt = (now - MainMenu.drawOn.lastUpdate) / 1000,
+        pseudoSprite = MainMenu.drawOn;
+
+    pseudoSprite.update(dt);
+    pseudoSprite.draw(pseudoSprite.context);
+
+    MainMenu.drawOn.lastUpdate = now;
+    raf = window.requestAnimationFrame(menuLoop);
   }
 
   // create the sprite layers - ordered by z-index
@@ -1012,6 +1083,8 @@
 
     draw: function drawBubble(context) {
       var pos = this.topLeft;
+
+      context.clearRect(0, 0, this.width, this.height);
 
       context.fillStyle = this.background;
       context.fillRect(Math.round(pos.x), Math.round(pos.y), this.width, this.height);

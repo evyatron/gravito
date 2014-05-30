@@ -262,7 +262,18 @@ body:full-screen #container {
     font-size: 2.5em;
     top: 50px;
     left: 50px;
+    letter-spacing: 0.1em;
   }
+    /* avatar */
+    #menu h1:before {
+      content: '';
+      position: absolute;
+      bottom: 21px;
+      right: -20px;
+      background: red;
+      width: 20px;
+      height: 20px;
+    }
   #menu .options {
     position: absolute;
     bottom: 50px;
@@ -326,7 +337,18 @@ body:full-screen #container {
       -webkit-transform: rotate(35deg) scale(.8, 1);
       transform: rotate(35deg) scale(.8, 1);
     }
-
+  #menu .bubbling {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 150px;
+  }
+    #menu .bubbling canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
 
 
 #log {

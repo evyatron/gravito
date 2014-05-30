@@ -9,6 +9,13 @@ var MainMenu = (function() {
     init: function init(options) {
       !options && (options = {});
 
+      if (options.onShow) {
+        this.addEventListener('show', options.onShow);
+      }
+      if (options.onHide) {
+        this.addEventListener('hide', options.onHide);
+      }
+
       this.createHTML();
 
       this.addOptions(options.options);
@@ -22,15 +29,25 @@ var MainMenu = (function() {
     },
 
     show: function show() {
+      if (this.isVisible) {
+        return;
+      }
+
       this.isVisible = true;
       document.body.classList.add('menu-visible');
       this.el.classList.add('visible');
+      this.trigger('show');
     },
 
     hide: function hide() {
+      if (!this.isVisible) {
+        return;
+      }
+
       this.isVisible = false;
       document.body.classList.remove('menu-visible');
       this.el.classList.remove('visible');
+      this.trigger('hide');
     },
 
     set: function set(id, newValue) {
