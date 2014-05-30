@@ -232,14 +232,14 @@
                 (document.body.webkitRequestFullScreen ||
                  document.body.mozRequestFullScreen ||
                  document.body.requestFullScreen
-                  )(document.body.ALLOW_KEYBOARD_INPUT);
+                  ).call(document.body, document.body.ALLOW_KEYBOARD_INPUT);
               } else {
                 (document.webkitCancelFullScreen ||
                  document.mozCancelFullScreen ||
-                 document.cancelFullScreen)();
+                 document.cancelFullScreen).call(document);
               }
             } catch(ex) {
-              console.error('fullscreen error', ex);
+              console.warn('fullscreen error', ex);
             }
           }
         }
