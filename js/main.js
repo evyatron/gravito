@@ -135,8 +135,6 @@
     SoundManager.init();
 
     initMenu();
-    MainMenu.show();
-
     Dialog.init({
       'elContainer': document.getElementById('dialogs')
     });
@@ -173,7 +171,11 @@
     });
 
     // load the first level
-    //loadLevel((window.location.href.match(/LEVEL=(\d+)/) || [])[1]);
+    if (/SKIP_MENU/.test(window.location.href)) {
+      loadLevel((window.location.href.match(/LEVEL=(\d+)/) || [])[1]);
+    } else {
+      MainMenu.show();
+    }
   }
 
   function onKeyToggleMenu(e) {
