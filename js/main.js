@@ -263,7 +263,7 @@
   function onMenuShown() {
     game.stop();
 
-    var playerLevel = Player.get('maxLevel') || 1,
+    var playerLevel = Math.min(Player.get('maxLevel') || 1, NUMBER_OF_LEVELS),
         isNewGame = playerLevel === 1 && !currentLevelData,
         textKey = 'menu-option-' + (isNewGame? 'new' : 'continue');
 
