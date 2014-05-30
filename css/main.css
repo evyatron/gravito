@@ -17,6 +17,10 @@ body:-moz-full-screen #container {
 body:full-screen #container {
 }
 
+a {
+  color: inherit;
+}
+
 #container {
   position: absolute;
   top: 50%;
@@ -281,6 +285,9 @@ body:full-screen #container {
     opacity: .3;
     border-top: 1px solid #fff;
   }
+    #menu h2 a {
+      text-decoration: none;
+    }
   #menu .options {
     position: absolute;
     bottom: 50px;
