@@ -27,10 +27,15 @@ window.Player = (function() {
     this.onCollisionStart = null;
     this.onCollisionEnd = null;
 
+    this.isNew = true;
+
     this.data = {
       'maxRotation': 0,
       'didIntro': false,
-      'didIntroTutorial': false
+      'didIntroTutorial': false,
+      'settings-sound': 'on',
+      'settings-volume': '0.5',
+      'settings-fullscreen': 'off'
     };
 
     // from config
@@ -58,6 +63,7 @@ window.Player = (function() {
       this.loadSettings(function onDataLoaded() {
         document.body.classList.add('allowed-rotation-' + this.get('maxRotation'));
         document.body.classList.add('intro-' + this.get('didIntroTutorial'));
+        options.onSettingsLoad && (options.onSettingsLoad(this.data));
       }.bind(this));
     },
 
@@ -92,7 +98,7 @@ window.Player = (function() {
     },
 
     get: function get(key) {
-      return this.data[key];
+      return key? this.data[key] : this.data;
     },
 
     disableControl: function disableControl() {

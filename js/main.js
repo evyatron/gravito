@@ -38,6 +38,8 @@
       DEATH_SOUND_NUMBER_OF_STEPS = 0,
       DEATH_SOUND_DISTANCE_STEP = 0,
 
+      TIME_BEFORE_SHOWING_INTRO = 0,
+
       NUMBER_OF_LEVELS = 0,
 
       // used for CSS rotation of the game
@@ -50,7 +52,7 @@
     request.responseType = 'json';
     request.onload = function onGameConfigLoad() {
       populateFromConfig(request.response);
-      init();
+      loadTexts();
     };
     request.send();
   }
@@ -89,6 +91,8 @@
     DEATH_SOUND_NUMBER_OF_STEPS = config.DEATH_SOUND_NUMBER_OF_STEPS;
     DEATH_SOUND_DISTANCE_STEP = config.DEATH_SOUND_DISTANCE_STEP;
 
+    TIME_BEFORE_SHOWING_INTRO = config.TIME_BEFORE_SHOWING_INTRO;
+
     for (var k in config.BUBBLES) {
       Bubbles[k] = config.BUBBLES[k];
     }
@@ -98,6 +102,24 @@
     for (var k in config.DIALOG) {
       Dialog[k] = config.DIALOG[k];
     }
+  }
+
+  function loadTexts() {
+    utils.l10n.init({
+      'onReady': function onTextsLoad() {
+        initPlayer();
+      }
+    });
+  }
+
+  function initPlayer() {
+    Player.init({
+      'onCollisionStart': onPlayerCollisionStart,
+      'onCollisionEnd': onPlayerCollisionEnd,
+      'onSettingsLoad': function onSettingsLoad() {
+        init();
+      }
+    });
   }
 
   // initialize game components
@@ -110,9 +132,10 @@
       'height:' + DEFAULT_HEIGHT + 'px;' +
       'margin:' + -DEFAULT_HEIGHT/2 + 'px 0 0 ' + -DEFAULT_WIDTH/2 + 'px;';
 
-    utils.l10n.init();
-
     SoundManager.init();
+
+    initMenu();
+    MainMenu.show();
 
     Dialog.init({
       'elContainer': document.getElementById('dialogs')
@@ -130,12 +153,6 @@
 
     // create all sprite layers - background, player, etc.
     createLayers();
-
-    // add player
-    Player.init({
-      'onCollisionStart': onPlayerCollisionStart,
-      'onCollisionEnd': onPlayerCollisionEnd
-    });
 
     // UI controls event listeners etc.
     UIControls.init();
@@ -156,7 +173,84 @@
     });
 
     // load the first level
-    loadLevel((window.location.href.match(/LEVEL=(\d+)/) || [])[1]);
+    //loadLevel((window.location.href.match(/LEVEL=(\d+)/) || [])[1]);
+  }
+
+  function onKeyToggleMenu(e) {
+    var keyCode = e.keyCode;
+    if (keyCode !== 27) {
+      return;
+    }
+
+    if (MainMenu.isVisible) {
+      if (currentLevelData) {
+        MainMenu.hide();
+        game.start();
+      }
+    } else {
+      game.stop();
+      MainMenu.show();
+    }
+  }
+
+  function initMenu() {
+    MainMenu.init({
+      'elContainer': document.body,
+      'options': [
+        {
+          'id': Player.isNew? 'new' : 'continue',
+          'type': 'click',
+          'onSelect': function onMenuContinueClick() {
+            MainMenu.hide();
+
+            if (currentLevelData) {
+              game.start();
+            } else {
+              window.setTimeout(function() {
+                loadLevel((window.location.href.match(/LEVEL=(\d+)/) || [])[1]);
+              }, 200);
+            }
+          }
+        },
+        {'type': 'separator'},
+        {
+          'id': 'sound',
+          'type': 'toggle',
+          'value': Player.get('settings-sound'),
+          'onChange': function onSoundSettingChange(newValue, oldValue) {
+            if (newValue === 'on') {
+              SoundManager.enable();
+            } else {
+              SoundManager.disable();
+            }
+          }
+        },
+        {
+          'id': 'volume',
+          'type': 'range',
+          'min': 0,
+          'max': 1,
+          'step': 0.01,
+          'value': Player.get('settings-volume'),
+          'onChange': function onVolumeSettingChange(newValue, oldValue) {
+            SoundManager.setGlobalVolume(newValue);
+          }
+        },
+        {
+          'id': 'fullscreen',
+          'type': 'toggle',
+          'value': Player.get('settings-fullscreen')
+        }
+      ],
+      // whenever changing any setting - update the user's storage
+      // make settings persistent
+      'onChange': function onMenuOptionChange(id, value) {
+        Player.set('settings-' + id, value);
+      }
+    });
+
+    // ESC key to toggle menu
+    window.addEventListener('keydown', onKeyToggleMenu);
   }
 
   // create the sprite layers - ordered by z-index
@@ -340,15 +434,18 @@
     // game's first introduction
     if (!Player.get('didIntro')) {
       Player.disableControl();
-      Dialog.show({
-        'id': 'intro',
-        'text': utils.l10n.get('intro'),
-        'sprite': Player.sprite,
-        'onEnd': function onDialogEnd() {
-          Player.set('didIntro', true);
-          Player.enableControl();
-        }
-      });
+
+      window.setTimeout(function() {
+        Dialog.show({
+          'id': 'intro',
+          'text': utils.l10n.get('intro'),
+          'sprite': Player.sprite,
+          'onEnd': function onDialogEnd() {
+            Player.set('didIntro', true);
+            Player.enableControl();
+          }
+        });
+      }, TIME_BEFORE_SHOWING_INTRO);
     }
 
     // Game Ready!

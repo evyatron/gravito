@@ -114,14 +114,14 @@ utils = (function() {
       init: function init(options) {
         !options && (options = {});
 
-        this.load(options.language);
+        this.load(options.language, options.onReady);
       },
 
       get: function get(key) {
         return this.translations[key];
       },
 
-      load: function load(language) {
+      load: function load(language, callback) {
         !language && (language = this.DEFAULT_LANGUAGE);
 
         var self = this,
@@ -131,8 +131,9 @@ utils = (function() {
         request.onload = function(data) {
           if (request.response) {
             self.translations = request.response;
+            callback && callback(language);
           } else if (language !== self.DEFAULT_LANGUAGE) {
-            self.load(self.DEFAULT_LANGUAGE);
+            self.load(self.DEFAULT_LANGUAGE, callback);
           }
         };
         request.responseType = 'json';

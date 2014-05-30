@@ -2,6 +2,13 @@
   "NOTE": "This is a plain-text file with ALL OF THE GAMES' TEXT",
   "NOTE": "As such, it will contain MANY SPOILERS and should really not be viewed by anyone",
 
+  "menu-title": "[GAME]",
+  "menu-option-new": "New Game",
+  "menu-option-continue": "Continue",
+  "menu-option-sound": "Sound Enabled",
+  "menu-option-volume": "Volume",
+  "menu-option-fullscreen": "Fullscreen",
+
 
   "intro": [
     "{d:3500}Where... Where am I?",
@@ -33,7 +40,7 @@
     "Oh I'm going to enjoy this!"
   ],
 
-  "cant-rotate": "{d:2000}Hmm... I can't seem to do that right now.",
+  "cant-rotate": "{d:2000}Hmm... I can't seem to do that here.",
 
   "ideas": "is this only 2 dimensions? I need to go back",
   "ideas": "There seems to be some...force keeps pulling me down",

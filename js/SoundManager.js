@@ -1,9 +1,14 @@
 (function() {
   function SoundManager() {
     var self = this,
-        sounds = {}, activeSounds = {},
+        sounds = {},
+        activeSounds = {},
         loadingSounds = {},
+
+        globalVolume = 1,
+
         onStateChange,
+
         EXTENSION_TO_PLAY = '',
         STORAGE_KEY = 'sound';
         
@@ -23,6 +28,9 @@
         return;
       }
       
+      for (var id in activeSounds) {
+        activeSounds[id].play();
+      }
       self.active = true;
       updateStorage();
       onStateChange(self.active);
@@ -83,7 +91,7 @@
       }
     };
 
-    // TODO: direction sound using WebAudioAPI!
+    // TODO: directional sound using WebAudioAPI!
     this.play = function play(id, onPlayFinished) {
       var activeSound = activeSounds[id];
       
@@ -129,7 +137,7 @@
         });
       }
 
-      sound.volume = soundConfig.volume || 1;
+      sound.volume = soundConfig.volume * globalVolume;
       sound.loop = !!soundConfig.loop;
       
       (function(sound, id) {
@@ -171,7 +179,19 @@
     
     this.setVolume = function setVolume(id, volume) {
       sounds[id] && (sounds[id].volume = volume);
-      activeSounds[id] && (activeSounds[id].volume = volume);
+      activeSounds[id] && (activeSounds[id].volume = sounds[id].volume * globalVolume);
+    };
+
+    this.setGlobalVolume = function setGlobalVolume(volume) {
+      if (volume === globalVolume) {
+        return;
+      }
+
+      globalVolume = volume;
+
+      for (var id in activeSounds) {
+        activeSounds[id].volume = sounds[id].volume * globalVolume;
+      }
     };
     
     // check which sound files the browser can play
