@@ -283,8 +283,16 @@ a {
     letter-spacing: 0.117em;
     text-transform: lowercase;
     opacity: .3;
-    border-top: 1px solid #fff;
   }
+    #menu h2:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 1px;
+      background: #fff;
+      width: 266px;
+    }
     #menu h2 a {
       text-decoration: none;
     }
