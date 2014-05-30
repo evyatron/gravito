@@ -204,6 +204,7 @@ Game = (function() {
           sprite.collide(spriteWith, collision);
 
           if (!spriteWith.solid) {
+            sprite.velocity = sprite.velocity.scale(spriteWith.density);
             continue;
           }
 
@@ -217,7 +218,6 @@ Game = (function() {
           if (sprite.id === 'player') {
             Log.add(collision + ' (' + spriteWith.id + ')');
           }
-
 
           if (collision === 'bottom') {
             sprite.set(null, spriteWith.topLeft.y - sprite.height);

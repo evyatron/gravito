@@ -5,6 +5,7 @@ Sprite = (function() {
     this.width = 0;
     this.height = 0;
     this.mass = 1;
+    this.density = 1;
 
     this.data = {};
 

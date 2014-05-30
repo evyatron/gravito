@@ -489,13 +489,23 @@
       finishLevel();
     },
     'death': function onPlayerCollisionWithDeath(sprite, direction) {
-      SoundManager.setVolume('water', 1);
       Player.disableControl();
       Player.stopAllMovement();
-      window.setTimeout(function() {
-        SoundManager.stop('water');
-        restartLevel();
-      }, 1500);
+
+      var volume = 1.05;
+      function lowerVolume() {
+        volume -= 0.015;
+
+        if (volume <= 0) {
+          SoundManager.stop('water');
+          restartLevel();
+        } else {
+          SoundManager.setVolume('water', volume);
+          window.setTimeout(lowerVolume, 30);
+        }
+      }
+      lowerVolume();
+
     },
     'score': function onPlayerCollisionWithScore(sprite, direction) {
       sprite.layer.removeSprite(sprite);
@@ -586,12 +596,13 @@
       'id': 'collectible_' + Math.random(),
       'x': 0,
       'y': 0,
+      'density': 0.5,
       'width': DEFAULT_COLLECTIBLE_WIDTH,
       'height': DEFAULT_COLLECTIBLE_HEIGHT,
       'type': 'collectible',
       'background': DEFAULT_COLLECTIBLE_COLOR,
       'collisionable': true,
-      'friction': new Vector(0, 0)
+      'friction': new Vector(0, 1)
     };
 
     fillWith(data, spriteData);
