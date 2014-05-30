@@ -153,7 +153,7 @@
 
     // load the first level
     if (/SKIP_MENU/.test(window.location.href)) {
-      loadLevel((window.location.href.match(/LEVEL=(\d+)/) || [])[1]);
+      loadLevel((window.location.href.match(/LEVEL=(\d+)/) || [])[1] || Player.get('maxLevel'));
     } else {
       MainMenu.show();
     }
@@ -181,7 +181,7 @@
       'onHide': onMenuHidden,
       'options': [
         {
-          'id': Player.isNew? 'new' : 'continue',
+          'id': 'new',
           'type': 'click',
           'onSelect': function onMenuContinueClick() {
             MainMenu.hide();
@@ -190,7 +190,7 @@
               game.start();
             } else {
               window.setTimeout(function() {
-                loadLevel((window.location.href.match(/LEVEL=(\d+)/) || [])[1]);
+                loadLevel((window.location.href.match(/LEVEL=(\d+)/) || [])[1] || Player.get('maxLevel'));
               }, 200);
             }
           }
@@ -250,6 +250,12 @@
 
   function onMenuShown() {
     game.stop();
+
+    var playerLevel = Player.get('maxLevel') || 1,
+        isNewGame = playerLevel === 1 && !currentLevelData,
+        textKey = 'menu-option-' + (isNewGame? 'new' : 'continue');
+
+    MainMenu.setOptionText('new', utils.l10n.get(textKey, {'level': playerLevel}));
 
     var elBubbling = MainMenu.el.querySelector('.bubbling');
     if (!elBubbling) {
@@ -362,7 +368,7 @@
 
     !level && (level = currentLevel);
     if (level > NUMBER_OF_LEVELS) {
-      level = 1;
+      level = NUMBER_OF_LEVELS;
     }
 
     currentLevel = level;
@@ -521,8 +527,14 @@
 
   // complete level
   function finishLevel() {
-    console.info('finish level!', arguments)
-    rotateGravity(currentGravityAngle)
+    var nextLevel = currentLevel + 1,
+        userMaxLevel = Player.get('maxLevel');
+
+    if (!userMaxLevel || userMaxLevel < nextLevel) {
+      Player.set('maxLevel', nextLevel);
+    }
+    
+    rotateGravity(currentGravityAngle);
     loadNextLevel();
   }
 

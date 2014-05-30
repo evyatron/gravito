@@ -50,6 +50,14 @@ var MainMenu = (function() {
       this.trigger('hide');
     },
 
+    setOptionText: function setOptionText(id, text) {
+      var elLabel = this.elOptions.querySelector('*[data-id = "' + id + '"] label');
+
+      if (elLabel) {
+        elLabel.innerHTML = text;
+      }
+    },
+
     set: function set(id, newValue) {
       var elOption = this.elOptions.querySelector('.option-' + id);
 

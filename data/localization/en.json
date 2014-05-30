@@ -4,7 +4,7 @@
 
   "menu-title": "[GAME]",
   "menu-option-new": "New Game",
-  "menu-option-continue": "Continue",
+  "menu-option-continue": "Continue <span>(level {{level}})</span>",
   "menu-option-sound": "Sound Enabled",
   "menu-option-volume": "Volume",
   "menu-option-fullscreen": "Fullscreen",

@@ -33,6 +33,19 @@ utils = (function() {
     }
   };
 
+  String.prototype.format = function format(args) {
+    return this.replace(/{{([^\}]+)}}/g, function match(original, k) {
+      var value = args,
+          properties = k = k.split('.');
+
+      for (var i = 0, property; property = properties[i++];) {
+        value = value && value[property];
+      }
+
+      return value === undefined? '' : value;
+    });
+  };
+
   return {
     random: function random(min, max) {
       return (Math.random() * (max - min)) + min;
@@ -117,8 +130,8 @@ utils = (function() {
         this.load(options.language, options.onReady);
       },
 
-      get: function get(key) {
-        return this.translations[key];
+      get: function get(key, args) {
+        return (this.translations[key] || '').format(args);
       },
 
       load: function load(language, callback) {

@@ -30,6 +30,7 @@ window.Player = (function() {
     this.isNew = true;
 
     this.data = {
+      'maxLevel': 1,
       'maxRotation': 0,
       'didIntro': false,
       'didIntroTutorial': false,

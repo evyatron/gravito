@@ -304,6 +304,9 @@ body:full-screen #container {
         width: 160px;
         margin-top: -25px;
       }
+      #menu .options li span {
+        opacity: .2;
+      }
     #menu .options li.separator {
       background: transparent;
       padding: 0;
@@ -320,8 +323,9 @@ body:full-screen #container {
       width: 40px;
       height: 40px;
       margin-top: -20px;
-      background: rgba(255, 255, 255, .2);
       border-radius: 4px;
+      background: rgba(255, 255, 255, .2);
+      box-shadow: 1px 1px 1px 0 rgba(0, 0, 0, 1) inset;
     }
     #menu .options .toggle[data-value = on]:after {
       content: '';
