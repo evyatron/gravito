@@ -343,6 +343,7 @@ body:full-screen #container {
     left: 0;
     right: 0;
     height: 150px;
+    pointer-events: none;
   }
     #menu .bubbling canvas {
       position: absolute;
