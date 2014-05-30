@@ -9,6 +9,7 @@
       currentLevel = 1,
       currentLevelData,
       CurrentLevel,
+      seenLevelIntro = false,
 
       DEFAULT_WIDTH = 0,
       DEFAULT_HEIGHT = 0,
@@ -26,7 +27,7 @@
       DEATH_SOUND_NUMBER_OF_STEPS = 0,
       DEATH_SOUND_DISTANCE_STEP = 0,
 
-      TIME_BEFORE_SHOWING_INTRO = 0,
+      TIME_BEFORE_LEVEL_INTRO = 0,
 
       NUMBER_OF_LEVELS = 0,
 
@@ -69,7 +70,7 @@
     DEATH_SOUND_NUMBER_OF_STEPS = config.DEATH_SOUND_NUMBER_OF_STEPS;
     DEATH_SOUND_DISTANCE_STEP = config.DEATH_SOUND_DISTANCE_STEP;
 
-    TIME_BEFORE_SHOWING_INTRO = config.TIME_BEFORE_SHOWING_INTRO;
+    TIME_BEFORE_LEVEL_INTRO = config.TIME_BEFORE_LEVEL_INTRO;
 
     for (var k in config.SPRITE_PRESETS) {
       SPRITE_PRESETS[k] = config.SPRITE_PRESETS[k];
@@ -116,6 +117,7 @@
     SoundManager.init();
 
     initMenu();
+
     Dialog.init({
       'elContainer': document.getElementById('dialogs')
     });
@@ -141,6 +143,10 @@
       window.addEventListener('keydown', onKeyIntroTutorial);
     }
 
+    if (!Player.get('didDieTutorial')) {
+      window.addEventListener('player-die', onPlayerDie);
+    }
+
     // when a level is ready - start the game loop
     window.addEventListener('levelReady', onLevelReady);
 
@@ -157,6 +163,18 @@
     } else {
       MainMenu.show();
     }
+  }
+
+  function onPlayerDie() {
+    window.removeEventListener('player-die', onPlayerDie);
+    
+    Dialog.show({
+      'id': 'die-tutorial',
+      'text': utils.l10n.get('die-tutorial'),
+      'sprite': Player.sprite
+    });
+
+    Player.set('didDieTutorial', true);
   }
 
   function onKeyToggleMenu(e) {
@@ -384,10 +402,9 @@
     }
 
     currentLevel = level;
+    seenLevelIntro = false;
 
-    layerBackground.clear();
-    layerObjects.clear();
-    layerPlayer.clear();
+    clearLevel();
 
     var url = 'data/levels/' + level + '.json',
         request = new XMLHttpRequest();
@@ -400,6 +417,12 @@
     };
 
     request.send();
+  }
+
+  function clearLevel() {
+    layerBackground.clear();
+    layerObjects.clear();
+    layerPlayer.clear();
   }
 
   // after loading a level, create everything - platforms, sprites,
@@ -473,6 +496,8 @@
     }
 
     Player.createSprite(layerPlayer, userCreationData);
+    Player.enableControl();
+
 
     /* --------------- LEVEL FINISH POINT --------------- */
     if (finishData.width && finishData.height) {
@@ -500,41 +525,45 @@
     }
 
 
+    /* --------------- SHOW LEVEL TUTORIAL --------------- */
+    var levelText = utils.l10n.get('level-' + currentLevel);
+    // game's first introduction
+    if (levelText && !seenLevelIntro) {
+      Player.disableControl();
+
+      window.setTimeout(function() {
+        seenLevelIntro = true;
+        Dialog.show({
+          'id': 'level-' + currentLevel,
+          'text': levelText,
+          'sprite': Player.sprite,
+          'onEnd': function onDialogEnd() {
+            Player.enableControl();
+          }
+        });
+      }, TIME_BEFORE_LEVEL_INTRO);
+    }
+
+
     /* --------------- LOAD SPECIAL GAME SCRIPT --------------- */
     if (currentLevelData.script) {
       var elScript = document.createElement('script');
       elScript.src = currentLevelData.script;
       document.body.appendChild(elScript);
-      return;
+    } else {
+      // Game Ready!
+      var eventReady = new CustomEvent('levelReady');
+      window.dispatchEvent(eventReady);
     }
-
-    Player.enableControl();
-
-    // game's first introduction
-    if (!Player.get('didIntro')) {
-      Player.disableControl();
-
-      window.setTimeout(function() {
-        Dialog.show({
-          'id': 'intro',
-          'text': utils.l10n.get('intro'),
-          'sprite': Player.sprite,
-          'onEnd': function onDialogEnd() {
-            Player.set('didIntro', true);
-            Player.enableControl();
-          }
-        });
-      }, TIME_BEFORE_SHOWING_INTRO);
-    }
-
-    // Game Ready!
-    var eventReady = new CustomEvent('levelReady');
-    window.dispatchEvent(eventReady);
   }
 
   // restart current level - return everything to its original place
   function restartLevel() {
-    loadLevel();
+    clearLevel();
+    initLevel();
+
+    var e = new CustomEvent('player-die');
+    window.dispatchEvent(e);
   }
 
   // complete level

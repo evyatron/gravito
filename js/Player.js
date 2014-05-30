@@ -32,8 +32,8 @@ window.Player = (function() {
     this.data = {
       'maxLevel': 1,
       'maxRotation': 0,
-      'didIntro': false,
       'didIntroTutorial': false,
+      'didDieTutorial': false,
       'settings-sound': 'on',
       'settings-volume': '0.5',
       'settings-fullscreen': 'off'

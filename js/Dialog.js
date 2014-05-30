@@ -40,7 +40,7 @@ Dialog = (function() {
 
       function showText() {
         var text = texts.shift(),
-            duration = this.DEFAULT_DURATION,
+            duration = self.DEFAULT_DURATION,
             durationFromText = (text || '').match(DURATION_REGEX),
             methodFromText = (text || '').match(METHOD_REGEX);
 
