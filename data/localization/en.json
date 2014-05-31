@@ -48,6 +48,10 @@
     "I think it's coming from that green stuff over there."
   ],
 
+  "level-4": [
+    "...Oh great."
+  ],
+
   "die-tutorial": [
     "Bubbling, putrid, toxic-looking liquid - BAD",
     "Dully noted."
@@ -62,9 +66,10 @@
     "pick up parts of gravity device which lets you rotate it. first part -90, second 90, third all the way to 180",
     "super jumper - can be used only once per level?",
     "if there are points in level - add a UI indication. each point collected will be marked there - when finished the level will count globally",
-    "why collect points??",
+    "why collect points?? need to integrate into story?",
     "narrating the players' choices (change gravity, take A or B path, die, etc.). a global text area?",
-    "sounds - background music, menu clicks"
+    "sounds - background music, menu clicks",
+    "controls in the menu - just show, no changing at first"
   ],
   "story": [
     "2d need to get back - players think to 3d, but actually to 1d",
