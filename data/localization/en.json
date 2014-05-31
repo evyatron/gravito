@@ -14,11 +14,11 @@
 
   "intro-tutorial": [
     "Right, moving in 2D. I know this one.",
-    "{m:moveRight}This is right...",
-    "{m:moveLeft}And that's left...",
+    "{m:moveRight}[&#8594;] is right...",
+    "{m:moveLeft}And [&#8592;] is left...",
     "{d:1200}Can I...",
     "{m:jump}",
-    "{d:2000}Yeap, that's jumping.",
+    "{d:2000}Yeap, [SPACEBAR/&#8593;] is jumping.",
     "Okay, I think I got it!"
   ],
 
@@ -37,9 +37,9 @@
   "level-1": [
     "{d:3500}Where... Where am I?",
     "{d:2500}What's going on?",
-    "{d:3000}Am I... Am I in 2D?",
-    "{d:3500}I better find a way to get back...",
-    "{d:5000}There seems to be some light coming in from over there, if I could just reach it."
+    "{d:3000}Am I... Am I a bloody rectangle??",
+    "{d:3500}Again??",
+    "{d:5000}There seems to be some light coming from over there, maybe that's the way back."
   ],
 
   "level-3": [
@@ -62,7 +62,9 @@
     "pick up parts of gravity device which lets you rotate it. first part -90, second 90, third all the way to 180",
     "super jumper - can be used only once per level?",
     "if there are points in level - add a UI indication. each point collected will be marked there - when finished the level will count globally",
-    "narrating the players' choices (change gravity, take A or B path, die, etc.). a global text area?"
+    "why collect points??",
+    "narrating the players' choices (change gravity, take A or B path, die, etc.). a global text area?",
+    "sounds - background music, menu clicks"
   ],
   "story": [
     "2d need to get back - players think to 3d, but actually to 1d",
