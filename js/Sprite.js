@@ -321,13 +321,13 @@ Sprite = (function() {
             oY = hHeights - Math.abs(vY);
 
         if (oX >= oY) {
-          if (vY > 0) {
+          if (vY >= 0) {
             return 'top';
           } else {
             return 'bottom';
           }
         } else {
-          if (vX > 0) {
+          if (vX >= 0) {
             return 'left';
           } else {
             return 'right';

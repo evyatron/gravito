@@ -56,8 +56,8 @@ Game = (function() {
       var gravityX = window.GRAVITY.x,
           gravityY = window.GRAVITY.y;
 
-      gravityX = gravityX > 0? 1 : gravityX < 0? -1 : 0;
-      gravityY = gravityY > 0? 1 : gravityY < 0? -1 : 0;
+      gravityX = (gravityX / Math.abs(gravityX)) || 0;
+      gravityY = (gravityY / Math.abs(gravityY)) || 0;
 
       window.GRAVITY_DIRECTION = new Vector(gravityX, gravityY);
     },
@@ -165,6 +165,9 @@ Game = (function() {
 
 
       // limit tick interval to 60FPS
+      // when a player minimizes the game, and reopens it after a few seconds,
+      // the interval will read as few seconds - we don't want that
+      // we want to continue "naturally"
       dt = Math.min(dt, 0.06);
 
       Log.clear();
@@ -188,7 +191,7 @@ Game = (function() {
         }
 
         for (j = 0; spriteWith = collisionables[j++];) {
-          // don't compare sprite with itself
+          // don't compare a sprite with itself
           if (sprite.id === spriteWith.id) {
             continue;
           }
