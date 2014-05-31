@@ -19,7 +19,7 @@ Dialog = (function() {
     init: function init(options) {
       this.elContainer = options.elContainer;
 
-      window.addEventListener('keydown', this.onKeyPress.bind(this));
+      window.addEventListener('keypress', this.onKeyPress.bind(this));
     },
 
     show: function show(options) {
@@ -94,11 +94,13 @@ Dialog = (function() {
       this.showText();
     },
 
-    onKeyPress: function onKeyPress() {
-      if (this.timeoutNextStep) {
-        window.clearTimeout(this.timeoutNextStep);
-        this.timeoutNextStep = null;
-        window.setTimeout(this.nextStep.bind(this), 200);
+    onKeyPress: function onKeyPress(e) {
+      if (e.keyCode === 32) {
+        if (this.timeoutNextStep) {
+          window.clearTimeout(this.timeoutNextStep);
+          this.timeoutNextStep = null;
+          window.setTimeout(this.nextStep.bind(this), 200);
+        }
       }
     },
 
