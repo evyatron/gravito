@@ -271,7 +271,7 @@ Game = (function() {
 
           if (headStuck) {
             // when jumping up and banging head - send back down
-            sprite.velocity[gravityAxis] = 1.5;
+            sprite.velocity[gravityAxis] *= -0.5;
 
             if (Math.abs(sprite.velocity[gravityAxis]) < Math.abs(GRAVITY[gravityAxis] * dt)) {
               sprite.velocity[gravityAxis] = GRAVITY[gravityAxis] * dt;
