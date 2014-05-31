@@ -18,8 +18,8 @@
     "{m:moveLeft}And [&#8592;] is left...",
     "{d:1200}Can I...",
     "{m:jump}",
-    "{d:2000}Yeap, [SPACEBAR/&#8593;] is jumping.",
-    "Okay, I think I got it!"
+    "{d:2000}Yeap, [SPACEBAR] or [&#8593;] is jumping.",
+    "Got it. Onwards!"
   ],
 
   "gravity-1": [
