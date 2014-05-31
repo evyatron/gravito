@@ -58,7 +58,11 @@
 
   "ideas": [
     "is this only 2 dimensions? I need to go back",
-    "There seems to be some...force keeps pulling me down"
+    "There seems to be some...force keeps pulling me down",
+    "pick up parts of gravity device which lets you rotate it. first part -90, second 90, third all the way to 180",
+    "super jumper - can be used only once per level?",
+    "if there are points in level - add a UI indication. each point collected will be marked there - when finished the level will count globally",
+    "narrating the players' choices (change gravity, take A or B path, die, etc.). a global text area?"
   ],
   "story": [
     "2d need to get back - players think to 3d, but actually to 1d",
@@ -67,10 +71,14 @@
   ],
   "levels": [
     "tutorial, just steps to reach the next level",
-    "get gravity controller - need to reach the top but no stairs, need to rotate",
-    "poison pools",
-    "holes - play with gravity",
-    "movables - need to push to block a hole",
-    "slippery - holes with slippery platforms in between"
+    "get *gravity controller* - need to reach the top but no stairs, need to rotate",
+    "*poison pools*",
+    "*holes* - play with gravity",
+    "*movables* - need to push to block a hole",
+    "normal maze with all elements",
+    "*slippery platforms* - holes with slippery platforms in between"
+  ],
+  "design": [
+    "create UI representation of gravity device (and name)"
   ]
 }
