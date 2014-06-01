@@ -34,8 +34,6 @@ Dialog = (function() {
         texts = [texts];
       }
 
-      console.log(texts)
-
       this.id = id;
       this.texts = texts.slice(0);
       this.onMethod = options.onMethod || this.defaultOnMethod
