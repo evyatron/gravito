@@ -988,7 +988,7 @@
 
     // if player just can't do it yet - don't show a message
     if (Math.abs(newAngle) > Player.get('maxRotation')) {
-      //return;
+      return;
     }
 
     // if player is limited by something - show a message
