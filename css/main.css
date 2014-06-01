@@ -94,14 +94,17 @@ a {
 
 #controls {
   position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
+  bottom: 0;
+  left: 50%;
+  width: 500px;
+  margin-left: -250px;
+  height: 80px;
+  background: rgba(255, 255, 255, .1);
+  border-radius: 6px 6px 0 0;
 }
   #controls div {
     position: absolute;
     top: 0;
-    padding: 0 10px;
     opacity: 0;
     pointer-events: none;
     -webkit-transition: all 600ms ease-in-out;
@@ -119,26 +122,95 @@ a {
   }
 
   #controls .gravity {
-    left: 0;
+    top: 10px;
+    left: 10px;
+    width: 60px;
+    height: 60px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, .2);
+    border-radius: 12px;
+    -webkit-transform: rotate(45deg);
+    transform: rotate(45deg);
   }
+    #controls .gravity .needle {
+      position: absolute;
+      top: 30px;
+      left: 30px;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+      z-index: 100;
+      border: 15px solid transparent;
+      border-bottom-color: rgba(255, 255, 255, .4);
+      border-right-color: rgba(255, 255, 255, .4);
+      /* same duration as #canvases above */
+      -webkit-transition: all 700ms ease-in-out;
+      transition: all 700ms ease-in-out;
+    }
+    .rotation--90 #controls .gravity .needle,
+    .rotation-270 #controls .gravity .needle {
+      top: 30px;
+      left: 0;
+    }
+    .rotation--180 #controls .gravity .needle,
+    .rotation-180 #controls .gravity .needle {
+      top: 0;
+      left: 0;
+    }
+    .rotation--270 #controls .gravity .needle,
+    .rotation-90 #controls .gravity .needle {
+      top: 0;
+      left: 30px;
+    }
+
+
     #controls .gravity b {
-      width: 50px;
-      height: 50px;
-      line-height: 50px;
-      margin-right: 5px;
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      cursor: pointer;
+      z-index: 50;
+      background: rgba(255, 255, 255, 0);
+      -webkit-transform: rotate(45deg);
+      transform: rotate(45deg);
+      -webkit-transition: all 120ms ease-in-out;
+      transition: all 120ms ease-in-out;
     }
-    #controls .gravity b.active {
-      line-height: 53px;
+    #controls .gravity b:hover {
+      background: rgba(255, 255, 255, .05);
     }
+    #controls .gravity #rotate-left {
+      top: 25px;
+      left: -62px;
+    }
+    #controls .gravity #rotate-right {
+      top: -62px;
+      left: 25px;
+    }
+
   #controls .movement {
-    right: 0;
+    top: 10px;
+    right: 10px;
   }
     #controls .movement b {
+      float: left;
+      font-family: monospace;
+      font-weight: 300;
+      text-align: center;
+      -webkit-box-sizing: borderbox;
+      -moz-box-sizing: borderbox;
+      box-sizing: borderbox;
+      cursor: pointer;
+      background: rgba(255, 255, 255, .5);
+      border-radius: 6px;
       font-size: 20px;
-      width: 24px;
-      height: 24px;
-      line-height: 20px;
+      width: 30px;
+      height: 30px;
+      line-height: 28px;
       box-shadow: -1px -1px 0 0 rgba(255, 255, 255, .3) inset;
+    }
+    #controls .movement b:hover {
+      background: rgba(255, 255, 255, .6);
     }
     #controls .movement #move-right {
       margin-left: 2px;
@@ -149,27 +221,7 @@ a {
       margin: 0 auto 2px auto;
     }
     #controls .movement b.active {
-      line-height: 22px;
-    }
-
-  #controls b {
-    float: left;
-    font-family: monospace;
-    font-size: 28px;
-    font-weight: 300;
-    text-align: center;
-    -webkit-box-sizing: borderbox;
-    -moz-box-sizing: borderbox;
-    box-sizing: borderbox;
-    box-shadow: -1px -1px 0 0 rgba(255, 255, 255, .7) inset;
-    cursor: pointer;
-    background: rgba(255, 255, 255, .5);
-    border-radius: 6px;
-  }
-  #controls b:hover {
-    background: rgba(255, 255, 255, .6);
-  }
-    #controls b.active {
+      line-height: 30px;
       text-indent: 1px;
       box-shadow: 1px 1px 0 0 rgba(0, 0, 0, .7) inset;
       background: rgba(255, 255, 255, .4);
@@ -209,6 +261,9 @@ a {
   }
 */
 
+#dialogs {
+  pointer-events: none;
+}
 #dialogs > div {
   position: absolute;
   top: 0;
@@ -231,6 +286,19 @@ a {
     left: 50%;
     -webkit-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
+  }
+  #dialogs .key {
+    display: inline-block;
+    font-weight: normal;
+    font-family: monospace;
+    height: 24px;
+    min-width: 16px;
+    padding: 0 4px;
+    text-align: center;
+    vertical-align: bottom;
+    background: rgba(255, 255, 255, .2);
+    box-shadow: -1px -1px 2px 0 rgba(255, 255, 255, .2) inset;
+    border-radius: 3px;
   }
 
 

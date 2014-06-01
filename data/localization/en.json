@@ -10,25 +10,25 @@
   "menu-option-volume": "Volume",
   "menu-option-fullscreen": "Fullscreen",
 
-  "cant-rotate": "{d:2000}Hmm... I can't seem to do that here.",
+  "cant-rotate": "{d:2000}I can't seem to do that here.",
 
   "intro-tutorial": [
     "Right, moving in 2D. I know this one.",
-    "{m:moveRight}[&#8594;] is right...",
-    "{m:moveLeft}And [&#8592;] is left...",
+    "{m:moveRight}<b class='key'>&#8594;</b> is right...",
+    "{m:moveLeft}And <b class='key'>&#8592;</b> is left...",
     "{d:1200}Can I...",
     "{m:jump}",
-    "{d:2000}Yeap, [SPACEBAR] or [&#8593;] is jumping.",
+    "{d:2000}Yeap, <b class='key'>SPACEBAR</b> or <b class='key'>&#8593;</b> is jumping.",
     "Got it. Onwards!"
   ],
 
   "gravity-1": [
     "What's this then?",
     "{d:2500}Hmm... What a weird device.",
-    "{d:3000}I wonder what happens if I press this here--",
+    "{d:3000}I wonder what happens if I press <b class='key'>A</b> here--",
     "{m:gravityCW}Whoaaaaa!",
     "{d:1800}Woohoo!",
-    "{d:2000}So this other button probably....",
+    "{d:2000}So <b class='key'>D</b> probably....",
     "{m:gravityCCW}{d:2500}",
     "{d:1800}Yeap. That's it.",
     "Oh I'm going to enjoy this!"
@@ -69,12 +69,12 @@
     "why collect points?? need to integrate into story?",
     "narrating the players' choices (change gravity, take A or B path, die, etc.). a global text area?",
     "sounds - background music, menu clicks",
-    "controls in the menu - just show, no changing at first"
+    "controls in the menu - just show, no changing at first",
+    "end of game - flatten to a single line, can do all levels in 1d. for each level need to plot a course of points to translate to a plain (1D)"
   ],
   "story": [
     "2d need to get back - players think to 3d, but actually to 1d",
-    "end of game - flatten to a single line, can do all levels in 1d",
-    "for each level need to plot a course of points to translate to a plain (1D)"
+    ""
   ],
   "levels": [
     "tutorial, just steps to reach the next level",

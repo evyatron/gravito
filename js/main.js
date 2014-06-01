@@ -109,6 +109,8 @@
     elContainer = document.getElementById('container');
     elCanvases = document.getElementById('canvases');
 
+    document.body.classList.add('rotation-0');
+
     elContainer.style.cssText += 
       'width:' + DEFAULT_WIDTH + 'px;' +
       'height:' + DEFAULT_HEIGHT + 'px;' +
@@ -525,23 +527,25 @@
 
 
     /* --------------- SHOW LEVEL TUTORIAL --------------- */
-    var levelText = utils.l10n.get('level-' + currentLevel);
-    // game's first introduction
-    if (levelText && !seenLevelIntro) {
-      Player.stopAllMovement();
-      Player.disableControl();
+    if (!/SKIP_LEVEL_DIALOGS/.test(window.location.href)) {
+      var levelText = utils.l10n.get('level-' + currentLevel);
+      // game's first introduction
+      if (levelText && !seenLevelIntro) {
+        Player.stopAllMovement();
+        Player.disableControl();
 
-      window.setTimeout(function() {
-        seenLevelIntro = true;
-        Dialog.show({
-          'id': 'level-' + currentLevel,
-          'text': levelText,
-          'sprite': Player.sprite,
-          'onEnd': function onDialogEnd() {
-            Player.enableControl();
-          }
-        });
-      }, TIME_BEFORE_LEVEL_INTRO);
+        window.setTimeout(function() {
+          seenLevelIntro = true;
+          Dialog.show({
+            'id': 'level-' + currentLevel,
+            'text': levelText,
+            'sprite': Player.sprite,
+            'onEnd': function onDialogEnd() {
+              Player.enableControl();
+            }
+          });
+        }, TIME_BEFORE_LEVEL_INTRO);
+      }
     }
 
 
@@ -877,10 +881,10 @@
       this.elButtons = document.querySelectorAll('*[data-property]');
 
       document.getElementById('rotate-left').addEventListener('click', function() {
-        rotateGravity(90);
+        playerRotateGravity(90);
       });
       document.getElementById('rotate-right').addEventListener('click', function() {
-        rotateGravity(-90);
+        playerRotateGravity(-90);
       });
 
       for (var i = 0, el; el = this.elButtons[i++];) {
@@ -984,7 +988,7 @@
 
     // if player just can't do it yet - don't show a message
     if (Math.abs(newAngle) > Player.get('maxRotation')) {
-      return;
+      //return;
     }
 
     // if player is limited by something - show a message
@@ -1009,17 +1013,6 @@
       return;
     }
 
-    var elButton;
-    if (angle > 0) {
-      elButton = document.getElementById('rotate-left');
-    } else if (angle < 0) {
-      elButton = document.getElementById('rotate-right');
-    }
-
-    if (elButton.classList.contains('active')) {
-      return;
-    }
-
     currentGravityAngle -= angle;
 
     // change gravity
@@ -1029,13 +1022,25 @@
     elCanvases.style.cssText += '-webkit-transform: rotate(' + currentGravityAngle + 'deg);' +
                                  'transform: rotate(' + currentGravityAngle + 'deg);';
 
+    // add a class according to the new angle, for UI
+    var newAngle = currentGravityAngle % 360,
+        currentClass = document.body.className,
+        elGravityNeedle = document.querySelector('#controls .gravity .needle');
+
+    currentClass = currentClass.replace(/\srotation-(-?\d+)/, ' rotation-' + newAngle);
+    document.body.className = currentClass;
+
+    if (elGravityNeedle) {
+      elGravityNeedle.style.cssText += '-webkit-transform: rotate(' + -currentGravityAngle + 'deg);' +
+                                       'transform: rotate(' + -currentGravityAngle + 'deg);';
+    }
+
+
     // UI indication
     Player.stopAllMovement();
     Player.disableControl();
-    elButton.classList.add('active')
     window.setTimeout(function() {
       Player.enableControl();
-      elButton.classList.remove('active')
     }, 700);
   }
 

@@ -24,9 +24,7 @@ Dialog = (function() {
 
     show: function show(options) {
       var texts = options.text,
-          id = options.id;
-
-      !id && (id = text.replace(/[^a-zA-Z]/g, '').toLowerCase());
+          id = options.id || 'dialog';
 
       if (document.getElementById('dialog-' + id)) {
         return;
@@ -36,10 +34,12 @@ Dialog = (function() {
         texts = [texts];
       }
 
+      console.log(texts)
+
       this.id = id;
       this.texts = texts.slice(0);
       this.onMethod = options.onMethod || this.defaultOnMethod
-      this.onEnd = options.onEnd || function() {};;
+      this.onEnd = options.onEnd || function() {};
       this.sprite = options.sprite;
 
       this.showText();
