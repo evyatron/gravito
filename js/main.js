@@ -581,6 +581,14 @@
       createCollectible(spriteData);
     }
 
+    /* --------------- SCORES --------------- */
+    // automatically assign ids, to keep track for scoring
+    for (var i = 0, spriteData; spriteData = currentLevelData.scores[i++];) {
+      spriteData.id = 'score_' + i;
+      spriteData.type = 'score';
+      createCollectible(spriteData);
+    }
+
 
     /* --------------- SHOW LEVEL TUTORIAL --------------- */
     if (!/SKIP_LEVEL_DIALOGS/.test(window.location.href)) {
@@ -721,8 +729,38 @@
 
     },
     'score': function onPlayerCollisionWithScore(sprite, direction) {
+      // remove the collected point from the game
       sprite.layer.removeSprite(sprite);
-      console.info('score++')
+
+      var keyLevel = 'level-' + currentLevel,
+          playerTotalScore = Player.get('totalScore') || 0
+          playerScorePerLevel = Player.get('scorePerLevel') || {},
+          playerLevelScore = playerScorePerLevel[keyLevel] || {},
+          levelScores = currentLevelData.scores || [];
+
+      // make sure the player score map for this level is complete
+      // with 'false' for uncollected points
+      for (var i = 0, score; score = levelScores[i++];) {
+        playerLevelScore[score.id] = playerLevelScore[score.id] || false;
+      }
+
+      // if the player already collected this point - nothing to do
+      if (playerLevelScore[sprite.id]) {
+        return;
+      }
+
+      // set the currently earned point to true (collected)
+      playerLevelScore[sprite.id] = true;
+
+      // copy the data back to the main level score map
+      playerScorePerLevel[keyLevel] = playerLevelScore;
+
+      // and save for the user
+      Player.set('scorePerLevel', playerScorePerLevel);
+
+      // update the player's total score (sum of all collected points throughout the levels)
+      // TODO: maybe remove and just count the 'scorePerLevel' whenever we need?
+      Player.set('totalScore', ++playerTotalScore);
     }
   };
 
@@ -776,7 +814,6 @@
       'collisionable': true,
       'friction': new Vector(0, 1)
     });
-
     
     data.x += currentLevelData.frameWidth.left;
     data.y += currentLevelData.frameWidth.top;

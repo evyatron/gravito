@@ -69,7 +69,8 @@
     }
   ],
   "movables": [],
-  "collectibles": [
+  "collectibles": [],
+  "scores": [
     {
       "x": 506,
       "y": 375,

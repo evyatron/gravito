@@ -40,7 +40,7 @@ window.Player = (function() {
       'tutorial-die-poison': false,
       'tutorial-die-bounds': false,
 
-      'score': 0,
+      'totalScore': 0,
       'scorePerLevel': {},
 
       'settings-sound': 'on',

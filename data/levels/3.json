@@ -21,11 +21,11 @@
 
   "platforms": [],
   "movables": [],
-  "collectibles": [
+  "collectibles": [],
+  "scores": [
     {
       "x": 50,
-      "y": 150,
-      "type": "score"
+      "y": 150
     }
   ]
 }
