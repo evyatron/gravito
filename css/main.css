@@ -203,6 +203,7 @@ a {
       position: absolute;
       left: 0;
       border: 2px solid rgba(255, 255, 255, .4);
+      border-radius: 50%/0% 50%;
       border-width: 2px 0 0 2px;
     }
     #controls .rotate-gravity:before {
@@ -210,6 +211,7 @@ a {
       width: 7px;
       height: 20px;
       border-width: 2px 2px 0 0;
+      border-radius: 0 15px 0 0;
       -webkit-transform: rotate(8deg);
       transform: rotate(8deg);
     }
@@ -223,7 +225,6 @@ a {
     #controls .rotate-gravity:hover:before,
     #controls .rotate-gravity:hover:after {
       border-color: rgba(255, 255, 255, .6);
-
     }
 
   #controls .movement {
@@ -232,23 +233,19 @@ a {
   }
     #controls .movement b {
       float: left;
-      font-family: monospace;
-      font-weight: 300;
-      text-align: center;
-      -webkit-box-sizing: borderbox;
-      -moz-box-sizing: borderbox;
-      box-sizing: borderbox;
-      cursor: pointer;
-      background: rgba(255, 255, 255, .5);
-      border-radius: 6px;
-      font-size: 20px;
       width: 30px;
       height: 30px;
       line-height: 28px;
-      box-shadow: -1px -1px 0 0 rgba(255, 255, 255, .3) inset;
+      text-align: center;
+      font: 300 20px monospace;
+      cursor: pointer;
+      border-radius: 50%/60% 49% 47% 48%;
+      background: #555;
+      box-shadow: -1px -1px 0 0 rgba(255, 255, 255, .2) inset,
+                  0 0 0 2px rgba(0, 0, 0, 1);
     }
     #controls .movement b:hover {
-      background: rgba(255, 255, 255, .6);
+      background: #666;
     }
     #controls .movement #move-right {
       margin-left: 2px;
@@ -259,10 +256,11 @@ a {
       margin: 0 auto 2px auto;
     }
     #controls .movement b.active {
-      line-height: 30px;
+      line-height: 26px;
       text-indent: 1px;
-      box-shadow: 1px 1px 0 0 rgba(0, 0, 0, .7) inset;
-      background: rgba(255, 255, 255, .4);
+      box-shadow: 1px 1px 0 0 rgba(0, 0, 0, .7) inset,
+                  0 0 0 2px rgba(0, 0, 0, 1);
+      background: #444;
     }
 
 /*
