@@ -235,9 +235,9 @@ a {
       float: left;
       width: 30px;
       height: 30px;
-      line-height: 28px;
-      text-align: center;
       font: 300 20px monospace;
+      text-align: center;
+      line-height: 27px;
       cursor: pointer;
       border-radius: 50%/60% 49% 47% 48%;
       background: #555;
@@ -256,7 +256,7 @@ a {
       margin: 0 auto 2px auto;
     }
     #controls .movement b.active {
-      line-height: 26px;
+      line-height: 29px;
       text-indent: 1px;
       box-shadow: 1px 1px 0 0 rgba(0, 0, 0, .7) inset,
                   0 0 0 2px rgba(0, 0, 0, 1);
