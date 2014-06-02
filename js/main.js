@@ -1071,7 +1071,7 @@
         currentClass = document.body.className,
         elGravityNeedle = document.querySelector('#controls .gravity .needle');
 
-    currentClass = currentClass.replace(/\srotation-(-?\d+)/, ' rotation-' + newAngle);
+    currentClass = currentClass.replace(/(\s|^)rotation-(-?\d+)/, ' rotation-' + newAngle);
     document.body.className = currentClass;
 
     if (elGravityNeedle) {

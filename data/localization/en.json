@@ -10,27 +10,36 @@
   "menu-option-volume": "Volume",
   "menu-option-fullscreen": "Fullscreen",
 
-  "cant-rotate": "{d:2000}Oh shucks, that doesn't work here!",
+  "cant-rotate": "{d:2000}Aw shucks, that doesn't work here!",
 
   "level-1": [
+    "{d:4000}*YAAAAWWWN*",
+    "{d:9000}What a great dream! I was a dragon crossing the narrow sea, and I carried dozens of cupcakes to give to villagers, and--",
+    "{d:1800}Wait.",
     "{d:3500}Where... Where am I?",
-    "{d:2500}What's going on?",
-    "{d:3000}Am I... Am I a rectangle??",
+    "{d:3000}Am I a rectangle??",
     "{d:3500}Again?? Oh man!",
-    "{d:5000}I better hurry back. I think there's some light coming from over there!"
+    "{d:2000}I better hurry back.",
+    "{d:5000}I think there's some light coming from over there!"
   ],
 
+  "level-2": null,
+
   "level-3": [
+    "NEED TO ADD A LEVEL - explain points to collect (??)"
+  ],
+
+  "level-4": [
     "Okay, should be smooth sailing from now o--",
     "Ugh! What's that smell??",
     "I think it's coming from that green stuff over there."
   ],
 
-  "level-4": [
+  "level-5": [
     "...Oh great."
   ],
 
-  "level-5": [
+  "level-6": [
     "Well the good news are it seems to be getting brighter in here.",
     "So I'm probably on the right track.",
     "Gotta keep going!"

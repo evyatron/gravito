@@ -1,0 +1,79 @@
+{
+  "frame": {
+    "top": 10,
+    "left": 10,
+    "right": 10,
+    "bottom": 0
+  },
+  "background": "rgba(80, 80, 80, 1)",
+  "size": {
+    "width": 600,
+    "height": 400
+  },
+  "start": {
+    "x": 15,
+    "y": 100
+  },
+  "finish": {
+    "x": 580,
+    "y": 100,
+    "width": 10,
+    "height": 50
+  },
+  "rotationLimit": {
+    "max": 0
+  },
+
+  "platforms": [
+    {
+      "x": 0,
+      "y": 150,
+      "width": 54,
+      "height": 240
+    },
+    {
+      "x": 70,
+      "y": 156,
+      "width": 30,
+      "height": 240
+    },
+    {
+      "x": 170,
+      "y": 110,
+      "width": 100,
+      "height": 280
+    },
+    {
+      "x": 340,
+      "y": 200,
+      "width": 20,
+      "height": 190
+    },
+    {
+      "x": 410,
+      "y": 190,
+      "width": 30,
+      "height": 200
+    },
+    {
+      "x": 520,
+      "y": 180,
+      "width": 40,
+      "height": 210
+    },
+    {
+      "x": 520,
+      "y": 150,
+      "width": 60,
+      "height": 30
+    }
+  ],
+  "movables": [],
+  "collectibles": [
+    {
+      "x": 506,
+      "y": 375,
+      "type": "score"
+    }
+  ]
+}
