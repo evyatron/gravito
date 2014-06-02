@@ -90,9 +90,12 @@
     "Oh I'm going to enjoy this!"
   ],
 
-  "die-tutorial": [
+  "tutorial-die-poison": [
     "Bubbling, putrid, toxic-looking liquid - BAD",
     "Dully noted."
+  ],
+  "tutorial-die-bounds": [
+    "Jumping - Good. Falling - Bad."
   ],
 
 
@@ -102,12 +105,14 @@
     "is this only 2 dimensions? I need to go back",
     "There seems to be some...force keeps pulling me down",
     "pick up parts of gravity device which lets you rotate it. first part -90, second 90, third all the way to 180",
-    "super jumper - can be used only once per level?",
+
     "if there are points in level - add a UI indication. each point collected will be marked there - when finished the level will count globally",
-    "why collect points?? need to integrate into story?",
-    "narrating the players' choices (change gravity, take A or B path, die, etc.). a global text area?",
-    "sounds - background music, menu clicks",
+    "why collect points?? need to integrate into story",
+    "sounds - background music, menu clicks, points collecting",
     "controls in the menu - just show, no changing at first",
+
+    "super jumper - can be used only once per level?",
+    "narrating the players' choices (change gravity, take A or B path, die, etc.). a global text area?",
     "end of game - flatten to a single line, can do all levels in 1d. for each level need to plot a course of points to translate to a plain (1D)"
   ],
   "story": [

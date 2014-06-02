@@ -29,12 +29,20 @@ window.Player = (function() {
 
     this.isNew = true;
 
+    // data to be saved in persistent storage
     this.data = {
       'maxLevel': 1,
       'maxRotation': 0,
       'didIntroTutorial': false,
-      'didDieTutorial': false,
       'gameFinished': false,
+
+      'didDeathTutorials': false,
+      'tutorial-die-poison': false,
+      'tutorial-die-bounds': false,
+
+      'score': 0,
+      'scorePerLevel': {},
+
       'settings-sound': 'on',
       'settings-volume': '0.5',
       'settings-fullscreen': 'off'

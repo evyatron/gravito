@@ -34,6 +34,11 @@
 
       SPRITE_PRESETS = {},
 
+      DEATHS = {
+        POISON: 'poison',
+        OUT_OF_BOUNDS: 'bounds'
+      },
+
       // used for CSS rotation of the game
       currentGravityAngle = 0;
 
@@ -146,7 +151,7 @@
       window.addEventListener('keydown', onKeyIntroTutorial);
     }
 
-    if (!Player.get('didDieTutorial')) {
+    if (!Player.get('didDeathTutorials')) {
       window.addEventListener('player-die', onPlayerDie);
     }
 
@@ -168,16 +173,31 @@
     }
   }
 
-  function onPlayerDie() {
-    window.removeEventListener('player-die', onPlayerDie);
-    
-    Dialog.show({
-      'id': 'die-tutorial',
-      'text': utils.l10n.get('die-tutorial'),
-      'sprite': Player.sprite
-    });
+  function onPlayerDie(e) {
+    var cause = (e.detail || {}).cause,
+        key = 'tutorial-die-' + cause,
+        sawAllTutorials = true;
 
-    Player.set('didDieTutorial', true);
+    
+    if (!Player.get(key)) {
+      Dialog.show({
+        'id': 'die-tutorial',
+        'text': utils.l10n.get(key),
+        'sprite': Player.sprite
+      });
+
+      Player.set(key, true);
+    }
+
+    for (var deathCause in DEATHS) {
+      key = 'tutorial-die-' + deathCause;
+      sawAllTutorials = sawAllTutorials && Player.get(key);
+    }
+
+    if (sawAllTutorials) {
+      Player.set('didDeathTutorials', true);
+      window.removeEventListener('player-die', onPlayerDie);
+    }
   }
 
   function onKeyToggleMenu(e) {
@@ -410,6 +430,7 @@
   // load the current level's data and create it
   function loadLevel(level) {
     !level && (level = currentLevel);
+    level = level * 1;
 
     game.stop();
 
@@ -599,18 +620,22 @@
   }
 
   // restart current level - return everything to its original place
-  function restartLevel() {
+  function restartLevel(deathCause) {
     clearLevel();
     initLevel();
 
-    var e = new CustomEvent('player-die');
+    var e = new CustomEvent('player-die', {
+      'detail': {
+        'cause': deathCause
+      }
+    });
     window.dispatchEvent(e);
   }
 
   // complete level
   function finishLevel() {
     var nextLevel = Math.min(currentLevel + 1, NUMBER_OF_LEVELS),
-        userMaxLevel = Player.get('maxLevel');
+        userMaxLevel = (Player.get('maxLevel') || 1) * 1;
 
     if (!userMaxLevel || userMaxLevel < nextLevel) {
       Player.set('maxLevel', nextLevel);
@@ -684,7 +709,9 @@
 
         if (volume <= 0) {
           SoundManager.stop('water');
-          window.setTimeout(restartLevel, 250);
+          window.setTimeout(function() {
+            restartLevel(DEATHS.POISON);
+          }, 250);
         } else {
           SoundManager.setVolume('water', volume);
           window.setTimeout(lowerVolume, 30);
@@ -1122,7 +1149,7 @@
         playerSprite.topLeft.y > game.height ||
         playerSprite.bottomRight.x < 0 ||
         playerSprite.topLeft.x > game.width) {
-      restartLevel();
+      restartLevel(DEATHS.OUT_OF_BOUNDS);
     }
   }
 
