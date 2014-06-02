@@ -1157,26 +1157,6 @@
 
   // for death areas
   var Bubbles = {
-    SIZE_MIN: 0,
-    SIZE_MAX: 0,
-    SIZE_MEGA: 0,
-    SPEED_MIN: 0,
-    SPEED_MAX: 0,
-    MARGIN_MIN: 0,
-    MARGIN_MAX: 0,
-    COLOR_MIN: 0,
-    COLOR_MAX: 0,
-    OPACITY_MIN: 0,
-    OPACITY_MAX: 0,
-
-    POP_MIN: 0,
-    POP_MAX: 0,
-    POP_OPACITY_STEP_MIN: 0,
-    POP_OPACITY_STEP_MAX: 0,
-
-    GENERATION_MIN: 0,
-    GENERATION_MAX: 0,
-
     update: function updateBubble(dt) {
       !this.bubblesConfig && (this.bubblesConfig = {
         timeSinceGeneration: 0,
@@ -1205,6 +1185,7 @@
       }
 
 
+      // update all bubbles
       for (var i = 0, bubble; bubble = bubbles[i++];) {
         if (bubble.pop) {
           bubble.size += bubble.popIncrement;
@@ -1226,6 +1207,8 @@
       return true;
     },
 
+    // draw all bubbles
+    // note that this is still all under a single sprite!
     draw: function drawBubble(context) {
       var pos = this.topLeft;
 
@@ -1249,9 +1232,9 @@
       var size = utils.random(Bubbles.SIZE_MIN, Bubbles.SIZE_MAX) * (isMega? Bubbles.SIZE_MEGA : 1),
           speed = utils.random(Bubbles.SPEED_MIN, Bubbles.SPEED_MAX),
           margin = utils.random(Bubbles.MARGIN_MIN, Bubbles.MARGIN_MAX),
-          popIncrement = utils.random(Bubbles.POP_MIN, Bubbles.POP_MAX),
+          popIncrement = isMega? Bubbles.POP_MEGA : utils.random(Bubbles.POP_MIN, Bubbles.POP_MAX),
           opacity = utils.random(Bubbles.OPACITY_MIN, Bubbles.OPACITY_MAX),
-          popOpacityStep = utils.random(Bubbles.POP_OPACITY_STEP_MIN, Bubbles.POP_OPACITY_STEP_MAX),
+          popOpacityStep = isMega? Bubbles.POP_OPACITY_STEP_MEGA : utils.random(Bubbles.POP_OPACITY_STEP_MIN, Bubbles.POP_OPACITY_STEP_MAX),
           color = 'rgba(0, ' + Math.round(utils.random(Bubbles.COLOR_MIN, Bubbles.COLOR_MAX)) + ', 0, 1)';
 
       margin = Math.min(margin, sprite.height / 2);

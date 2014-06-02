@@ -78,8 +78,10 @@
 
     "POP_MIN": 0.5,
     "POP_MAX": 2,
+    "POP_MEGA": 2,
     "POP_OPACITY_STEP_MIN": 0.25,
     "POP_OPACITY_STEP_MAX": 0.5,
+    "POP_OPACITY_STEP_MEGA": 0.3,
 
     "GENERATION_MIN": 0.2,
     "GENERATION_MAX": 1,
