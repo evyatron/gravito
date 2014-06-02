@@ -880,10 +880,10 @@
     init: function init() {
       this.elButtons = document.querySelectorAll('*[data-property]');
 
-      document.getElementById('rotate-left').addEventListener('click', function() {
+      document.getElementById('gravity-rotate-left').addEventListener('click', function() {
         playerRotateGravity(90);
       });
-      document.getElementById('rotate-right').addEventListener('click', function() {
+      document.getElementById('gravity-rotate-right').addEventListener('click', function() {
         playerRotateGravity(-90);
       });
 

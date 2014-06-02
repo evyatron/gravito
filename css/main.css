@@ -123,24 +123,25 @@ a {
 
   #controls .gravity {
     top: 10px;
-    left: 10px;
+    left: 50px;
     width: 60px;
     height: 60px;
+    z-index: 100;
     overflow: hidden;
-    background: rgba(255, 255, 255, .2);
-    border-radius: 12px;
+    background: #444;
+    border-radius: 50%;
     -webkit-transform: rotate(45deg);
     transform: rotate(45deg);
   }
     #controls .gravity .needle {
       position: absolute;
-      top: 30px;
-      left: 30px;
+      top: 15px;
+      left: 15px;
       width: 0;
       height: 0;
       pointer-events: none;
       z-index: 100;
-      border: 15px solid transparent;
+      border: 25px solid transparent;
       border-bottom-color: rgba(255, 255, 255, .4);
       border-right-color: rgba(255, 255, 255, .4);
       /* same duration as #canvases above */
@@ -149,43 +150,69 @@ a {
     }
     .rotation--90 #controls .gravity .needle,
     .rotation-270 #controls .gravity .needle {
-      top: 30px;
-      left: 0;
+      top: 15px;
+      left: -5px;
     }
     .rotation--180 #controls .gravity .needle,
     .rotation-180 #controls .gravity .needle {
-      top: 0;
-      left: 0;
+      top: -5px;
+      left: -5px;
     }
     .rotation--270 #controls .gravity .needle,
     .rotation-90 #controls .gravity .needle {
       top: 0;
-      left: 30px;
+      left: 15px;
     }
 
-
-    #controls .gravity b {
+    #controls .rotate-gravity {
       position: absolute;
-      width: 120px;
-      height: 120px;
+      top: 50%;
+      width: 10px;
+      height: 20px;
+      margin-top: -10px;
+      font-size: 0;
       cursor: pointer;
       z-index: 50;
-      background: rgba(255, 255, 255, 0);
-      -webkit-transform: rotate(45deg);
-      transform: rotate(45deg);
-      -webkit-transition: all 120ms ease-in-out;
-      transition: all 120ms ease-in-out;
+      background: #aaa;
+      -webkit-transition: all 80ms ease-in-out;
+      transition: all 80ms ease-in-out;
     }
-    #controls .gravity b:hover {
-      background: rgba(255, 255, 255, .05);
+    #controls .rotate-gravity:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 0;
+      margin: 0 0 0 -10px;
+      border: 10px solid #aaa;
+      border-color: #aaa transparent transparent #aaa;
+      -webkit-transform: rotate(-45deg);
+      transform: rotate(-45deg);
+      -webkit-transition: all 80ms ease-in-out;
+      transition: all 80ms ease-in-out;
     }
-    #controls .gravity #rotate-left {
-      top: 25px;
-      left: -62px;
+    #controls .rotate-gravity:hover {
+      background: #bbb;
     }
-    #controls .gravity #rotate-right {
-      top: -62px;
-      left: 25px;
+    #controls .rotate-gravity:hover:before {
+      border-color: #bbb transparent transparent #bbb;
+    }
+    #controls #gravity-rotate-left {
+      left: 48px;
+    }
+    #controls #gravity-rotate-left:hover {
+      -webkit-transform: translateX(-2px);
+      transform: translateX(-2px);
+    }
+    #controls #gravity-rotate-right {
+      left: 102px;
+      -webkit-transform: scale(-1, 1);
+      transform: scale(-1, 1);
+    }
+    #controls #gravity-rotate-right:hover {
+      -webkit-transform: scale(-1, 1) translateX(-2px);
+      transform: scale(-1, 1) translateX(-2px);
     }
 
   #controls .movement {
