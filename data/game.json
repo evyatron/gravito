@@ -66,12 +66,15 @@
   "BUBBLES": {
     "SIZE_MIN": 1,
     "SIZE_MAX": 5,
+    "SIZE_MEGA": 4,
     "SPEED_MIN": 20,
     "SPEED_MAX": 50,
     "MARGIN_MIN": 5,
     "MARGIN_MAX": 30,
     "COLOR_MIN": 120,
     "COLOR_MAX": 190,
+    "OPACITY_MIN": 0.8,
+    "OPACITY_MAX": 1,
 
     "POP_MIN": 0.5,
     "POP_MAX": 2,
@@ -79,7 +82,9 @@
     "POP_OPACITY_STEP_MAX": 0.5,
 
     "GENERATION_MIN": 0.2,
-    "GENERATION_MAX": 1
+    "GENERATION_MAX": 1,
+    "GENERATION_MEGA_MIN": 7,
+    "GENERATION_MEGA_MAX": 12
   },
 
   "PLAYER": {

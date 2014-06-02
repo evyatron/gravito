@@ -1159,12 +1159,15 @@
   var Bubbles = {
     SIZE_MIN: 0,
     SIZE_MAX: 0,
+    SIZE_MEGA: 0,
     SPEED_MIN: 0,
     SPEED_MAX: 0,
     MARGIN_MIN: 0,
     MARGIN_MAX: 0,
     COLOR_MIN: 0,
     COLOR_MAX: 0,
+    OPACITY_MIN: 0,
+    OPACITY_MAX: 0,
 
     POP_MIN: 0,
     POP_MAX: 0,
@@ -1177,18 +1180,28 @@
     update: function updateBubble(dt) {
       !this.bubblesConfig && (this.bubblesConfig = {
         timeSinceGeneration: 0,
+        timeSinceMegaGeneration: 0,
         timeToGenerate: 0,
+        timeToGenerateMega: 0,
         bubbles: []
       });
 
       var bubbles = this.bubblesConfig.bubbles;
 
+      // normal bubbles generation
       this.bubblesConfig.timeSinceGeneration += dt;
-
       if (this.bubblesConfig.timeSinceGeneration >= this.bubblesConfig.timeToGenerate) {
         bubbles.push(Bubbles.createBubble(this));
         this.bubblesConfig.timeSinceGeneration = 0;
         this.bubblesConfig.timeToGenerate = utils.random(Bubbles.GENERATION_MIN, Bubbles.GENERATION_MAX);
+      }
+
+      // mega bubbles
+      this.bubblesConfig.timeSinceMegaGeneration += dt;
+      if (this.bubblesConfig.timeSinceMegaGeneration >= this.bubblesConfig.timeToGenerateMega) {
+        bubbles.push(Bubbles.createBubble(this, true));
+        this.bubblesConfig.timeSinceMegaGeneration = 0;
+        this.bubblesConfig.timeToGenerateMega = utils.random(Bubbles.GENERATION_MEGA_MIN, Bubbles.GENERATION_MEGA_MAX);
       }
 
 
@@ -1232,11 +1245,12 @@
       }
     },
 
-    createBubble: function createBubble(sprite) {
-      var size = utils.random(Bubbles.SIZE_MIN, Bubbles.SIZE_MAX),
+    createBubble: function createBubble(sprite, isMega) {
+      var size = utils.random(Bubbles.SIZE_MIN, Bubbles.SIZE_MAX) * (isMega? Bubbles.SIZE_MEGA : 1),
           speed = utils.random(Bubbles.SPEED_MIN, Bubbles.SPEED_MAX),
           margin = utils.random(Bubbles.MARGIN_MIN, Bubbles.MARGIN_MAX),
           popIncrement = utils.random(Bubbles.POP_MIN, Bubbles.POP_MAX),
+          opacity = utils.random(Bubbles.OPACITY_MIN, Bubbles.OPACITY_MAX),
           popOpacityStep = utils.random(Bubbles.POP_OPACITY_STEP_MIN, Bubbles.POP_OPACITY_STEP_MAX),
           color = 'rgba(0, ' + Math.round(utils.random(Bubbles.COLOR_MIN, Bubbles.COLOR_MAX)) + ', 0, 1)';
 
@@ -1251,7 +1265,7 @@
         'color': color,
         'popIncrement': popIncrement,
         'popOpacityStep': popOpacityStep,
-        'opacity': 1
+        'opacity': opacity
       };
 
       return bubble;
