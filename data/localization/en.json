@@ -10,16 +10,63 @@
   "menu-option-volume": "Volume",
   "menu-option-fullscreen": "Fullscreen",
 
-  "cant-rotate": "{d:2000}I can't seem to do that here.",
+  "cant-rotate": "{d:2000}Oh shucks, that doesn't work here!",
+
+  "level-1": [
+    "{d:3500}Where... Where am I?",
+    "{d:2500}What's going on?",
+    "{d:3000}Am I... Am I a rectangle??",
+    "{d:3500}Again?? Oh man!",
+    "{d:5000}I better hurry back. I think there's some light coming from over there!"
+  ],
+
+  "level-3": [
+    "Okay, should be smooth sailing from now o--",
+    "Ugh! What's that smell??",
+    "I think it's coming from that green stuff over there."
+  ],
+
+  "level-4": [
+    "...Oh great."
+  ],
+
+  "level-5": [
+    "Well the good news are it seems to be getting brighter in here.",
+    "So I'm probably on the right track.",
+    "Gotta keep going!"
+  ],
+
+
+  "level-": [
+    "Ugh, it's so bright in here!"
+  ],
+
+  "level-9": [
+    "Now that's more like it.",
+    "Hey I think I can see my bed through there!",
+    "I can do it!"
+  ],
+
+  "level-final": [
+    "One dimension, oh how I've missed you! I will never leave you again."
+  ],
+  "final": [
+    "*YAAAAWWWN*",
+    "Hey! I'm here!",
+    "YAY!",
+    "Finally I'm done with that 2D horror."
+  ],
+
+
 
   "intro-tutorial": [
-    "Right, moving in 2D. I know this one.",
+    "Okay, moving around in 2D. I know this one.",
     "{m:moveRight}<b class='key'>&#8594;</b> is right...",
     "{m:moveLeft}And <b class='key'>&#8592;</b> is left...",
-    "{d:1200}Can I...",
+    "{d:1300}Can I...",
     "{m:jump}",
     "{d:2000}Yeap, <b class='key'>SPACEBAR</b> or <b class='key'>&#8593;</b> is jumping.",
-    "Got it. Onwards!"
+    "Got it. Let's go!"
   ],
 
   "gravity-1": [
@@ -32,24 +79,6 @@
     "{m:gravityCCW}{d:2500}",
     "{d:1800}Yeap. That's it.",
     "Oh I'm going to enjoy this!"
-  ],
-
-  "level-1": [
-    "{d:3500}Where... Where am I?",
-    "{d:2500}What's going on?",
-    "{d:3000}Am I... Am I a bloody rectangle??",
-    "{d:3500}Again??",
-    "{d:5000}There seems to be some light coming from over there, maybe that's the way back."
-  ],
-
-  "level-3": [
-    "Okay, should be smooth sailing from now o--",
-    "Ugh! What's that smell??",
-    "I think it's coming from that green stuff over there."
-  ],
-
-  "level-4": [
-    "...Oh great."
   ],
 
   "die-tutorial": [

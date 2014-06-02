@@ -28,6 +28,7 @@
       DEATH_SOUND_DISTANCE_STEP = 0,
 
       TIME_BEFORE_LEVEL_INTRO = 0,
+      TIME_BEFORE_FINAL_TEXT = 0,
 
       NUMBER_OF_LEVELS = 0,
 
@@ -71,6 +72,7 @@
     DEATH_SOUND_DISTANCE_STEP = config.DEATH_SOUND_DISTANCE_STEP;
 
     TIME_BEFORE_LEVEL_INTRO = config.TIME_BEFORE_LEVEL_INTRO;
+    TIME_BEFORE_FINAL_TEXT = config.TIME_BEFORE_FINAL_TEXT;
 
     for (var k in config.SPRITE_PRESETS) {
       SPRITE_PRESETS[k] = config.SPRITE_PRESETS[k];
@@ -131,8 +133,7 @@
       'onBeforeTick': gameTick
     });
 
-    // just for easy debugging
-    window.game = game;
+    WRAPPER.game = game;
 
     // create all sprite layers - background, player, etc.
     createLayers();
@@ -382,33 +383,41 @@
     document.body.classList.remove('level-loading');
     document.body.classList.add('level-ready');
 
-    window.setTimeout(game.start.bind(game), 50);
+    window.setTimeout(function() {
+      game.start();
+
+      var eventReady = new CustomEvent('gameStart', {
+        'detail': {
+          'game': WRAPPER
+        }
+      });
+      window.dispatchEvent(eventReady);
+    }, 50);
   }
 
   // next level
   function loadNextLevel() {
     currentLevel++;
-    loadLevel();
+
+    if (currentLevel > NUMBER_OF_LEVELS) {
+      hideLevel();
+      finishGame(loadLevel);
+    } else {
+      loadLevel();
+    }
   }
 
   // load the current level's data and create it
   function loadLevel(level) {
+    !level && (level = currentLevel);
+
     game.stop();
 
-    document.body.classList.add('level-loading');
-    document.body.classList.remove('level-ready');
+    hideLevel();
 
-    !level && (level = currentLevel);
-    if (level > NUMBER_OF_LEVELS) {
-      level = NUMBER_OF_LEVELS;
-    }
+    currentLevel = Math.min(level, NUMBER_OF_LEVELS + 1);
 
-    currentLevel = level;
-    seenLevelIntro = false;
-
-    clearLevel();
-
-    var url = 'data/levels/' + level + '.json',
+    var url = 'data/levels/' + (currentLevel > NUMBER_OF_LEVELS? 'final' : level) + '.json',
         request = new XMLHttpRequest();
 
     request.open('GET', url, true);
@@ -419,6 +428,24 @@
     };
 
     request.send();
+  }
+
+  function hideLevel() {
+    document.body.classList.add('level-loading');
+    document.body.classList.remove('level-ready');
+
+    seenLevelIntro = false;
+    clearLevel();
+  }
+
+  function finishGame(callback) {
+    window.setTimeout(function() {
+      Dialog.show({
+        'id': 'final',
+        'text': utils.l10n.get('final'),
+        'onEnd': callback
+      });
+    }, TIME_BEFORE_FINAL_TEXT);
   }
 
   function clearLevel() {
@@ -467,6 +494,8 @@
       };
     }
 
+    currentLevelData.frameWidth = frameWidth;
+
 
     /* --------------- PLAYER POSITION --------------- */
     var playerStartPosition = currentLevelData.start || {};
@@ -487,16 +516,22 @@
       playerStartPosition.y = (game.height * percent / 100);
     }
 
-    var userCreationData = {
+    var playerCreationData = {
       'x': playerStartPosition.x,
       'y': playerStartPosition.y
     };
     if (Player.sprite) {
-      userCreationData.velocity = Player.sprite.velocity;
-      userCreationData.acceleration = Player.sprite.acceleration;
+      playerCreationData.velocity = Player.sprite.velocity;
+      playerCreationData.acceleration = Player.sprite.acceleration;
     }
 
-    Player.createSprite(layerPlayer, userCreationData);
+    if (currentLevelData.player) {
+      for (var k in currentLevelData.player) {
+        playerCreationData[k] = currentLevelData.player[k];
+      }
+    }
+
+    Player.createSprite(layerPlayer, playerCreationData);
     Player.enableControl();
 
 
@@ -512,23 +547,25 @@
 
     /* --------------- PLATFORMS --------------- */
     for (var i = 0, spriteData; spriteData = currentLevelData.platforms[i++];) {
-      createPlatform(spriteData, frameWidth);
+      createPlatform(spriteData);
     }
 
     /* --------------- MOVABLES --------------- */
     for (var i = 0, spriteData; spriteData = currentLevelData.movables[i++];) {
-      createMovable(spriteData, frameWidth);
+      createMovable(spriteData);
     }
 
     /* --------------- COLLECTIBLES --------------- */
     for (var i = 0, spriteData; spriteData = currentLevelData.collectibles[i++];) {
-      createCollectible(spriteData, frameWidth);
+      createCollectible(spriteData);
     }
 
 
     /* --------------- SHOW LEVEL TUTORIAL --------------- */
     if (!/SKIP_LEVEL_DIALOGS/.test(window.location.href)) {
-      var levelText = utils.l10n.get('level-' + currentLevel);
+      var levelTextId = (currentLevel > NUMBER_OF_LEVELS)? 'final' : currentLevel,
+          levelText = utils.l10n.get('level-' + levelTextId);
+
       // game's first introduction
       if (levelText && !seenLevelIntro) {
         Player.stopAllMovement();
@@ -537,7 +574,7 @@
         window.setTimeout(function() {
           seenLevelIntro = true;
           Dialog.show({
-            'id': 'level-' + currentLevel,
+            'id': 'level-' + levelTextId,
             'text': levelText,
             'sprite': Player.sprite,
             'onEnd': function onDialogEnd() {
@@ -572,7 +609,7 @@
 
   // complete level
   function finishLevel() {
-    var nextLevel = currentLevel + 1,
+    var nextLevel = Math.min(currentLevel + 1, NUMBER_OF_LEVELS),
         userMaxLevel = Player.get('maxLevel');
 
     if (!userMaxLevel || userMaxLevel < nextLevel) {
@@ -666,7 +703,7 @@
 
   };
 
-  function createPlatform(spriteData, frameWidth) {
+  function createPlatform(spriteData, ignoreFrame) {
     var data = getSpriteData(spriteData, {
       'id': 'platform_' + Math.random(),
       'x': 0,
@@ -675,12 +712,14 @@
       'friction': new Vector(DEFAULT_PLATFORM_FRICTION_X, DEFAULT_PLATFORM_FRICTION_Y)
     });
 
-    if (frameWidth) {
-      data.x += frameWidth.left;
-      data.y += frameWidth.top;
+    if (!ignoreFrame) {
+      data.x += currentLevelData.frameWidth.left;
+      data.y += currentLevelData.frameWidth.top;
     }
 
-    layerBackground.addSprite(new Sprite(data));
+    var sprite = new Sprite(data);
+    layerBackground.addSprite(sprite);
+    return sprite;
   }
 
   function createMovable(spriteData, frameWidth) {
@@ -693,10 +732,12 @@
       'friction': new Vector(DEFAULT_MOVABLE_FRICTION_X, DEFAULT_MOVABLE_FRICTION_Y)
     });
 
-    data.x += frameWidth.left;
-    data.y += frameWidth.top;
+    data.x += currentLevelData.frameWidth.left;
+    data.y += currentLevelData.frameWidth.top;
 
-    layerObjects.addSprite(new Sprite(data));
+    var sprite = new Sprite(data);
+    layerObjects.addSprite(sprite);
+    return sprite;
   }
 
   function createCollectible(spriteData, frameWidth) {
@@ -709,14 +750,15 @@
       'friction': new Vector(0, 1)
     });
 
-    data.x += frameWidth.left;
-    data.y += frameWidth.top;
+    
+    data.x += currentLevelData.frameWidth.left;
+    data.y += currentLevelData.frameWidth.top;
 
-    var collectible = new Sprite(data);
+    var sprite = new Sprite(data);
 
     if (data.type === 'death') {
-      collectible.update = Bubbles.update;
-      collectible.draw = Bubbles.draw;
+      sprite.update = Bubbles.update;
+      sprite.draw = Bubbles.draw;
 
       if (DEATH_AREA_SOUND) {
         for (var i = 1, sizeStep; i <= DEATH_SOUND_NUMBER_OF_STEPS; i++) {
@@ -740,7 +782,9 @@
       }
     }
 
-    layerObjects.addSprite(collectible);
+    layerObjects.addSprite(sprite);
+
+    return sprite;
   }
 
   function createFrame(frameWidth, finishData) {
@@ -813,7 +857,7 @@
     }
 
     for (var i = 0, data; data = platforms[i++];) {
-      createPlatform(data);
+      createPlatform(data, true);
     }
   }
 
@@ -1192,12 +1236,12 @@
   var WRAPPER = {
     loadLevel: loadLevel,
     initLevel: initLevel,
+    player: Player,
     createPlatform: createPlatform,
     createCollectible: createCollectible,
     setPlayerAllowedRotation: setPlayerAllowedRotation,
     playerRotateGravity: playerRotateGravity,
     rotateGravity: rotateGravity,
-    game: game,
     finishLevel: finishLevel,
     layerBackground: layerBackground,
     layerObjects: layerObjects,

@@ -34,6 +34,7 @@ window.Player = (function() {
       'maxRotation': 0,
       'didIntroTutorial': false,
       'didDieTutorial': false,
+      'gameFinished': false,
       'settings-sound': 'on',
       'settings-volume': '0.5',
       'settings-fullscreen': 'off'

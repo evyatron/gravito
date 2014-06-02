@@ -161,6 +161,13 @@ Game = (function() {
           gravityAxis = gravityDirY? 'y' : 'x',
           movementAxis = gravityDirY? 'x' : 'y',
 
+          collisionOpposites = {
+            'top': 'bottom',
+            'bottom': 'top',
+            'left': 'right',
+            'right': 'left'
+          },
+
           i = 0, layer, sprite, spriteWith, collision, appliedFriction;
 
 
@@ -204,6 +211,7 @@ Game = (function() {
           }
 
           // report collision to sprite - to propogate to event listeners etc.
+          spriteWith.collide(sprite, collisionOpposites[collision]);
           sprite.collide(spriteWith, collision);
 
           if (!spriteWith.solid) {

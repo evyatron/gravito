@@ -1,0 +1,25 @@
+{
+  "frame": 10,
+  "background": "rgba(80, 80, 80, 1)",
+  "size": {
+    "width": 300,
+    "height": 30
+  },
+  "start": {
+    "x": 15,
+    "y": 0
+  },
+  "rotationLimit": {
+    "min": 0,
+    "max": 0
+  },
+  "player": {
+    "width": 10,
+    "height": 10
+  },
+  "script": "js/levels/final.js",
+
+  "platforms": [],
+  "movables": [],
+  "collectibles": []
+}
