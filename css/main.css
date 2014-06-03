@@ -381,10 +381,9 @@ a {
     position: absolute;
     top: 158px;
     left: 89px;
-    font-size: 1.1em;
-    font-weight: 300;
+    font: 300 0.8em monospace;
     line-height: 1;
-    letter-spacing: 0.117em;
+    letter-spacing: 0.028em;
     text-transform: lowercase;
     opacity: .3;
   }
