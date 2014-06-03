@@ -456,12 +456,11 @@
     window.setTimeout(function() {
       game.start();
 
-      var eventReady = new CustomEvent('gameStart', {
+      window.dispatchEvent(new CustomEvent('gameStart', {
         'detail': {
           'game': WRAPPER
         }
-      });
-      window.dispatchEvent(eventReady);
+      }));
     }, 50);
   }
 
@@ -681,8 +680,7 @@
       document.body.appendChild(elScript);
     } else {
       // Game Ready!
-      var eventReady = new CustomEvent('levelReady');
-      window.dispatchEvent(eventReady);
+      window.dispatchEvent(new CustomEvent('levelReady'));
     }
   }
 
@@ -691,12 +689,11 @@
     clearLevel();
     initLevel();
 
-    var e = new CustomEvent('player-die', {
+    window.dispatchEvent(new CustomEvent('player-die', {
       'detail': {
         'cause': deathCause
       }
-    });
-    window.dispatchEvent(e);
+    }));
   }
 
   // complete level
@@ -834,6 +831,12 @@
       // update the player's total score (sum of all collected points throughout the levels)
       // TODO: maybe remove and just count the 'scorePerLevel' whenever we need?
       Player.set('totalScore', ++playerTotalScore);
+
+      window.dispatchEvent(new CustomEvent('playerScore', {
+        'detail': {
+          'scoreId': sprite.id
+        }
+      }));
     }
   };
 
@@ -1059,7 +1062,7 @@
     elButtons: [],
 
     init: function init() {
-      this.elButtons = document.querySelectorAll('*[data-property]');
+      this.elButtons = document.querySelectorAll('#controls *[data-property]');
 
       document.getElementById('gravity-rotate-left').addEventListener('click', function() {
         playerRotateGravity(90);
@@ -1075,6 +1078,8 @@
       window.addEventListener('mouseup', this.stopAllControls.bind(this));
 
       window.addEventListener('keydown', this.onKeyPress);
+
+      this.PointsCounter.init();
     },
 
     onControlButtonClick: function onControlButtonClick(e) {
@@ -1108,6 +1113,66 @@
             height: Player.sprite.height
           }));
           break;
+      }
+    },
+
+    PointsCounter: {
+      el: null,
+      elTotal: null,
+
+      init: function init() {
+        this.el = document.getElementById('levelScores');
+        this.elTotal = document.querySelector('#totalScore b');
+
+        if (this.el) {
+          window.addEventListener('levelReady', this.onLevelReady.bind(this));
+          window.addEventListener('playerScore', this.onPlayerCollectScore.bind(this));
+        }
+
+        this.updateTotalScore();
+      },
+
+      onLevelReady: function onLevelReady() {
+        var levelScores = currentLevelData.scores || [],
+            html = '';
+
+        for (var i = 0, score; score = levelScores[i++];) {
+          html += '<li data-id="' + score.id + '"></li>';
+        }
+
+        this.el.innerHTML = html;
+
+        window.setTimeout(this.showCollectedScores.bind(this), 0);
+      },
+
+      showCollectedScores: function showCollectedScores() {
+        var playerScorePerLevel = Player.get('scorePerLevel') || {},
+            playerLevelScore = playerScorePerLevel['level-' + currentLevel] || {},
+            elScore;
+
+        for (var id in playerLevelScore) {
+          if (playerLevelScore[id]) {
+            elScore = this.el.querySelector('[data-id = "' + id + '"]');
+            if (elScore) {
+              elScore.classList.add('picked');
+            }
+          }
+        }
+      },
+
+      onPlayerCollectScore: function onPlayerCollectScore(e) {
+        var scoreId = (e.detail || {}).scoreId,
+            el = this.el.querySelector('[data-id = "' + scoreId + '"]');
+
+        if (el) {
+          el.classList.add('picked');
+        }
+
+        this.updateTotalScore();
+      },
+
+      updateTotalScore: function updateTotalScore() {
+        this.elTotal.innerHTML = Player.get('totalScore');
       }
     }
   }

@@ -263,6 +263,47 @@ a {
       background: #444;
     }
 
+  #levelScores {
+    position: absolute;
+    top: 2px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    list-style-type: none;
+    pointer-events: none;
+  }
+    #levelScores li {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      margin: 0 6px;
+      background: rgba(0, 0, 0, .1);
+      box-shadow: 0 0 0 4px rgba(255, 255, 255, .1);
+      -webkit-transition: all 400ms ease-in;
+      transition: all 400ms ease-in;
+    }
+    #levelScores li.picked {
+      background: rgba(190, 120, 0, 1);
+      box-shadow: 0 0 0 4px rgba(240, 210, 140, .15);
+    }
+
+  #totalScore {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100px;
+    height: 34px;
+    line-height: 34px;
+    text-align: center;
+    font-size: 33px;
+    margin: -17px 0 0 -50px;
+    background: rgba(255, 255, 255, .7);
+    border-radius: 5px;
+  }
+    #totalScore b {
+      font-weight: 300;
+    }
+
 /*
 #dialogs {
   position: absolute;
