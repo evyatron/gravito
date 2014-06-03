@@ -8,6 +8,7 @@
   "menu-option-continue": "Continue <span>(level {{level}})</span>",
   "menu-option-sound": "Sound Enabled",
   "menu-option-volume": "Volume",
+  "menu-option-controls": "Controls",
   "menu-option-fullscreen": "Fullscreen",
 
   "cant-rotate": "{d:2000}Aw shucks, that doesn't work here!",

@@ -323,7 +323,8 @@ a {
     -webkit-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
   }
-  #dialogs .key {
+  #dialogs .key,
+  #menu .key {
     display: inline-block;
     font-weight: normal;
     font-family: monospace;
@@ -466,6 +467,51 @@ a {
       -webkit-transform: rotate(35deg) scale(.8, 1);
       transform: rotate(35deg) scale(.8, 1);
     }
+  #menu .text-menu {
+    position: absolute;
+    bottom: 150px;
+    left: 50%;
+    width: 480px;
+    font-size: .9em;
+    margin-left: -240px;
+  }
+  #menu .text-menu:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: -100px;
+    background: rgba(0, 0, 0, 1);
+  }
+    #menu .text-menu dl {
+      position: relative;
+      z-index: 5;
+      padding: 10px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, .2);
+    pointer-events: none;
+    }
+    #menu .text-menu dl > * {
+      display: inline-block;
+      vertical-align: middle;
+      margin-bottom: 5px;
+    }
+    #menu .text-menu dt {
+      width: 260px;
+    }
+    #menu .text-menu dd {
+    }
+      #menu .text-menu dd span {
+        position: relative;
+        top: -5px;
+        font-size: 24px;
+        line-height: 1.1;
+      }
+      #menu .text-menu dd .key {
+        top: -10px;
+      }
   #menu .bubbling {
     position: absolute;
     bottom: 0;

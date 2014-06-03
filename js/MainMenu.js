@@ -1,5 +1,6 @@
 var MainMenu = (function() {
   function MainMenu() {
+    this.elContainer = null;
     this.el = null;
     this.elOptions = null;
     this.isVisible = false;
@@ -16,13 +17,14 @@ var MainMenu = (function() {
         this.addEventListener('hide', options.onHide);
       }
 
+      this.elContainer = options.elContainer;
+
       this.createHTML();
 
       this.addOptions(options.options);
 
-      if (options.elContainer) {
-        options.elContainer.appendChild(this.el);
-      }
+      this.elContainer.appendChild(this.el);
+      
       if (options.onChange) {
         this.addEventListener('change', options.onChange);
       }
@@ -160,6 +162,11 @@ var MainMenu = (function() {
           case 'click':
             el.addEventListener('click', data.onSelect || function(){console.warn('please implement callback for click option!')});
             break;
+          case 'text':
+            el.addEventListener('click', function onMenuTextClick() {
+              this.showText(data);
+            }.bind(this));
+            break;
           case 'toggle':
             el.addEventListener('click', this.onToggleOptionClick.bind(this));
 
@@ -188,6 +195,22 @@ var MainMenu = (function() {
       }
 
       this.elOptions.appendChild(el);
+    },
+
+    showText: function showText(data) {
+      var elText = document.createElement('div');
+      elText.className = 'text-menu text-' + data.id;
+      elText.innerHTML = data.value;
+
+      this.el.appendChild(elText);
+
+      // attach a click-anywhere-to-close event
+      // using onmouseup and not click because click would fire right away
+      window.addEventListener('mouseup', function onClick() {
+        window.removeEventListener('mouseup', onClick);
+
+        elText.parentNode.removeChild(elText);
+      });
     },
 
     createHTML: function createHTML() {

@@ -125,7 +125,7 @@
 
     SoundManager.init();
 
-    initMenu();
+    MenuHandler.init();
 
     Dialog.init({
       'elContainer': document.getElementById('dialogs')
@@ -200,178 +200,210 @@
     }
   }
 
-  function onKeyToggleMenu(e) {
-    var key = e.keyCode;
+  var MenuHandler = {
+    init: function init() {
+      this._tick = this.tick.bind(this);
+      this._onResize = this.onResize.bind(this);
 
-    if (key === 27) {
-      if (MainMenu.isVisible) {
-        if (currentLevelData) {
-          MainMenu.hide();
+      MainMenu.init({
+        'elContainer': document.body,
+        'onShow': this.onShow.bind(this),
+        'onHide': this.onHide.bind(this),
+        'options': [
+          {
+            'id': 'new',
+            'type': 'click',
+            'onSelect': this.options.onNew
+          },
+          {'type': 'separator'},
+          {
+            'id': 'sound',
+            'type': 'toggle',
+            'value': Player.get('settings-sound'),
+            'onChange': this.options.onSound
+          },
+          {
+            'id': 'volume',
+            'type': 'range',
+            'min': 0,
+            'max': 1,
+            'step': 0.01,
+            'value': Player.get('settings-volume'),
+            'onChange': this.options.onVolume
+          },
+          {
+            'id': 'controls',
+            'type': 'text',
+            'value': '<dl>' +
+                        '<dt>Move Left</dt>' +
+                        '<dd><span class="key">&#8592;</span></dd>' +
+                        '<dt>Move Right</dt>' +
+                        '<dd><span class="key">&#8594;</span></dd>' +
+                        '<dt>Jump</dt>' +
+                        '<dd><span class="key">&#8593;</span><span> or </span><span class="key">SPACEBAR</span></dd>' +
+                        '<dt>Rotate Gravity Left</dt>' +
+                        '<dd><span class="key">A</span></dd>' +
+                        '<dt>Rotate Gravity Right</dt>' +
+                        '<dd><span class="key">D</span></dd>' +
+                        '<dt>Main Menu</dt>' +
+                        '<dd><span class="key">Esc</span></dd>' +
+                      '</dl>'
+          },
+          {
+            'id': 'fullscreen',
+            'type': 'toggle',
+            'value': 'off',
+            'onChange': this.options.onFullscreen
+          }
+        ],
+        // whenever changing any setting - update the user's storage
+        // make settings persistent
+        'onChange': function onMenuOptionChange(id, value) {
+          Player.set('settings-' + id, value);
         }
-      } else {
-        MainMenu.show();
-      }
-    } else if (key === 13) {
-      if (MainMenu.isVisible) {
-        MainMenu.clickOn('new');
-      }
-    }
-  }
+      });
 
-  function initMenu() {
-    MainMenu.init({
-      'elContainer': document.body,
-      'onShow': onMenuShown,
-      'onHide': onMenuHidden,
-      'options': [
-        {
-          'id': 'new',
-          'type': 'click',
-          'onSelect': function onMenuContinueClick() {
+      // ESC key to toggle menu
+      window.addEventListener('keydown', this.onKeyPress);
+    },
+
+    onKeyPress: function onKeyPress(e) {
+      var key = e.keyCode;
+
+      if (key === 27) {
+        if (MainMenu.isVisible) {
+          if (currentLevelData) {
             MainMenu.hide();
-
-            if (currentLevelData) {
-              game.start();
-            } else {
-              window.setTimeout(function() {
-                loadLevel((window.location.href.match(/LEVEL=(\d+)/) || [])[1] || Player.get('maxLevel'));
-              }, 200);
-            }
           }
-        },
-        {'type': 'separator'},
-        {
-          'id': 'sound',
-          'type': 'toggle',
-          'value': Player.get('settings-sound'),
-          'onChange': function onSoundSettingChange(value) {
-            if (value === 'on') {
-              SoundManager.enable();
-            } else {
-              SoundManager.disable();
-            }
-          }
-        },
-        {
-          'id': 'volume',
-          'type': 'range',
-          'min': 0,
-          'max': 1,
-          'step': 0.01,
-          'value': Player.get('settings-volume'),
-          'onChange': function onVolumeSettingChange(value) {
-            SoundManager.setGlobalVolume(value);
-          }
-        },
-        {
-          'id': 'fullscreen',
-          'type': 'toggle',
-          'value': 'off',
-          'onChange': function onFullscreenSettingChange(value) {
-            try {
-              if (value === 'on') {
-                (document.body.webkitRequestFullScreen ||
-                 document.body.mozRequestFullScreen ||
-                 document.body.requestFullScreen
-                  ).call(document.body, document.body.ALLOW_KEYBOARD_INPUT);
-              } else {
-                (document.webkitCancelFullScreen ||
-                 document.mozCancelFullScreen ||
-                 document.cancelFullScreen).call(document);
-              }
-            } catch(ex) {
-              console.warn('fullscreen error', ex);
-            }
-          }
+        } else {
+          MainMenu.show();
         }
-      ],
-      // whenever changing any setting - update the user's storage
-      // make settings persistent
-      'onChange': function onMenuOptionChange(id, value) {
-        Player.set('settings-' + id, value);
+      } else if (key === 13) {
+        if (MainMenu.isVisible) {
+          MainMenu.clickOn('new');
+        }
       }
-    });
+    },
 
-    var elBubbling = document.createElement('div');
-    elBubbling.className = 'bubbling';
-    elBubbling.innerHTML = '<canvas></canvas>';
-    MainMenu.el.appendChild(elBubbling);
+    options: {
+      onNew: function onNew() {
+        MainMenu.hide();
 
-    // ESC key to toggle menu
-    window.addEventListener('keydown', onKeyToggleMenu);
-  }
-
-  function onMenuShown() {
-    game.stop();
-
-    var playerLevel = Math.min(Player.get('maxLevel') || 1, NUMBER_OF_LEVELS),
-        isNewGame = playerLevel === 1 && !currentLevelData,
-        textKey = 'menu-option-' + (isNewGame? 'new' : 'continue');
-
-    MainMenu.setOptionText('new', utils.l10n.get(textKey, {'level': playerLevel}));
-
-    var elBubbling = MainMenu.el.querySelector('.bubbling');
-    if (!elBubbling) {
-      return;
-    }
-    var elCanvas = elBubbling.querySelector('canvas');
-    if (!elCanvas) {
-      return;
-    }
-
-    MainMenu.drawOn = {
-      context: elCanvas.getContext('2d'),
-      lastUpdate: Date.now(),
-
-      background: SPRITE_PRESETS.death.background,
-      topLeft: {
-        x: 0,
-        y: 0
+        if (currentLevelData) {
+          game.start();
+        } else {
+          window.setTimeout(function() {
+            loadLevel((window.location.href.match(/LEVEL=(\d+)/) || [])[1] || Player.get('maxLevel'));
+          }, 200);
+        }
       },
-      update: Bubbles.update,
-      draw: Bubbles.draw
-    };
 
-    onResizeWhileMenuVisible();
+      onSound: function onSound(value) {
+        if (value === 'on') {
+          SoundManager.enable();
+        } else {
+          SoundManager.disable();
+        }
+      },
 
-    window.addEventListener('resize', onResizeWhileMenuVisible);
+      onVolume: function onVolume(value) {
+        SoundManager.setGlobalVolume(value);
+      },
 
-    window.requestAnimationFrame(menuLoop);
-  }
+      onControls: function onControls() {
 
-  function onMenuHidden() {
-    window.removeEventListener('resize', onResizeWhileMenuVisible);
+      },
 
-    if (currentLevelData) {
-      game.start();
+      onFullscreen: function onFullscreen(value) {
+        try {
+          if (value === 'on') {
+            (document.body.webkitRequestFullScreen ||
+             document.body.mozRequestFullScreen ||
+             document.body.requestFullScreen
+              ).call(document.body, document.body.ALLOW_KEYBOARD_INPUT);
+          } else {
+            (document.webkitCancelFullScreen ||
+             document.mozCancelFullScreen ||
+             document.cancelFullScreen).call(document);
+          }
+        } catch(ex) {
+          console.warn('fullscreen error', ex);
+        }
+      }
+    },
+
+    tick: function tick() {
+      if (!MainMenu.isVisible) {
+        return;
+      }
+
+      var now = Date.now(),
+          dt = (now - this.lastUpdate) / 1000;
+
+      this.sprite.update(dt);
+      this.sprite.draw(this.context);
+
+      this.lastUpdate = now;
+      this.raf = window.requestAnimationFrame(this._tick);
+    },
+
+    onShow: function onShow() {
+      game.stop();
+
+      var playerLevel = Math.min(Player.get('maxLevel') || 1, NUMBER_OF_LEVELS),
+          isNewGame = playerLevel === 1 && !currentLevelData,
+          textKey = 'menu-option-' + (isNewGame? 'new' : 'continue');
+
+      MainMenu.setOptionText('new', utils.l10n.get(textKey, {'level': playerLevel}));
+
+      var elCanvas = MainMenu.el.querySelector('.bubbling canvas');
+      if (!elCanvas) {
+        var elBubbling = document.createElement('div');
+        elBubbling.className = 'bubbling';
+        elBubbling.innerHTML = '<canvas></canvas>';
+        MainMenu.el.appendChild(elBubbling);
+
+        elCanvas = elBubbling.querySelector('canvas');
+      }
+
+      this.context = elCanvas.getContext('2d');
+      this.lastUpdate = Date.now();
+
+      this.sprite = {
+        background: SPRITE_PRESETS.death.background,
+        topLeft: {
+          x: 0,
+          y: 0
+        },
+        update: Bubbles.update,
+        draw: Bubbles.draw
+      };
+
+      // handle resize to change the sprite width
+      this.onResize();
+      window.addEventListener('resize', this._onResize);
+
+      // start the loop (for the bubbles animation)
+      window.requestAnimationFrame(this._tick);
+    },
+
+    onHide: function onHide() {
+      window.removeEventListener('resize', this._onResize);
+
+      if (currentLevelData) {
+        game.start();
+      }
+    },
+
+    onResize: function onResize() {
+      var elCanvas = this.context.canvas,
+          elBubbling = elCanvas.parentNode;
+
+      elCanvas.width = this.sprite.width = elBubbling.offsetWidth;
+      elCanvas.height = this.sprite.height = elBubbling.offsetHeight;
+      this.sprite.topLeft.y = this.sprite.height - 10;
     }
-  }
-
-  function onResizeWhileMenuVisible() {
-    var elCanvas = (MainMenu.drawOn || {}).context.canvas,
-        elBubbling = elCanvas.parentNode;
-
-    elCanvas.width = MainMenu.drawOn.width = elBubbling.offsetWidth;
-    elCanvas.height = MainMenu.drawOn.height = elBubbling.offsetHeight;
-    MainMenu.drawOn.topLeft.y = MainMenu.drawOn.height - 10;
-
-  }
-
-  function menuLoop() {
-    if (!MainMenu.isVisible) {
-      return;
-    }
-
-    var now = Date.now(),
-        dt = (now - MainMenu.drawOn.lastUpdate) / 1000,
-        pseudoSprite = MainMenu.drawOn;
-
-    pseudoSprite.update(dt);
-    pseudoSprite.draw(pseudoSprite.context);
-
-    MainMenu.drawOn.lastUpdate = now;
-    raf = window.requestAnimationFrame(menuLoop);
-  }
+  };
 
   // create the sprite layers - ordered by z-index
   function createLayers() {
@@ -1202,6 +1234,8 @@
         timeToGenerateMega: 0,
         bubbles: []
       });
+
+      //console.log(utils.random(Bubbles.GENERATION_MIN, Bubbles.GENERATION_MAX))
 
       var bubbles = this.bubblesConfig.bubbles;
 
