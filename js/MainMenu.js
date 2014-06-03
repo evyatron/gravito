@@ -211,6 +211,8 @@ var MainMenu = (function() {
 
         elText.parentNode.removeChild(elText);
       });
+
+      data.onSelect && data.onSelect();
     },
 
     createHTML: function createHTML() {

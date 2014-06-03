@@ -367,6 +367,7 @@ a {
     font-size: 2.5em;
     font-weight: 700;
     letter-spacing: 0.1em;
+    z-index: 150;
   }
     /* avatar */
     #menu h1:before {
@@ -387,6 +388,7 @@ a {
     letter-spacing: 0.028em;
     text-transform: lowercase;
     opacity: .3;
+    z-index: 150;
   }
     #menu h2:before {
       content: '';
@@ -474,6 +476,7 @@ a {
     width: 480px;
     font-size: .9em;
     margin-left: -240px;
+    z-index: 50;
   }
   #menu .text-menu:before {
     content: '';

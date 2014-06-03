@@ -60,6 +60,10 @@ Game = (function() {
       gravityY = (gravityY / Math.abs(gravityY)) || 0;
 
       window.GRAVITY_DIRECTION = new Vector(gravityX, gravityY);
+      window.GRAVITY_DIRECTION_NAME = gravityX > 0? 'right' :
+                                      gravityX < 0? 'left' :
+                                      gravityY < 0? 'top' :
+                                      'bottom';
     },
 
     addLayer: function addLayer(layer) {

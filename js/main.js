@@ -10,6 +10,7 @@
       currentLevelData,
       CurrentLevel,
       seenLevelIntro = false,
+      firstThud = true,
 
       DEFAULT_WIDTH = 0,
       DEFAULT_HEIGHT = 0,
@@ -151,6 +152,8 @@
       window.addEventListener('keydown', onKeyIntroTutorial);
     }
 
+    // all of the death tutorials
+    // set to true only once all death types have happened and their tutotrials shown
     if (!Player.get('didDeathTutorials')) {
       window.addEventListener('player-die', onPlayerDie);
     }
@@ -158,10 +161,22 @@
     // when a level is ready - start the game loop
     window.addEventListener('levelReady', onLevelReady);
 
+    // load all sounds
     SoundManager.load({
       'water': {
         'src': 'sounds/water',
         'loop': true
+      },
+      'menu': {
+        'src': 'sounds/menu',
+        'volume': 0.6
+      },
+      'score': {
+        'src': 'sounds/score'
+      },
+      'player_land': {
+        'src': 'sounds/player_land.wav',
+        'volume': 0.6
       }
     });
 
@@ -247,7 +262,8 @@
                         '<dd><span class="key">D</span></dd>' +
                         '<dt>Main Menu</dt>' +
                         '<dd><span class="key">Esc</span></dd>' +
-                      '</dl>'
+                      '</dl>',
+            'onSelect': this.options.onControls
           },
           {
             'id': 'fullscreen',
@@ -259,6 +275,7 @@
         // whenever changing any setting - update the user's storage
         // make settings persistent
         'onChange': function onMenuOptionChange(id, value) {
+          SoundManager.play('menu');
           Player.set('settings-' + id, value);
         }
       });
@@ -287,6 +304,7 @@
 
     options: {
       onNew: function onNew() {
+        SoundManager.play('menu');
         MainMenu.hide();
 
         if (currentLevelData) {
@@ -311,7 +329,7 @@
       },
 
       onControls: function onControls() {
-
+        SoundManager.play('menu');
       },
 
       onFullscreen: function onFullscreen(value) {
@@ -451,6 +469,8 @@
   function loadNextLevel() {
     currentLevel++;
 
+    game.stop();
+
     if (currentLevel > NUMBER_OF_LEVELS) {
       hideLevel();
       finishGame(loadLevel);
@@ -463,8 +483,6 @@
   function loadLevel(level) {
     !level && (level = currentLevel);
     level = level * 1;
-
-    game.stop();
 
     hideLevel();
 
@@ -488,7 +506,14 @@
     document.body.classList.remove('level-ready');
 
     seenLevelIntro = false;
+    firstThud = true;
     clearLevel();
+  }
+
+  function clearLevel() {
+    layerBackground.clear();
+    layerObjects.clear();
+    layerPlayer.clear();
   }
 
   function finishGame(callback) {
@@ -499,12 +524,6 @@
         'onEnd': callback
       });
     }, TIME_BEFORE_FINAL_TEXT);
-  }
-
-  function clearLevel() {
-    layerBackground.clear();
-    layerObjects.clear();
-    layerPlayer.clear();
   }
 
   // after loading a level, create everything - platforms, sprites,
@@ -599,26 +618,34 @@
 
 
     /* --------------- PLATFORMS --------------- */
-    for (var i = 0, spriteData; spriteData = currentLevelData.platforms[i++];) {
-      createPlatform(spriteData);
+    if (currentLevelData.platforms) {
+      for (var i = 0, spriteData; spriteData = currentLevelData.platforms[i++];) {
+        createPlatform(spriteData);
+      }
     }
 
     /* --------------- MOVABLES --------------- */
-    for (var i = 0, spriteData; spriteData = currentLevelData.movables[i++];) {
-      createMovable(spriteData);
+    if (currentLevelData.movables) {
+      for (var i = 0, spriteData; spriteData = currentLevelData.movables[i++];) {
+        createMovable(spriteData);
+      }
     }
 
     /* --------------- COLLECTIBLES --------------- */
-    for (var i = 0, spriteData; spriteData = currentLevelData.collectibles[i++];) {
-      createCollectible(spriteData);
+    if (currentLevelData.collectibles) {
+      for (var i = 0, spriteData; spriteData = currentLevelData.collectibles[i++];) {
+        createCollectible(spriteData);
+      }
     }
 
     /* --------------- SCORES --------------- */
     // automatically assign ids, to keep track for scoring
-    for (var i = 0, spriteData; spriteData = currentLevelData.scores[i++];) {
-      spriteData.id = 'score_' + i;
-      spriteData.type = 'score';
-      createCollectible(spriteData);
+    if (currentLevelData.scores) {
+      for (var i = 0, spriteData; spriteData = currentLevelData.scores[i++];) {
+        spriteData.id = 'score_' + i;
+        spriteData.type = 'score';
+        createCollectible(spriteData);
+      }
     }
 
 
@@ -689,6 +716,15 @@
   // checks for general things - death, win, points, etc.
   function onPlayerCollisionStart(sprite, direction) {
     var type = sprite.type;
+
+    // hitting a platform in the gravity direction ( = resting), play a "thud"
+    if (type === 'platform' && direction === window.GRAVITY_DIRECTION_NAME) {
+      if (firstThud) {
+        firstThud = false;
+      } else {
+        SoundManager.play('player_land');
+      }
+    }
 
     if (onPlayerCollisionWithStart[type]) {
       onPlayerCollisionWithStart[type].apply(this, arguments)
@@ -775,6 +811,11 @@
       for (var i = 0, score; score = levelScores[i++];) {
         playerLevelScore[score.id] = playerLevelScore[score.id] || false;
       }
+
+      // play the collecting sound - before checking if its been collected before
+      // we want sound indication if the point doesn't count towards the player's
+      // total score
+      SoundManager.play('score');
 
       // if the player already collected this point - nothing to do
       if (playerLevelScore[sprite.id]) {

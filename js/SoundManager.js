@@ -62,13 +62,17 @@
         if (typeof soundConfig === 'string') {
           soundConfig = {
             "src": soundConfig,
-            "volume": 1,
             "loop": false,
             "onlyOne": false
           };
         }
         
-        soundConfig.src += '.' + EXTENSION_TO_PLAY;
+        if (soundConfig.src.indexOf('.') === -1) {
+          soundConfig.src += '.' + EXTENSION_TO_PLAY;
+        }
+        if (soundConfig.volume === undefined) {
+          soundConfig.volume = 1;
+        }
         
         var sound = new Audio();
         sound.preload = 'auto';
@@ -94,7 +98,7 @@
     // TODO: directional sound using WebAudioAPI!
     this.play = function play(id, onPlayFinished) {
       var activeSound = activeSounds[id];
-      
+
       if (activeSound && activeSound.loop && self.active) {
         activeSound.play();
         onPlayFinished && onPlayFinished();
@@ -107,7 +111,7 @@
       if (!soundConfig) {
         return false;
       }
-      
+
       if (self.active) {
         sound.preload = true;
         sound.autoplay = true;
