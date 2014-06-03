@@ -152,7 +152,7 @@ var MainMenu = (function() {
         
       } else {
         var id = data.id,
-          html = '<label>' + (data.text || utils.l10n.get('menu-option-' + id)) + '</label>'
+          html = '<div></div><label>' + (data.text || utils.l10n.get('menu-option-' + id)) + '</label>'
 
         el.dataset.id = id;
         el.dataset.value = (data.value || '');

@@ -415,12 +415,31 @@ a {
       padding: 10px 20px;
       cursor: pointer;
       margin: 10px 0;
-      border-radius: 6px;
-      background: rgba(255, 255, 255, .2);
+      border-radius: 16px 0 0 0;
+      background: rgba(255, 255, 255, .05);
+      -webkit-transition: all 60ms ease-in-out;
+      transition: all 60ms ease-in-out;
     }
     #menu .options li:hover {
-      background: rgba(255, 255, 255, .25);
+      background: rgba(255, 255, 255, .1);
     }
+      #menu .options li div {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        pointer-events: none;
+        border-radius: inherit;
+        border-bottom: 2px solid rgba(255, 0, 0, .5);
+        -webkit-transform-origin: 0% 100%;
+        -webkit-transform: scale(0, 1);
+        -webkit-transition: all 400ms ease-out;
+        transition: all 400ms ease-out;
+      }
+      #menu .options li:hover div {
+        -webkit-transform: scale(1, 1);
+      }
       #menu .options li label {
         pointer-events: none;
       }
