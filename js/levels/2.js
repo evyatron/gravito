@@ -5,7 +5,6 @@
         var game = this;
 
         // remove the device from the game
-        game.layerObjects.removeSprite('rotation-device-wrapper');
         game.layerObjects.removeSprite(sprite);
 
         // stop player

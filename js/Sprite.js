@@ -27,6 +27,8 @@ Sprite = (function() {
     this.drag = new Vector(0.5, 0.5);
 
     this.background = '';
+    this.borderColor = '';
+    this.borderSize = 0;
 
     this.hasCollisionCallbacks = false;
     this.previousCollisions = {};
@@ -260,6 +262,11 @@ Sprite = (function() {
 
       context.fillStyle = this.background;
       context.fillRect(Math.round(pos.x), Math.round(pos.y), this.width, this.height);
+      if (this.borderColor) {
+        context.strokeStyle = this.borderColor;
+        context.lineWidth = this.borderSize;
+        context.strokeRect(Math.round(pos.x), Math.round(pos.y), this.width, this.height);
+      }
     },
 
     triggerCollisionCallbacks: function triggerCollisionCallbacks() {

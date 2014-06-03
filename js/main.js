@@ -1254,6 +1254,8 @@
       context.fillStyle = this.background;
       context.fillRect(Math.round(pos.x), Math.round(pos.y), this.width, this.height);
 
+      context.lineWidth = 1;
+
       var bubbles = (this.bubblesConfig || {}).bubbles;
       for (var i = 0, bubble; bubble = bubbles[i++];) {
         var size = bubble.size;

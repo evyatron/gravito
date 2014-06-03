@@ -68,22 +68,17 @@
     }
   ],
   "movables": [],
+  "scores": [],
   "collectibles": [
     {
-      "id": "rotation-device-wrapper",
+      "id": "rotation-device",
       "x": 20,
       "y": 180,
-      "width": 20,
-      "height": 20,
-      "background": "rgba(0, 138, 0, 1)"
-    },
-    {
-      "id": "rotation-device",
-      "x": 25,
-      "y": 185,
-      "width": 10,
-      "height": 10,
+      "width": 12,
+      "height": 12,
       "background": "rgba(0, 178, 0, 1)",
+      "borderColor": "rgba(0, 138, 0, 1)",
+      "borderSize": 4,
       "data": {
         "collisionCallback": "onCollectRotate1"
       }
