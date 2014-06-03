@@ -511,9 +511,8 @@ a {
       position: relative;
       z-index: 5;
       padding: 10px 20px;
-      border-radius: 6px;
-      background: rgba(255, 255, 255, .2);
-    pointer-events: none;
+      background: rgba(255, 255, 255, .1);
+      pointer-events: none;
     }
     #menu .text-menu dl > * {
       display: inline-block;
