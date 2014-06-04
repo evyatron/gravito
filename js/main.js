@@ -144,6 +144,7 @@
     });
 
     WRAPPER.game = game;
+    window.game = game;
 
     // create all sprite layers - background, player, etc.
     createLayers();
@@ -566,6 +567,7 @@
 
     /* --------------- FRAME & FINISH POINT--------------- */
     var finishData = {
+      'id': 'finish',
       'x': null,
       'y': null,
       'width': 0,
@@ -1022,7 +1024,9 @@
   }
 
   function createFinishArea(finishData, frameWidth) {
-    var finishLight = new Sprite();
+    var finishLight = new Sprite({
+      'id': 'finish-light'
+    });
     finishLight.draw = function drawMethod(context) {
       context.beginPath();
       context.moveTo(finishData.x + frameWidth.left, finishData.y + finishData.height + frameWidth.top);

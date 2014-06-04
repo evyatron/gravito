@@ -589,6 +589,10 @@ a {
     }
 
 
+.editor #canvases canvas:last-child {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 1);
+}
+
 #controls #editor {
   position: absolute;
   top: 0;
@@ -600,23 +604,41 @@ a {
   z-index: 500;
   background: rgba(255, 255, 255, 1);
 }
-  #controls #editor .size {
+  #editor > div {
+    float: left;
     font-family: monospace;
     padding: 5px;
   }
-    #controls #editor .size label {
+    #editor > div label {
       display: block;
       margin-bottom: 5px;
     }
-      #controls #editor .size label b {
+      #editor > div label b {
         display: inline-block;
         vertical-align: middle;
-        width: 60px;
       }
-      #controls #editor .size label input {
+      #editor > div label input {
         vertical-align: middle;
       }
 
+      #editor .size label b {
+        width: 60px;
+      }
+      #editor .bg label b {
+        width: 90px;
+      }
+  #editor .game {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    padding: 0;
+    text-align: center;
+  }
+    #editor .game button {
+      padding: 4px 8px;
+      margin: 0 5px;
+    }
 #log {
   position: absolute;
   top: 0;

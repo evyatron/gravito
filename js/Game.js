@@ -110,6 +110,19 @@ Game = (function() {
       }
     },
 
+    getSpriteById: function getSpriteById(id) {
+      var sprite;
+
+      for (var i = 0, layer; layer = this.layers[i++];) {
+        sprite = layer.getSpriteById(id);
+        if (sprite) {
+          break;
+        }
+      }
+
+      return sprite;
+    },
+
     stop: function stop() {
       if (!this.running) {
         return false;

@@ -2,11 +2,21 @@ var LevelEditor = (function() {
   var game,
       elUI,
       el,
+
       levelData = {
         'frame': 10,
+        'background': '',
         'player': {
-        }
+        },
+        'finish': {
+          'x': 180,
+          'y': 130,
+          'width': 10,
+          'height': 50
+        },
       },
+
+      sprites = [],
 
       spriteStartX = 0,
       spriteStartY = 0,
@@ -25,6 +35,9 @@ var LevelEditor = (function() {
 
     window.addEventListener('mousedown', onMouseDown);
     el.querySelector('.size').addEventListener('keyup', onKeyPress);
+    el.querySelector('.width').addEventListener('blur', updateLevelProperties);
+    el.querySelector('.height').addEventListener('blur', updateLevelProperties);
+    el.querySelector('.background').addEventListener('change', updateLevelProperties);
     el.querySelector('.play').addEventListener('click', play);
     el.querySelector('.stop').addEventListener('click', stop);
 
@@ -32,6 +45,9 @@ var LevelEditor = (function() {
       window.removeEventListener('gameStart', onFirstGameStart);
       cancelGravity();
     });
+    window.addEventListener('levelReady', onLevelReady);
+
+    document.body.classList.add('editor');
   }
 
   function begin() {
@@ -41,6 +57,14 @@ var LevelEditor = (function() {
   function initLevel() {
     game.hideLevel();
     game.initLevel(levelData);
+  }
+
+  function onLevelReady() {
+    populateSprites();
+  }
+
+  function populateSprites() {
+    sprites = [];
   }
 
   function cancelGravity() {
@@ -88,11 +112,17 @@ var LevelEditor = (function() {
     running = false;
   }
 
-  function udpateLevelData() {
+  function updateLevelData() {
     levelData.player = {
       'x': Player.sprite.topLeft.x,
       'y': Player.sprite.topLeft.y,
     };
+
+    var finishSprite = game.game.getSpriteById('finish');
+    levelData.finish.x = finishSprite.topLeft.x - levelData.frame;
+    levelData.finish.y = finishSprite.topLeft.y - levelData.frame;
+
+    initLevel();
 
     console.info('New game data:', levelData);
   }
@@ -102,25 +132,39 @@ var LevelEditor = (function() {
     if (x > playerSprite.topLeft.x && x < playerSprite.bottomRight.x &&
         y > playerSprite.topLeft.y && y < playerSprite.bottomRight.y) {
       pickup(playerSprite);
+      return;
     }
+
+    var finishSprite = levelData.finish;
+    if (x - levelData.frame > finishSprite.x && x - levelData.frame < finishSprite.x + finishSprite.width &&
+        y - levelData.frame > finishSprite.y && y - levelData.frame < finishSprite.y + finishSprite.height) {
+      pickup(game.game.getSpriteById('finish'));
+      return;
+    }
+  }
+
+  function updateLevelProperties() {
+    levelData.size = {
+      'width': (el.querySelector('.width').value || CONFIG.WIDTH) * 1,
+      'height': (el.querySelector('.height').value || CONFIG.HEIGHT) * 1
+    };
+
+    if (levelData.player.x > levelData.size.width) {
+      levelData.player.x = levelData.size.width - Player.sprite.width;
+    }
+    if (levelData.player.y > levelData.size.height) {
+      levelData.player.y
+      levelData.player.y = levelData.size.height - Player.sprite.height - levelData.frameWidth.bottom;
+    }
+
+    levelData.background = el.querySelector('.background').value || CONFIG.DEFAULT_BACKGROUND;
+
+    initLevel();
   }
 
   function onKeyPress(e) {
     if (e.keyCode === 13) {
-      levelData.size = {
-        'width': (el.querySelector('.width').value || CONFIG.WIDTH) * 1,
-        'height': (el.querySelector('.height').value || CONFIG.HEIGHT) * 1
-      };
-
-      if (levelData.player.x > levelData.size.width) {
-        levelData.player.x = levelData.size.width - Player.sprite.width;
-      }
-      if (levelData.player.y > levelData.size.height) {
-        levelData.player.y
-        levelData.player.y = levelData.size.height - Player.sprite.height - levelData.frameWidth.bottom;
-      }
-
-      initLevel();
+      updateLevelProperties();
     }
   }
 
@@ -148,7 +192,7 @@ var LevelEditor = (function() {
   }
 
   function onMouseUp(e) {
-    udpateLevelData();
+    updateLevelData();
 
     holding = null;
     window.removeEventListener('mousemove', onMouseMove);
@@ -166,6 +210,12 @@ var LevelEditor = (function() {
                       '<label>' +
                         '<b>Height:</b>' +
                         '<input type="number" class="height" value="' + CONFIG.HEIGHT + '" />' +
+                      '</label>' +
+                   '</div>' +
+                   '<div class="bg">' +
+                      '<label>' +
+                        '<b>Background:</b>' +
+                        '<input type="color" class="background" value="#ffffff" />' +
                       '</label>' +
                    '</div>' +
                    '<div class="game">' +

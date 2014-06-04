@@ -52,6 +52,14 @@ Layer = (function() {
       this.sprites = [];
     },
 
+    getSpriteById: function getSpriteById(id) {
+      for (var i = 0, sprite; sprite = this.sprites[i++];) {
+        if (sprite.id === id) {
+          return sprite;
+        }
+      }
+    },
+
     update: function update(dt) {
       var sprites = this.sprites,
           updated = this.updated;
