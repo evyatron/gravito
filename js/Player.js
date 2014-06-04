@@ -77,7 +77,7 @@ window.Player = (function() {
       }.bind(this));
     },
 
-    createSprite: function createSprite(layer, options) {
+    createSprite: function createSprite(options) {
       !options && (options = {});
 
       var data = {};
@@ -89,7 +89,7 @@ window.Player = (function() {
         this.sprite.onCollision(this.onCollisionStart, this.onCollisionEnd);
       }
 
-      layer.addSprite(this.sprite);
+      return this.sprite;
     },
 
     loadSettings: function loadSettings(callback) {

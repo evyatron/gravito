@@ -102,7 +102,7 @@ a {
   background: rgba(255, 255, 255, .1);
   border-radius: 6px 6px 0 0;
 }
-  #controls div {
+  #controls > div {
     position: absolute;
     top: 0;
     opacity: 0;
@@ -588,6 +588,34 @@ a {
       left: 0;
     }
 
+
+#controls #editor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 1;
+  pointer-events: inherit;
+  z-index: 500;
+  background: rgba(255, 255, 255, 1);
+}
+  #controls #editor .size {
+    font-family: monospace;
+    padding: 5px;
+  }
+    #controls #editor .size label {
+      display: block;
+      margin-bottom: 5px;
+    }
+      #controls #editor .size label b {
+        display: inline-block;
+        vertical-align: middle;
+        width: 60px;
+      }
+      #controls #editor .size label input {
+        vertical-align: middle;
+      }
 
 #log {
   position: absolute;

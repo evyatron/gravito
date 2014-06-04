@@ -35,6 +35,8 @@
 
       SPRITE_PRESETS = {},
 
+      URL = window.location.href,
+
       DEATHS = {
         POISON: 'poison',
         OUT_OF_BOUNDS: 'bounds'
@@ -57,6 +59,8 @@
 
   // load all game config into local variables
   function populateFromConfig(config) {
+    window.CONFIG = config;
+
     document.body.style.background = config.BACKGROUND;
     NUMBER_OF_LEVELS = config.NUMBER_OF_LEVELS;
 
@@ -180,11 +184,26 @@
       }
     });
 
-    // load the first level
-    if (/SKIP_MENU/.test(window.location.href)) {
-      loadLevel((window.location.href.match(/LEVEL=(\d+)/) || [])[1] || Player.get('maxLevel'));
+    if (/LEVEL_EDITOR/.test(URL)) {
+      var elScript = document.createElement('script');
+      elScript.src = 'js/LevelEditor.js';
+      elScript.type = 'text/javascript';
+      elScript.onload = function() {
+        LevelEditor.init({
+          'game': WRAPPER,
+          'elUI': document.getElementById('controls')
+        });
+
+        LevelEditor.begin();
+      };
+      document.body.appendChild(elScript);
     } else {
-      MainMenu.show();
+      // load the first level
+      if (/SKIP_MENU/.test(URL)) {
+        loadLevel((URL.match(/LEVEL=(\d+)/) || [])[1] || Player.get('maxLevel'));
+      } else {
+        MainMenu.show();
+      }
     }
   }
 
@@ -311,7 +330,7 @@
           game.start();
         } else {
           window.setTimeout(function() {
-            loadLevel((window.location.href.match(/LEVEL=(\d+)/) || [])[1] || Player.get('maxLevel'));
+            loadLevel((URL.match(/LEVEL=(\d+)/) || [])[1] || Player.get('maxLevel'));
           }, 200);
         }
       },
@@ -493,8 +512,7 @@
     request.open('GET', url, true);
     request.responseType = 'json';
     request.onload = function onLevelDataLoad() {
-      currentLevelData = request.response;
-      initLevel();
+      initLevel(request.response);
     };
 
     request.send();
@@ -527,10 +545,12 @@
 
   // after loading a level, create everything - platforms, sprites,
   // position player, etc.
-  function initLevel() {
-    if (!currentLevelData) {
+  function initLevel(levelData) {
+    if (!levelData) {
       return;
     }
+
+    currentLevelData = levelData;
 
     var background = currentLevelData.background || DEFAULT_BACKGROUND;
     layerBackground.context.canvas.style.background = background;
@@ -567,16 +587,15 @@
 
     currentLevelData.frameWidth = frameWidth;
 
-
     /* --------------- PLAYER POSITION --------------- */
     var playerStartPosition = currentLevelData.start || {};
     // x = 0
     if (!playerStartPosition.hasOwnProperty('x')) {
-      playerStartPosition.x = frameWidth;
+      playerStartPosition.x = frameWidth.left;
     }
     // y = on top of the bottom frame
     if (!playerStartPosition.hasOwnProperty('y')) {
-      playerStartPosition.y = game.height - frameWidth.bottom - Player.sprite.height;
+      playerStartPosition.y = game.height - frameWidth.bottom - ((Player.sprite || currentLevelData.player || {}).height || Player.HEIGHT);
     }
     if (/%/.test(playerStartPosition.x)) {
       var percent = ('' + playerStartPosition.x).match(/(\d+)%/)[1];
@@ -602,7 +621,8 @@
       }
     }
 
-    Player.createSprite(layerPlayer, playerCreationData);
+    Player.createSprite(playerCreationData);
+    layerPlayer.addSprite(Player.sprite);
     Player.enableControl();
 
 
@@ -649,7 +669,7 @@
 
 
     /* --------------- SHOW LEVEL TUTORIAL --------------- */
-    if (!/SKIP_LEVEL_DIALOGS/.test(window.location.href)) {
+    if (!/SKIP_LEVEL_DIALOGS/.test(URL)) {
       var levelTextId = (currentLevel > NUMBER_OF_LEVELS)? 'final' : currentLevel,
           levelText = utils.l10n.get('level-' + levelTextId);
 
@@ -687,7 +707,7 @@
   // restart current level - return everything to its original place
   function restartLevel(deathCause) {
     clearLevel();
-    initLevel();
+    initLevel(currentLevelData);
 
     window.dispatchEvent(new CustomEvent('player-die', {
       'detail': {
@@ -1439,6 +1459,7 @@
   var WRAPPER = {
     loadLevel: loadLevel,
     initLevel: initLevel,
+    hideLevel: hideLevel,
     player: Player,
     createPlatform: createPlatform,
     createCollectible: createCollectible,

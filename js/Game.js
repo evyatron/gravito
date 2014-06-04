@@ -63,7 +63,8 @@ Game = (function() {
       window.GRAVITY_DIRECTION_NAME = gravityX > 0? 'right' :
                                       gravityX < 0? 'left' :
                                       gravityY < 0? 'top' :
-                                      'bottom';
+                                      gravityY > 0? 'bottom' :
+                                      '';
     },
 
     addLayer: function addLayer(layer) {
