@@ -181,7 +181,7 @@
       },
       'player_land': {
         'src': 'sounds/player_land.wav',
-        'volume': 0.6
+        'volume': 0.4
       }
     });
 
