@@ -88,7 +88,6 @@ var LevelEditor = (function() {
       window.removeEventListener('gameStart', onFirstGameStart);
       cancelGravity();
     });
-    window.addEventListener('levelReady', onLevelReady);
 
     document.body.classList.add('editor');
   }
@@ -100,14 +99,6 @@ var LevelEditor = (function() {
   function initLevel() {
     game.hideLevel();
     game.initLevel(levelData);
-  }
-
-  function onLevelReady() {
-    populateSprites();
-  }
-
-  function populateSprites() {
-    sprites = [];
   }
 
   function cancelGravity() {
@@ -174,8 +165,7 @@ var LevelEditor = (function() {
 
     // translate the sprites back from the Sprite game objects
     // to plain data in the level config
-    var sprites = game.game.layers[2].sprites
-                  .concat(game.game.layers[0].sprites),
+    var sprites = game.game.layers[2].sprites.concat(game.game.layers[0].sprites),
 
                   platforms = [],
                   movables = [],
@@ -257,6 +247,10 @@ var LevelEditor = (function() {
       'width': (el.querySelector('.width').value || CONFIG.WIDTH) * 1,
       'height': (el.querySelector('.height').value || CONFIG.HEIGHT) * 1
     };
+    levelData.player = {
+      'x': Player.sprite.topLeft.x,
+      'y': Player.sprite.topLeft.y,
+    };
 
     boundXYToLevel(Player.sprite, levelData.player);
     boundXYToLevel(game.game.getSpriteById('finish'), levelData.finish);
@@ -313,6 +307,18 @@ var LevelEditor = (function() {
       '<li><label>height:</label>' + holding.height + '</li>';
   }
 
+  function deleteHeldSprite() {
+    if (!holding) {
+      return;
+    }
+    if (SPRITE_IDS_TO_EXCLUDE.indexOf(holding.id) !== -1) {
+      return;
+    }
+
+    holding.layer.removeSprite(holding);
+    onMouseUp();
+  }
+
   function onSizeKeyPress(e) {
     if (e.keyCode === 13) {
       updateLevelProperties();
@@ -331,6 +337,9 @@ var LevelEditor = (function() {
     switch (e.keyCode) {
       case 16: // Shift
         IS_SHIFT_DOWN = false;
+        break;
+      case 46: // Del
+        deleteHeldSprite();
         break;
       case 90: //Z
         spawnPlatform();
@@ -373,7 +382,6 @@ var LevelEditor = (function() {
           'x': spriteStartX,
           'y': spriteStartY
         };
-
     
     if (IS_SHIFT_DOWN) {
       size.width += diffX;
@@ -383,9 +391,9 @@ var LevelEditor = (function() {
     } else {
       position.x += diffX
       position.y += diffY
-    boundXYToLevel(holding, position);
-    
-    holding.set(position.x, position.y);
+
+      boundXYToLevel(holding, position);
+      holding.set(position.x, position.y);
     }
 
 

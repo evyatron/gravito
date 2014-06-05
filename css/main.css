@@ -304,40 +304,6 @@ a {
       font-weight: 300;
     }
 
-/*
-#dialogs {
-  position: absolute;
-  bottom: -40px;
-  left: 50%;
-  width: 400px;
-  margin-left: -200px;
-  height: 100px;
-  text-align: center;
-  font-size: 19px;
-  letter-spacing: 1px;
-  font-weight: 300;
-  color: #fff;
-  pointer-events: none;
-}
-  #dialogs:before {
-    content: '';
-    height: 100%;
-    width: 0;
-    display: inline-block;
-    vertical-align: middle;
-  }
-  #dialogs > div {
-    display: inline-block;
-    vertical-align: middle;
-    padding: 20px;
-    background: rgba(40, 80, 120, 1);
-    box-shadow: 0 0 0 1px rgba(20, 60, 100, 1),
-                0 0 10px 3px rgba(0, 0, 0, .9),
-                0 0 0 1px rgba(255, 255, 255, 0.2) inset;
-    border-radius: 3px;
-  }
-*/
-
 #dialogs {
   pointer-events: none;
 }
@@ -639,11 +605,12 @@ a {
     bottom: 100%;
     left: 0;
     right: 0;
+    margin-bottom: 4px;
     padding: 0;
     text-align: center;
   }
     #editor .game button {
-      padding: 4px 8px;
+      padding: 4px 14px;
       margin: 0 5px;
     }
 

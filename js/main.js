@@ -200,7 +200,7 @@
       document.body.appendChild(elScript);
     } else {
       // load the first level
-      if (/SKIP_MENU/.test(URL)) {
+      if (/SKIP_MENU/.test(URL) || /LEVEL_EDITOR/.test(URL)) {
         loadLevel((URL.match(/LEVEL=(\d+)/) || [])[1] || Player.get('maxLevel'));
       } else {
         MainMenu.show();
@@ -529,6 +529,7 @@
   }
 
   function clearLevel() {
+    console.warn('clear level', layerBackground.sprites);
     layerBackground.clear();
     layerObjects.clear();
     layerPlayer.clear();
@@ -671,7 +672,7 @@
 
 
     /* --------------- SHOW LEVEL TUTORIAL --------------- */
-    if (!/SKIP_LEVEL_DIALOGS/.test(URL)) {
+    if (!/SKIP_LEVEL_DIALOGS/.test(URL) && !/LEVEL_EDITOR/.test(URL)) {
       var levelTextId = (currentLevel > NUMBER_OF_LEVELS)? 'final' : currentLevel,
           levelText = utils.l10n.get('level-' + levelTextId);
 
@@ -792,7 +793,9 @@
   // general collisions handler
   var onPlayerCollisionWithStart = {
     'finish': function onPlayerCollisionWithFinish(sprite, direction) {
-      finishLevel();
+      if (!/LEVEL_EDITOR/.test(URL)) {
+        finishLevel();
+      }
     },
     'death': function onPlayerCollisionWithDeath(sprite, direction) {
       Player.disableControl();
@@ -1009,7 +1012,7 @@
           'x': game.width - frameWidth.right,
           'y': finishData.y + finishData.height + frameWidth.top,
           'width': frameWidth.right,
-          'height': game.height - data.y
+          'height': game.height - (finishData.y + finishData.height + frameWidth.top)
         });
         platforms.push({
           'x': finishData.x + finishData.width + frameWidth.left,
