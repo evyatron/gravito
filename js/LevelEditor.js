@@ -4,8 +4,17 @@ var LevelEditor = (function() {
       el,
 
       levelData = {
-        'frame': 10,
+        'frame': {
+          'top': 10,
+          'bottom': 10,
+          'left': 10,
+          'right': 10
+        },
         'background': '',
+        'size': {
+          'width': CONFIG.WIDTH,
+          'height': CONFIG.HEIGHT
+        },
         'player': {
         },
         'finish': {
@@ -119,8 +128,8 @@ var LevelEditor = (function() {
     };
 
     var finishSprite = game.game.getSpriteById('finish');
-    levelData.finish.x = finishSprite.topLeft.x - levelData.frame;
-    levelData.finish.y = finishSprite.topLeft.y - levelData.frame;
+    levelData.finish.x = finishSprite.topLeft.x - levelData.frame.left;
+    levelData.finish.y = finishSprite.topLeft.y - levelData.frame.top;
 
     initLevel();
 
@@ -136,8 +145,8 @@ var LevelEditor = (function() {
     }
 
     var finishSprite = levelData.finish;
-    if (x - levelData.frame > finishSprite.x && x - levelData.frame < finishSprite.x + finishSprite.width &&
-        y - levelData.frame > finishSprite.y && y - levelData.frame < finishSprite.y + finishSprite.height) {
+    if (x - levelData.frame.left > finishSprite.x && x - levelData.frame.left < finishSprite.x + finishSprite.width &&
+        y - levelData.frame.top > finishSprite.y && y - levelData.frame.top < finishSprite.y + finishSprite.height) {
       pickup(game.game.getSpriteById('finish'));
       return;
     }
@@ -160,6 +169,18 @@ var LevelEditor = (function() {
     levelData.background = el.querySelector('.background').value || CONFIG.DEFAULT_BACKGROUND;
 
     initLevel();
+  }
+
+  function boundXYToLeve(sprite, x, y) {
+    x = Math.min(x, levelData.size.width - sprite.width);
+    x = Math.max(x, 0);
+    y = Math.min(y, levelData.size.height - sprite.height);
+    y = Math.max(y, 0);
+
+    return {
+      'x': x,
+      'y': y
+    };
   }
 
   function onKeyPress(e) {
@@ -186,9 +207,10 @@ var LevelEditor = (function() {
 
   function onMouseMove(e) {
     var diffX = mouseStartX - e.pageX,
-        diffY = mouseStartY - e.pageY;
-
-    holding.set(spriteStartX - diffX, spriteStartY - diffY);
+        diffY = mouseStartY - e.pageY,
+        position = boundXYToLeve(holding, spriteStartX - diffX, spriteStartY - diffY);
+    
+    holding.set(position.x, position.y);
   }
 
   function onMouseUp(e) {
@@ -204,11 +226,9 @@ var LevelEditor = (function() {
     el.id = 'editor';
     el.innerHTML = '<div class="size">' +
                       '<label>' +
-                        '<b>Width:</b>' +
+                        '<b>Size:</b>' +
                         '<input type="number" class="width" value="' + CONFIG.WIDTH + '" />' +
-                      '</label>' +
-                      '<label>' +
-                        '<b>Height:</b>' +
+                        'x' +
                         '<input type="number" class="height" value="' + CONFIG.HEIGHT + '" />' +
                       '</label>' +
                    '</div>' +
