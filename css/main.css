@@ -365,7 +365,8 @@ a {
     transform: translate(-50%, -50%);
   }
   #dialogs .key,
-  #menu .key {
+  #menu .key,
+  #controls .key {
     display: inline-block;
     font-weight: normal;
     font-family: monospace;
@@ -596,6 +597,9 @@ a {
 .editor #canvases canvas:last-child {
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 1);
 }
+.editor #controls {
+  height: 120px;
+}
 
 #controls #editor {
   position: absolute;
@@ -642,6 +646,39 @@ a {
       padding: 4px 8px;
       margin: 0 5px;
     }
+
+  #editor .controls {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 4px 0;
+    background: rgba(0, 0, 0, .4);
+    border-bottom-left-radius: 5px;
+    list-style-type: none;
+  }
+    #editor .controls li {
+      padding: 3px 7px;
+      cursor: pointer;
+    }
+    #editor .controls li:hover {
+      background: rgba(255, 255, 255, .3);
+    }
+    #editor .controls span {
+      display: inline-block;
+      vertical-align: middle;
+    }
+    #editor .controls span.key {
+      margin-right: 4px;
+      line-height: 24px;
+    }
+
+
+
+
+
+
+
+
 #log {
   position: absolute;
   top: 0;

@@ -74,6 +74,10 @@ var LevelEditor = (function() {
     el.querySelector('.play').addEventListener('click', play);
     el.querySelector('.stop').addEventListener('click', stop);
 
+    el.querySelector('.button-platform').addEventListener('click', spawnPlatform);
+    el.querySelector('.button-movable').addEventListener('click', spawnMovable);
+    el.querySelector('.button-score').addEventListener('click', spawnScore);
+
     window.addEventListener('gameStart', function onFirstGameStart(e) {
       window.removeEventListener('gameStart', onFirstGameStart);
       cancelGravity();
@@ -257,6 +261,38 @@ var LevelEditor = (function() {
     position.y = Math.max(position.y, 0);
   }
 
+  function spawnPlatform() {
+    game.createPlatform({
+      'id': 'new_platform_' + Date.now(),
+      'x': game.game.width / 2,
+      'y': game.game.height / 2,
+      'width': DEFAULT_PLATFORM.width,
+      'height': DEFAULT_PLATFORM.height
+    });
+    updateLevelData();
+  }
+
+  function spawnMovable() {
+    game.createMovable({
+      'id': 'new_movable_' + Date.now(),
+      'x': game.game.width / 2,
+      'y': game.game.height / 2,
+      'width': DEFAULT_MOVABLE.width,
+      'height': DEFAULT_MOVABLE.height
+    });
+    updateLevelData();
+  }
+
+  function spawnScore() {
+    game.createCollectible({
+      'id': 'new_score_' + Date.now(),
+      'type': 'score',
+      'x': game.game.width / 2,
+      'y': game.game.height / 2
+    });
+    updateLevelData();
+  }
+
   function onSizeKeyPress(e) {
     if (e.keyCode === 13) {
       updateLevelProperties();
@@ -266,33 +302,15 @@ var LevelEditor = (function() {
   function onKeyPress(e) {
     switch (e.keyCode) {
       case 90: //Z
-        game.createPlatform({
-          'id': 'new_platform_' + Date.now(),
-          'x': game.game.width / 2,
-          'y': game.game.height / 2,
-          'width': DEFAULT_PLATFORM.width,
-          'height': DEFAULT_PLATFORM.height
-        });
-        break; 
+        spawnPlatform();
+        break;
       case 88: //X
-        game.createMovable({
-          'id': 'new_movable_' + Date.now(),
-          'x': game.game.width / 2,
-          'y': game.game.height / 2,
-          'width': DEFAULT_MOVABLE.width,
-          'height': DEFAULT_MOVABLE.height
-        });
+        spawnMovable();
         break;
       case 67: //C
-        
+        spawnScore();
         break;
       case 86: //V
-        game.createCollectible({
-          'id': 'new_score_' + Date.now(),
-          'type': 'score',
-          'x': game.game.width / 2,
-          'y': game.game.height / 2
-        });
         break;
     }
   }
@@ -352,7 +370,12 @@ var LevelEditor = (function() {
                    '<div class="game">' +
                     '<button class="play">Play</button>' +
                     '<button class="stop">Stop</button>' +
-                   '</div>';
+                   '</div>' +
+                   '<ul class="controls">' +
+                    '<li class="button-platform"><span class="key">Z</span><span>Platform</span></li>' +
+                    '<li class="button-movable"><span class="key">X</span><span>Movable</span></li>' +
+                    '<li class="button-score"><span class="key">C</span><span>Score</span></li>' +
+                   '</ul>';
 
     elUI.appendChild(el);
   }
