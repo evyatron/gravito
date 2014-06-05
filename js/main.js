@@ -1470,6 +1470,7 @@
     hideLevel: hideLevel,
     player: Player,
     createPlatform: createPlatform,
+    createMovable: createMovable,
     createCollectible: createCollectible,
     setPlayerAllowedRotation: setPlayerAllowedRotation,
     playerRotateGravity: playerRotateGravity,

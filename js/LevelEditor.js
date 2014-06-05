@@ -23,6 +23,20 @@ var LevelEditor = (function() {
           'width': 10,
           'height': 50
         },
+        "platforms": [],
+        "movables": [],
+        "collectibles": [],
+        "scores": []
+      },
+
+      DEFAULT_PLATFORM = {
+        'width': 120,
+        'height': 10
+      },
+
+      DEFAULT_MOVABLE = {
+        'width': 100,
+        'height': 20
       },
 
       sprites = [],
@@ -34,7 +48,16 @@ var LevelEditor = (function() {
       holding = null,
       defaultGravity,
 
-      running = false;
+      running = false,
+
+      SPRITE_IDS_TO_EXCLUDE = [
+        'player',
+        'finish', 'finish-light',
+        'frame_top',
+        'frame_bottom',
+        'frame_left',
+        'frame_right'
+      ];
 
   function init(options) {
     game = options.game;
@@ -43,7 +66,8 @@ var LevelEditor = (function() {
     initUI();
 
     window.addEventListener('mousedown', onMouseDown);
-    el.querySelector('.size').addEventListener('keyup', onKeyPress);
+    window.addEventListener('keyup', onKeyPress);
+    el.querySelector('.size').addEventListener('keyup', onSizeKeyPress);
     el.querySelector('.width').addEventListener('blur', updateLevelProperties);
     el.querySelector('.height').addEventListener('blur', updateLevelProperties);
     el.querySelector('.background').addEventListener('change', updateLevelProperties);
@@ -131,16 +155,63 @@ var LevelEditor = (function() {
     levelData.finish.x = finishSprite.topLeft.x - levelData.frame.left;
     levelData.finish.y = finishSprite.topLeft.y - levelData.frame.top;
 
+
+    // translate the sprites back from the Sprite game objects
+    // to plain data in the level config
+    var sprites = game.game.layers[2].sprites
+                  .concat(game.game.layers[0].sprites),
+
+                  platforms = [],
+                  movables = [],
+                  collectibles = [],
+                  scores = [];
+
+    for (var i = 0, sprite; sprite = sprites[i++];) {
+      if (SPRITE_IDS_TO_EXCLUDE.indexOf(sprite.id) !== -1) {
+        continue;
+      }
+
+      var type = sprite.type,
+          data = {
+            'x': sprite.topLeft.x - levelData.frame.left,
+            'y': sprite.topLeft.y - levelData.frame.top
+          };
+
+      switch (type) {
+        case 'score':
+          scores.push(data);
+          break;
+        case 'platform':
+          data.width = sprite.width;
+          data.height = sprite.height;
+          platforms.push(data);
+          break;
+        case 'movable':
+          data.width = sprite.width;
+          data.height = sprite.height;
+          movables.push(data);
+          break;
+      }
+    }
+
+    levelData.platforms = platforms;
+    levelData.movables = movables;
+    levelData.collectibles = collectibles;
+    levelData.scores = scores;
+
     initLevel();
 
     console.info('New game data:', levelData);
   }
 
+  function isPointInSprite(sprite, x, y) {
+    return (x >= sprite.topLeft.x && x <= sprite.bottomRight.x &&
+            y >= sprite.topLeft.y && y <= sprite.bottomRight.y);
+  }
+
   function checkSpriteClick(x, y) {
-    var playerSprite = Player.sprite;
-    if (x > playerSprite.topLeft.x && x < playerSprite.bottomRight.x &&
-        y > playerSprite.topLeft.y && y < playerSprite.bottomRight.y) {
-      pickup(playerSprite);
+    if (isPointInSprite(Player.sprite, x, y)) {
+      pickup(Player.sprite);
       return;
     }
 
@@ -149,6 +220,19 @@ var LevelEditor = (function() {
         y - levelData.frame.top > finishSprite.y && y - levelData.frame.top < finishSprite.y + finishSprite.height) {
       pickup(game.game.getSpriteById('finish'));
       return;
+    }
+
+    var sprites = game.game.layers[2].sprites
+                  .concat(game.game.layers[0].sprites);
+
+    for (var i = 0, sprite; sprite = sprites[i++];) {
+      if (SPRITE_IDS_TO_EXCLUDE.indexOf(sprite.id) !== -1) {
+        continue;
+      }
+
+      if (isPointInSprite(sprite, x, y)) {
+        pickup(sprite);
+      }
     }
   }
 
@@ -159,6 +243,7 @@ var LevelEditor = (function() {
     };
 
     boundXYToLevel(Player.sprite, levelData.player);
+    boundXYToLevel(game.game.getSpriteById('finish'), levelData.finish);
 
     levelData.background = el.querySelector('.background').value || CONFIG.DEFAULT_BACKGROUND;
 
@@ -172,9 +257,43 @@ var LevelEditor = (function() {
     position.y = Math.max(position.y, 0);
   }
 
-  function onKeyPress(e) {
+  function onSizeKeyPress(e) {
     if (e.keyCode === 13) {
       updateLevelProperties();
+    }
+  }
+
+  function onKeyPress(e) {
+    switch (e.keyCode) {
+      case 90: //Z
+        game.createPlatform({
+          'id': 'new_platform_' + Date.now(),
+          'x': game.game.width / 2,
+          'y': game.game.height / 2,
+          'width': DEFAULT_PLATFORM.width,
+          'height': DEFAULT_PLATFORM.height
+        });
+        break; 
+      case 88: //X
+        game.createMovable({
+          'id': 'new_movable_' + Date.now(),
+          'x': game.game.width / 2,
+          'y': game.game.height / 2,
+          'width': DEFAULT_MOVABLE.width,
+          'height': DEFAULT_MOVABLE.height
+        });
+        break;
+      case 67: //C
+        
+        break;
+      case 86: //V
+        game.createCollectible({
+          'id': 'new_score_' + Date.now(),
+          'type': 'score',
+          'x': game.game.width / 2,
+          'y': game.game.height / 2
+        });
+        break;
     }
   }
 
