@@ -2,6 +2,7 @@ var LevelEditor = (function() {
   var game,
       elUI,
       el,
+      elCurrentHolding,
 
       levelData = {
         'frame': {
@@ -18,8 +19,8 @@ var LevelEditor = (function() {
         'player': {
         },
         'finish': {
-          'x': 180,
-          'y': 130,
+          'x': 0,
+          'y': 0,
           'width': 10,
           'height': 50
         },
@@ -43,12 +44,16 @@ var LevelEditor = (function() {
 
       spriteStartX = 0,
       spriteStartY = 0,
+      spriteStartWidth = 0,
+      spriteStartHeight = 0,
       mouseStartX = 0,
       mouseStartY = 0,
       holding = null,
       defaultGravity,
 
       running = false,
+
+      IS_SHIFT_DOWN = false,
 
       SPRITE_IDS_TO_EXCLUDE = [
         'player',
@@ -66,7 +71,8 @@ var LevelEditor = (function() {
     initUI();
 
     window.addEventListener('mousedown', onMouseDown);
-    window.addEventListener('keyup', onKeyPress);
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
     el.querySelector('.size').addEventListener('keyup', onSizeKeyPress);
     el.querySelector('.width').addEventListener('blur', updateLevelProperties);
     el.querySelector('.height').addEventListener('blur', updateLevelProperties);
@@ -125,8 +131,12 @@ var LevelEditor = (function() {
     holding = sprite;
     spriteStartX = holding.topLeft.x;
     spriteStartY = holding.topLeft.y;
+    spriteStartWidth = holding.width;
+    spriteStartHeight = holding.height;
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
+
+    updateCurrentlyHoldingInformation();
   }
 
   function drop() {
@@ -158,6 +168,8 @@ var LevelEditor = (function() {
     var finishSprite = game.game.getSpriteById('finish');
     levelData.finish.x = finishSprite.topLeft.x - levelData.frame.left;
     levelData.finish.y = finishSprite.topLeft.y - levelData.frame.top;
+    levelData.finish.width = finishSprite.width;
+    levelData.finish.height = finishSprite.height;
 
 
     // translate the sprites back from the Sprite game objects
@@ -293,14 +305,33 @@ var LevelEditor = (function() {
     updateLevelData();
   }
 
+  function updateCurrentlyHoldingInformation() {
+    elCurrentHolding.innerHTML = 
+      '<li><label>x:</label>' + holding.topLeft.x + '</li>' +
+      '<li><label>y:</label>' + holding.topLeft.y + '</li>' +
+      '<li><label>width:</label>' + holding.width + '</li>' +
+      '<li><label>height:</label>' + holding.height + '</li>';
+  }
+
   function onSizeKeyPress(e) {
     if (e.keyCode === 13) {
       updateLevelProperties();
     }
   }
 
-  function onKeyPress(e) {
+  function onKeyDown(e) {
     switch (e.keyCode) {
+      case 16: // Shift
+        IS_SHIFT_DOWN = true;
+        break;
+    }
+  }
+
+  function onKeyUp(e) {
+    switch (e.keyCode) {
+      case 16: // Shift
+        IS_SHIFT_DOWN = false;
+        break;
       case 90: //Z
         spawnPlatform();
         break;
@@ -332,20 +363,40 @@ var LevelEditor = (function() {
   }
 
   function onMouseMove(e) {
-    var position = {
-          'x': spriteStartX - (mouseStartX - e.pageX),
-          'y': spriteStartY - (mouseStartY - e.pageY)
+    var diffX = e.pageX - mouseStartX,
+        diffY = e.pageY - mouseStartY,
+        size = {
+          'width': spriteStartWidth,
+          'height': spriteStartHeight
+        },
+        position = {
+          'x': spriteStartX,
+          'y': spriteStartY
         };
 
+    
+    if (IS_SHIFT_DOWN) {
+      size.width += diffX;
+      size.height += diffY;
+      holding.width = size.width;
+      holding.height = size.height;
+    } else {
+      position.x += diffX
+      position.y += diffY
     boundXYToLevel(holding, position);
     
     holding.set(position.x, position.y);
+    }
+
+
+    updateCurrentlyHoldingInformation();
   }
 
   function onMouseUp(e) {
     updateLevelData();
 
     holding = null;
+    elCurrentHolding.innerHTML = '';
     window.removeEventListener('mousemove', onMouseMove);
     window.removeEventListener('mouseup', onMouseUp);
   }
@@ -375,7 +426,11 @@ var LevelEditor = (function() {
                     '<li class="button-platform"><span class="key">Z</span><span>Platform</span></li>' +
                     '<li class="button-movable"><span class="key">X</span><span>Movable</span></li>' +
                     '<li class="button-score"><span class="key">C</span><span>Score</span></li>' +
-                   '</ul>';
+                   '</ul>' +
+                   '<ul class="holding-stats"></ul>';
+
+
+    elCurrentHolding = el.querySelector('.holding-stats');
 
     elUI.appendChild(el);
   }

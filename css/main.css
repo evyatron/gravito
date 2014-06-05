@@ -607,13 +607,13 @@ a {
   left: 0;
   right: 0;
   bottom: 0;
+  font-family: monospace;
   opacity: 1;
   pointer-events: inherit;
   z-index: 500;
   background: rgba(255, 255, 255, 1);
 }
   #editor > div {
-    font-family: monospace;
     padding: 5px;
   }
     #editor > div label {
@@ -672,7 +672,20 @@ a {
       line-height: 24px;
     }
 
-
+#editor .holding-stats {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  background: rgba(255, 255, 255, .7);
+  list-style-type: none;
+  padding: 10px;
+  white-space: nowrap;
+  font-size: 1.2em;
+}
+  #editor .holding-stats label {
+    display: inline-block;
+    width: 80px;
+  }
 
 
 
