@@ -158,29 +158,18 @@ var LevelEditor = (function() {
       'height': (el.querySelector('.height').value || CONFIG.HEIGHT) * 1
     };
 
-    if (levelData.player.x > levelData.size.width) {
-      levelData.player.x = levelData.size.width - Player.sprite.width;
-    }
-    if (levelData.player.y > levelData.size.height) {
-      levelData.player.y
-      levelData.player.y = levelData.size.height - Player.sprite.height - levelData.frameWidth.bottom;
-    }
+    boundXYToLevel(Player.sprite, levelData.player);
 
     levelData.background = el.querySelector('.background').value || CONFIG.DEFAULT_BACKGROUND;
 
     initLevel();
   }
 
-  function boundXYToLeve(sprite, x, y) {
-    x = Math.min(x, levelData.size.width - sprite.width);
-    x = Math.max(x, 0);
-    y = Math.min(y, levelData.size.height - sprite.height);
-    y = Math.max(y, 0);
-
-    return {
-      'x': x,
-      'y': y
-    };
+  function boundXYToLevel(sprite, position) {
+    position.x = Math.min(position.x, levelData.size.width - sprite.width);
+    position.x = Math.max(position.x, 0);
+    position.y = Math.min(position.y, levelData.size.height - sprite.height);
+    position.y = Math.max(position.y, 0);
   }
 
   function onKeyPress(e) {
@@ -206,9 +195,12 @@ var LevelEditor = (function() {
   }
 
   function onMouseMove(e) {
-    var diffX = mouseStartX - e.pageX,
-        diffY = mouseStartY - e.pageY,
-        position = boundXYToLeve(holding, spriteStartX - diffX, spriteStartY - diffY);
+    var position = {
+          'x': spriteStartX - (mouseStartX - e.pageX),
+          'y': spriteStartY - (mouseStartY - e.pageY)
+        };
+
+    boundXYToLevel(holding, position);
     
     holding.set(position.x, position.y);
   }

@@ -16,8 +16,6 @@ Layer = (function() {
     },
 
     addSprite: function addSprite(sprite) {
-      console.log('[Layer] addSprite', this, sprite);
-
       this.sprites.push(sprite);
       sprite.layer = this;
 

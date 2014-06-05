@@ -955,6 +955,7 @@
 
     if (frameWidth.top) {
       platforms.push({
+        'id': 'frame_top',
         'x': 0,
         'y': 0,
         'width': game.width,
@@ -964,6 +965,7 @@
 
     if (frameWidth.bottom) {
       platforms.push({
+        'id': 'frame_bottom',
         'x': 0,
         'y': game.height - frameWidth.bottom,
         'width': game.width,
@@ -973,6 +975,7 @@
 
     if (frameWidth.left) {
       data = {
+        'id': 'frame_left',
         'x': 0,
         'y': 0,
         'width': frameWidth.left,
@@ -988,6 +991,7 @@
 
     if (frameWidth.right) {
       data = {
+        'id': 'frame_right',
         'x': game.width - frameWidth.right,
         'y': 0,
         'width': frameWidth.right,
