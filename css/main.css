@@ -376,6 +376,9 @@ a {
     font-weight: 700;
     letter-spacing: 0.1em;
     z-index: 150;
+    /* fixes font bug when hovering over the menu */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
   }
     /* avatar */
     #menu h1:before {
