@@ -541,6 +541,28 @@ a {
       #menu .text-menu dd .key {
         top: -10px;
       }
+  #menu .text-select-level {
+  }
+    #menu .text-select-level ul {
+      position: relative;
+      z-index: 1;
+      background: rgba(255, 255, 255, .1);
+      list-style-type: none;
+      overflow: auto;
+    }
+    #menu .text-select-level li {
+      display: inline-block;
+      margin: 0;
+      -webkit-transition: all 400ms ease-in-out;
+      transition: all 400ms ease-in-out;
+    }
+      #menu .text-select-level li canvas {
+        
+      }
+    #menu .text-select-level li:hover {
+      
+    }
+
   #menu .bubbling {
     position: absolute;
     bottom: 0;

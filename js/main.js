@@ -6,8 +6,6 @@
       layerPlayer,
 
       game,
-      currentLevel = 1,
-      currentLevelData,
       CurrentLevel,
       seenLevelIntro = false,
       firstThud = true,
@@ -45,16 +43,27 @@
       // used for CSS rotation of the game
       currentGravityAngle = 0;
 
-  // load external game config file before starting anything
-  function loadGameConfig() {
-    var request = new XMLHttpRequest();
-    request.open('GET', 'data/game.json', true);
-    request.responseType = 'json';
-    request.onload = function onGameConfigLoad() {
-      populateFromConfig(request.response);
-      loadTexts();
-    };
-    request.send();
+  // start the loading sequence
+  function begin() {
+    // load game config
+    utils.json('data/game.json', function onGameConfigLoad(response) {
+      populateFromConfig(response);
+      
+      // load and init the dictionary
+      utils.l10n.init({
+        'onReady': function onTextsLoad() {
+          
+          // init the player wrapper object
+          Player.init({
+            'onCollisionStart': PlayerCollisionHandler.onStart.bind(PlayerCollisionHandler),
+            'onCollisionEnd': PlayerCollisionHandler.onEnd.bind(PlayerCollisionHandler),
+            'onSettingsLoad': function onSettingsLoad() {
+              init();
+            }
+          });
+        }
+      });
+    });
   }
 
   // load all game config into local variables
@@ -98,24 +107,6 @@
     }
   }
 
-  function loadTexts() {
-    utils.l10n.init({
-      'onReady': function onTextsLoad() {
-        initPlayer();
-      }
-    });
-  }
-
-  function initPlayer() {
-    Player.init({
-      'onCollisionStart': onPlayerCollisionStart,
-      'onCollisionEnd': onPlayerCollisionEnd,
-      'onSettingsLoad': function onSettingsLoad() {
-        init();
-      }
-    });
-  }
-
   // initialize game components
   function init() {
     elContainer = document.getElementById('container');
@@ -147,7 +138,23 @@
     window.game = game;
 
     // create all sprite layers - background, player, etc.
-    createLayers();
+    layerBackground = new Layer({
+      'id': 'background'
+    }),
+    layerPlayer = new Layer({
+      'id': 'player'
+    });
+    layerObjects = new Layer({
+      'id': 'objects'
+    }),
+
+    game.addLayer(layerBackground);
+    game.addLayer(layerPlayer);
+    game.addLayer(layerObjects);
+
+    WRAPPER.layerBackground = layerBackground;
+    WRAPPER.layerPlayer = layerPlayer;
+    WRAPPER.layerObjects = layerObjects;
 
     // UI controls event listeners etc.
     UIControls.init();
@@ -163,8 +170,7 @@
       window.addEventListener('player-die', onPlayerDie);
     }
 
-    // when a level is ready - start the game loop
-    window.addEventListener('levelReady', onLevelReady);
+    LevelHandler.init();
 
     // load all sounds
     SoundManager.load({
@@ -201,7 +207,7 @@
     } else {
       // load the first level
       if (/SKIP_MENU/.test(URL) || /LEVEL_EDITOR/.test(URL)) {
-        loadLevel((URL.match(/LEVEL=(\d+)/) || [])[1] || Player.get('maxLevel'));
+        LevelHandler.load((URL.match(/LEVEL=(\d+)/) || [])[1] || Player.get('maxLevel'));
       } else {
         MainMenu.show();
       }
@@ -235,10 +241,68 @@
     }
   }
 
+  function drawLevelThumbnail(level, elCanvas) {
+    var width = 120,
+        height = 120;
+
+    elCanvas.width = width;
+    elCanvas.height = height;
+
+    utils.json('data/levels/' + level + '.json', function onLevelLoad(levelData) {
+      elCanvas.style.background = levelData.background;
+
+      var context = elCanvas.getContext('2d'),
+          platforms = levelData.platforms || [],
+          ratioHeight = height / levelData.size.height,
+          ratioWidth = width / levelData.size.width,
+          frameWidth = levelData.frame || 0;
+
+      if (ratioHeight > ratioWidth) {
+        ratioHeight = ratioWidth;
+        elCanvas.height = levelData.size.height * ratioHeight;
+      } else {
+        ratioWidth = ratioHeight;
+      }
+
+      if (typeof frameWidth === 'number') {
+        frameWidth = {
+          'top': frameWidth,
+          'bottom': frameWidth,
+          'left': frameWidth,
+          'right': frameWidth
+        };
+      }
+
+      var frameCSS = 'box-shadow: ' +
+          '0 ' + frameWidth.top*ratioHeight  + 'px 0 0 rgba(0, 0, 0, 1) inset,' +
+          frameWidth.left*ratioWidth  + 'px 0 0 0 rgba(0, 0, 0, 1) inset,' +
+          '0 ' + -frameWidth.bottom*ratioHeight  + 'px 0 0 rgba(0, 0, 0, 1) inset,' +
+          -frameWidth.right*ratioWidth  + 'px 0 0 0 rgba(0, 0, 0, 1) inset;';
+
+      elCanvas.style.cssText += frameCSS;
+
+      for (var i = 0, platform, platformData = {}; platform = platforms[i++];) {
+        var sprite = createPlatform(platform, frameWidth);
+        sprite.layer.removeSprite(sprite);
+
+        sprite.width *= ratioWidth;
+        sprite.height *= ratioHeight;
+        sprite.set(sprite.topLeft.x * ratioWidth, sprite.topLeft.y * ratioHeight);
+
+        sprite.draw(context);
+      }
+    })
+  }
+
   var MenuHandler = {
     init: function init() {
       this._tick = this.tick.bind(this);
       this._onResize = this.onResize.bind(this);
+
+      var htmlLevels = '<ul class="levels">';
+      for (var i = 0; i < NUMBER_OF_LEVELS; i++) {
+        htmlLevels += '<li data-level="' + (i + 1) + '"></li>';
+      }
 
       MainMenu.init({
         'elContainer': document.body,
@@ -249,6 +313,12 @@
             'id': 'new',
             'type': 'click',
             'onSelect': this.options.onNew
+          },
+          {
+            'id': 'select-level',
+            'type': 'text',
+            'value': htmlLevels,
+            'onSelect': this.options.onSelectLevel
           },
           {'type': 'separator'},
           {
@@ -309,7 +379,7 @@
 
       if (key === 27) {
         if (MainMenu.isVisible) {
-          if (currentLevelData) {
+          if (LevelHandler.currentData) {
             MainMenu.hide();
           }
         } else {
@@ -327,12 +397,28 @@
         SoundManager.play('menu');
         MainMenu.hide();
 
-        if (currentLevelData) {
+        if (LevelHandler.currentData) {
           game.start();
         } else {
           window.setTimeout(function() {
-            loadLevel((URL.match(/LEVEL=(\d+)/) || [])[1] || Player.get('maxLevel'));
+            LevelHandler.load((URL.match(/LEVEL=(\d+)/) || [])[1] || Player.get('maxLevel'));
           }, 200);
+        }
+      },
+
+      onSelectLevel: function onSelectLevel(el) {
+        SoundManager.play('menu');
+
+        var playerLevel = Player.get('maxLevel');
+        for (var i = 1, elLevel; i <= playerLevel; i++) {
+          elLevel = el.querySelector('[data-level = "' + i + '"]');
+
+          if (elLevel.dataset.loaded) {
+            continue;
+          }
+
+          elLevel.innerHTML = '<canvas></canvas>';
+          drawLevelThumbnail(i, elLevel.querySelector('canvas'));
         }
       },
 
@@ -389,7 +475,7 @@
       game.stop();
 
       var playerLevel = Math.min(Player.get('maxLevel') || 1, NUMBER_OF_LEVELS),
-          isNewGame = playerLevel === 1 && !currentLevelData,
+          isNewGame = playerLevel === 1 && !LevelHandler.currentData,
           textKey = 'menu-option-' + (isNewGame? 'new' : 'continue');
 
       MainMenu.setOptionText('new', utils.l10n.get(textKey, {'level': playerLevel}));
@@ -428,7 +514,7 @@
     onHide: function onHide() {
       window.removeEventListener('resize', this._onResize);
 
-      if (currentLevelData) {
+      if (LevelHandler.currentData) {
         game.start();
       }
     },
@@ -443,97 +529,260 @@
     }
   };
 
-  // create the sprite layers - ordered by z-index
-  function createLayers() {
-    layerBackground = new Layer({
-      'id': 'background'
-    }),
-    layerPlayer = new Layer({
-      'id': 'player'
-    });
-    layerObjects = new Layer({
-      'id': 'objects'
-    }),
+  var LevelHandler = {
+    currentIndex: 1,
+    currentData: null,
 
-    game.addLayer(layerBackground);
-    game.addLayer(layerPlayer);
-    game.addLayer(layerObjects);
 
-    WRAPPER.layerBackground = layerBackground;
-    WRAPPER.layerPlayer = layerPlayer;
-    WRAPPER.layerObjects = layerObjects;
-  }
+    init: function init() {
+      // when a level is ready - start the game loop
+      window.addEventListener('levelReady', this.onLevelReady);
+    },
 
-  // an event called when a level is ready to begin
-  // if a level loads an external script - it should fire this event
-  function onLevelReady(e) {
-    var levelObject = (e.detail || {}).level || {};
-    CurrentLevel = levelObject;
+    next: function next() {
+      this.currentIndex++;
 
-    document.body.classList.remove('level-loading');
-    document.body.classList.add('level-ready');
+      game.stop();
 
-    window.setTimeout(function() {
-      game.start();
+      if (this.currentIndex > NUMBER_OF_LEVELS) {
+        this.hide();
+        finishGame(LevelHandler.load.bind(LevelHandler));
+      } else {
+        this.load();
+      }
+    },
 
-      window.dispatchEvent(new CustomEvent('gameStart', {
-        'detail': {
-          'game': WRAPPER
+    hide: function hide() {
+      document.body.classList.add('level-loading');
+      document.body.classList.remove('level-ready');
+
+      seenLevelIntro = false;
+      firstThud = true;
+      this.clear();
+    },
+
+    clear: function clear() {
+      layerBackground.clear();
+      layerObjects.clear();
+      layerPlayer.clear();
+    },
+
+    // restart current level - return everything to its original place
+    restart: function restart(deathCause) {
+      this.clear();
+      this.create(this.currentData);
+    },
+
+    // complete level
+    finish: function finish() {
+      var nextLevel = Math.min(this.currentIndex + 1, NUMBER_OF_LEVELS),
+          userMaxLevel = (Player.get('maxLevel') || 1) * 1;
+
+      if (!userMaxLevel || userMaxLevel < nextLevel) {
+        Player.set('maxLevel', nextLevel);
+      }
+      
+      rotateGravity(currentGravityAngle);
+      this.next();
+    },
+
+    load: function load(level) {
+      !level && (level = this.currentIndex);
+      level = level * 1;
+
+      this.hide();
+
+      this.currentIndex = Math.min(level, NUMBER_OF_LEVELS + 1);
+
+      var levelId = this.currentIndex > NUMBER_OF_LEVELS? 'final' : this.currentIndex;
+
+      utils.json('data/levels/' + levelId + '.json', function onLevelDataLoad(response) {
+        this.create(response);
+      }.bind(this));
+    },
+
+    // after loading a level, create everything - platforms, sprites,
+    // position player, etc.
+    create: function create(levelData) {
+      if (!levelData) {
+        return;
+      }
+
+      this.currentData = levelData;
+
+      var background = levelData.background || DEFAULT_BACKGROUND;
+      layerBackground.context.canvas.style.background = background;
+
+      /* --------------- LEVEL SIZE --------------- */
+      var size = {
+        'width': DEFAULT_WIDTH,
+        'height': DEFAULT_HEIGHT
+      };
+      fillWith(size, levelData.size);
+
+      game.setSize(size.width, size.height);
+
+      /* --------------- FRAME & FINISH POINT--------------- */
+      var finishData = {
+        'id': 'finish',
+        'x': null,
+        'y': null,
+        'width': 0,
+        'height': 0,
+        'background': DEFAULT_FINISH_COLOR,
+        'type': 'finish'
+      };
+      fillWith(finishData, levelData.finish);
+
+      var frameWidth = levelData.frame || 0;
+      if (typeof frameWidth === 'number') {
+        frameWidth = {
+          'top': frameWidth,
+          'bottom': frameWidth,
+          'left': frameWidth,
+          'right': frameWidth
+        };
+      }
+
+      levelData.frameWidth = frameWidth;
+
+      /* --------------- PLAYER POSITION --------------- */
+      var playerStartPosition = levelData.start || {};
+      // x = 0
+      if (!playerStartPosition.hasOwnProperty('x')) {
+        playerStartPosition.x = frameWidth.left;
+      }
+      // y = on top of the bottom frame
+      if (!playerStartPosition.hasOwnProperty('y')) {
+        playerStartPosition.y = game.height - frameWidth.bottom - ((Player.sprite || levelData.player || {}).height || Player.HEIGHT);
+      }
+      if (/%/.test(playerStartPosition.x)) {
+        var percent = ('' + playerStartPosition.x).match(/(\d+)%/)[1];
+        playerStartPosition.x = (game.width * percent / 100);
+      }
+      if (/%/.test(playerStartPosition.y)) {
+        var percent = ('' + playerStartPosition.y).match(/(\d+)%/)[1];
+        playerStartPosition.y = (game.height * percent / 100);
+      }
+
+      var playerCreationData = {
+        'x': playerStartPosition.x,
+        'y': playerStartPosition.y
+      };
+      if (Player.sprite) {
+        playerCreationData.velocity = Player.sprite.velocity;
+        playerCreationData.acceleration = Player.sprite.acceleration;
+      }
+
+      if (levelData.player) {
+        for (var k in levelData.player) {
+          playerCreationData[k] = levelData.player[k];
         }
-      }));
-    }, 50);
-  }
+      }
 
-  // next level
-  function loadNextLevel() {
-    currentLevel++;
+      Player.createSprite(playerCreationData);
+      layerPlayer.addSprite(Player.sprite);
+      Player.enableControl();
 
-    game.stop();
 
-    if (currentLevel > NUMBER_OF_LEVELS) {
-      hideLevel();
-      finishGame(loadLevel);
-    } else {
-      loadLevel();
+      /* --------------- LEVEL FINISH POINT --------------- */
+      if (finishData.width && finishData.height) {
+        createFinishArea(finishData, frameWidth);
+      }
+
+
+      /* --------------- LEVEL FRAME BORDER --------------- */
+      createFrame(frameWidth, finishData);
+
+
+      /* --------------- PLATFORMS --------------- */
+      if (levelData.platforms) {
+        for (var i = 0, spriteData; spriteData = levelData.platforms[i++];) {
+          createPlatform(spriteData);
+        }
+      }
+
+      /* --------------- MOVABLES --------------- */
+      if (levelData.movables) {
+        for (var i = 0, spriteData; spriteData = levelData.movables[i++];) {
+          createMovable(spriteData);
+        }
+      }
+
+      /* --------------- COLLECTIBLES --------------- */
+      if (levelData.collectibles) {
+        for (var i = 0, spriteData; spriteData = levelData.collectibles[i++];) {
+          createCollectible(spriteData);
+        }
+      }
+
+      /* --------------- SCORES --------------- */
+      // automatically assign ids, to keep track for scoring
+      if (levelData.scores) {
+        for (var i = 0, spriteData; spriteData = levelData.scores[i++];) {
+          spriteData.id = 'score_' + i;
+          spriteData.type = 'score';
+          createCollectible(spriteData);
+        }
+      }
+
+
+      /* --------------- SHOW LEVEL TUTORIAL --------------- */
+      if (!/SKIP_LEVEL_DIALOGS/.test(URL) && !/LEVEL_EDITOR/.test(URL)) {
+        var levelTextId = (this.currentIndex > NUMBER_OF_LEVELS)? 'final' : this.currentIndex,
+            levelText = utils.l10n.get('level-' + levelTextId);
+
+        // game's first introduction
+        if (levelText && !seenLevelIntro) {
+          Player.stopAllMovement();
+          Player.disableControl();
+
+          window.setTimeout(function() {
+            seenLevelIntro = true;
+            Dialog.show({
+              'id': 'level-' + levelTextId,
+              'text': levelText,
+              'sprite': Player.sprite,
+              'onEnd': function onDialogEnd() {
+                Player.enableControl();
+              }
+            });
+          }, TIME_BEFORE_LEVEL_INTRO);
+        }
+      }
+
+
+      /* --------------- LOAD SPECIAL GAME SCRIPT --------------- */
+      if (levelData.script) {
+        var elScript = document.createElement('script');
+        elScript.src = levelData.script;
+        document.body.appendChild(elScript);
+      } else {
+        // Game Ready!
+        window.dispatchEvent(new CustomEvent('levelReady'));
+      }
+    },
+
+    // an event called when a level is ready to begin
+    // if a level loads an external script - it should fire this event
+    onLevelReady: function onLevelReady(e) {
+      var levelObject = (e.detail || {}).level || {};
+      CurrentLevel = levelObject;
+
+      document.body.classList.remove('level-loading');
+      document.body.classList.add('level-ready');
+
+      window.setTimeout(function() {
+        game.start();
+
+        window.dispatchEvent(new CustomEvent('gameStart', {
+          'detail': {
+            'game': WRAPPER
+          }
+        }));
+      }, 50);
     }
-  }
-
-  // load the current level's data and create it
-  function loadLevel(level) {
-    !level && (level = currentLevel);
-    level = level * 1;
-
-    hideLevel();
-
-    currentLevel = Math.min(level, NUMBER_OF_LEVELS + 1);
-
-    var url = 'data/levels/' + (currentLevel > NUMBER_OF_LEVELS? 'final' : level) + '.json',
-        request = new XMLHttpRequest();
-
-    request.open('GET', url, true);
-    request.responseType = 'json';
-    request.onload = function onLevelDataLoad() {
-      initLevel(request.response);
-    };
-
-    request.send();
-  }
-
-  function hideLevel() {
-    document.body.classList.add('level-loading');
-    document.body.classList.remove('level-ready');
-
-    seenLevelIntro = false;
-    firstThud = true;
-    clearLevel();
-  }
-
-  function clearLevel() {
-    console.warn('clear level', layerBackground.sprites);
-    layerBackground.clear();
-    layerObjects.clear();
-    layerPlayer.clear();
-  }
+  };
 
   function finishGame(callback) {
     window.setTimeout(function() {
@@ -545,331 +794,156 @@
     }, TIME_BEFORE_FINAL_TEXT);
   }
 
-  // after loading a level, create everything - platforms, sprites,
-  // position player, etc.
-  function initLevel(levelData) {
-    if (!levelData) {
-      return;
-    }
-
-    currentLevelData = levelData;
-
-    var background = currentLevelData.background || DEFAULT_BACKGROUND;
-    layerBackground.context.canvas.style.background = background;
-
-    /* --------------- LEVEL SIZE --------------- */
-    var size = {
-      'width': DEFAULT_WIDTH,
-      'height': DEFAULT_HEIGHT
-    };
-    fillWith(size, currentLevelData.size);
-
-    game.setSize(size.width, size.height);
-
-    /* --------------- FRAME & FINISH POINT--------------- */
-    var finishData = {
-      'id': 'finish',
-      'x': null,
-      'y': null,
-      'width': 0,
-      'height': 0,
-      'background': DEFAULT_FINISH_COLOR,
-      'type': 'finish'
-    };
-    fillWith(finishData, currentLevelData.finish);
-
-    var frameWidth = currentLevelData.frame || 0;
-    if (typeof frameWidth === 'number') {
-      frameWidth = {
-        'top': frameWidth,
-        'bottom': frameWidth,
-        'left': frameWidth,
-        'right': frameWidth
-      };
-    }
-
-    currentLevelData.frameWidth = frameWidth;
-
-    /* --------------- PLAYER POSITION --------------- */
-    var playerStartPosition = currentLevelData.start || {};
-    // x = 0
-    if (!playerStartPosition.hasOwnProperty('x')) {
-      playerStartPosition.x = frameWidth.left;
-    }
-    // y = on top of the bottom frame
-    if (!playerStartPosition.hasOwnProperty('y')) {
-      playerStartPosition.y = game.height - frameWidth.bottom - ((Player.sprite || currentLevelData.player || {}).height || Player.HEIGHT);
-    }
-    if (/%/.test(playerStartPosition.x)) {
-      var percent = ('' + playerStartPosition.x).match(/(\d+)%/)[1];
-      playerStartPosition.x = (game.width * percent / 100);
-    }
-    if (/%/.test(playerStartPosition.y)) {
-      var percent = ('' + playerStartPosition.y).match(/(\d+)%/)[1];
-      playerStartPosition.y = (game.height * percent / 100);
-    }
-
-    var playerCreationData = {
-      'x': playerStartPosition.x,
-      'y': playerStartPosition.y
-    };
-    if (Player.sprite) {
-      playerCreationData.velocity = Player.sprite.velocity;
-      playerCreationData.acceleration = Player.sprite.acceleration;
-    }
-
-    if (currentLevelData.player) {
-      for (var k in currentLevelData.player) {
-        playerCreationData[k] = currentLevelData.player[k];
-      }
-    }
-
-    Player.createSprite(playerCreationData);
-    layerPlayer.addSprite(Player.sprite);
-    Player.enableControl();
-
-
-    /* --------------- LEVEL FINISH POINT --------------- */
-    if (finishData.width && finishData.height) {
-      createFinishArea(finishData, frameWidth);
-    }
-
-
-    /* --------------- LEVEL FRAME BORDER --------------- */
-    createFrame(frameWidth, finishData);
-
-
-    /* --------------- PLATFORMS --------------- */
-    if (currentLevelData.platforms) {
-      for (var i = 0, spriteData; spriteData = currentLevelData.platforms[i++];) {
-        createPlatform(spriteData);
-      }
-    }
-
-    /* --------------- MOVABLES --------------- */
-    if (currentLevelData.movables) {
-      for (var i = 0, spriteData; spriteData = currentLevelData.movables[i++];) {
-        createMovable(spriteData);
-      }
-    }
-
-    /* --------------- COLLECTIBLES --------------- */
-    if (currentLevelData.collectibles) {
-      for (var i = 0, spriteData; spriteData = currentLevelData.collectibles[i++];) {
-        createCollectible(spriteData);
-      }
-    }
-
-    /* --------------- SCORES --------------- */
-    // automatically assign ids, to keep track for scoring
-    if (currentLevelData.scores) {
-      for (var i = 0, spriteData; spriteData = currentLevelData.scores[i++];) {
-        spriteData.id = 'score_' + i;
-        spriteData.type = 'score';
-        createCollectible(spriteData);
-      }
-    }
-
-
-    /* --------------- SHOW LEVEL TUTORIAL --------------- */
-    if (!/SKIP_LEVEL_DIALOGS/.test(URL) && !/LEVEL_EDITOR/.test(URL)) {
-      var levelTextId = (currentLevel > NUMBER_OF_LEVELS)? 'final' : currentLevel,
-          levelText = utils.l10n.get('level-' + levelTextId);
-
-      // game's first introduction
-      if (levelText && !seenLevelIntro) {
-        Player.stopAllMovement();
-        Player.disableControl();
-
-        window.setTimeout(function() {
-          seenLevelIntro = true;
-          Dialog.show({
-            'id': 'level-' + levelTextId,
-            'text': levelText,
-            'sprite': Player.sprite,
-            'onEnd': function onDialogEnd() {
-              Player.enableControl();
-            }
-          });
-        }, TIME_BEFORE_LEVEL_INTRO);
-      }
-    }
-
-
-    /* --------------- LOAD SPECIAL GAME SCRIPT --------------- */
-    if (currentLevelData.script) {
-      var elScript = document.createElement('script');
-      elScript.src = currentLevelData.script;
-      document.body.appendChild(elScript);
-    } else {
-      // Game Ready!
-      window.dispatchEvent(new CustomEvent('levelReady'));
-    }
-  }
-
-  // restart current level - return everything to its original place
-  function restartLevel(deathCause) {
-    clearLevel();
-    initLevel(currentLevelData);
+  function playerDie(cause) {
+    LevelHandler.restart();
 
     window.dispatchEvent(new CustomEvent('player-die', {
       'detail': {
-        'cause': deathCause
+        'cause': cause
       }
     }));
   }
 
-  // complete level
-  function finishLevel() {
-    var nextLevel = Math.min(currentLevel + 1, NUMBER_OF_LEVELS),
-        userMaxLevel = (Player.get('maxLevel') || 1) * 1;
+  var PlayerCollisionHandler = {
+    // whenever a player collides with a different sprite
+    // checks for general things - death, win, points, etc.
+    onStart: function onPlayerCollisionStart(sprite, direction) {
+      var type = sprite.type;
 
-    if (!userMaxLevel || userMaxLevel < nextLevel) {
-      Player.set('maxLevel', nextLevel);
-    }
-    
-    rotateGravity(currentGravityAngle);
-    loadNextLevel();
-  }
-
-  // whenever a player collides with a different sprite
-  // checks for general things - death, win, points, etc.
-  function onPlayerCollisionStart(sprite, direction) {
-    var type = sprite.type;
-
-    // hitting a platform in the gravity direction ( = resting), play a "thud"
-    if (type === 'platform' && direction === window.GRAVITY_DIRECTION_NAME) {
-      if (firstThud) {
-        firstThud = false;
-      } else {
-        SoundManager.play('player_land');
+      // hitting a platform in the gravity direction ( = resting), play a "thud"
+      if (type === 'platform' && direction === window.GRAVITY_DIRECTION_NAME) {
+        if (firstThud) {
+          firstThud = false;
+        } else {
+          SoundManager.play('player_land');
+        }
       }
-    }
 
-    if (onPlayerCollisionWithStart[type]) {
-      onPlayerCollisionWithStart[type].apply(this, arguments)
-    }
-
-    if (sprite.data.sound) {
-      SoundManager.setVolume(sprite.data.sound, sprite.data.volume);
-      SoundManager.play(sprite.data.sound);
-    }
-
-    if (sprite.data.collisionCallback) {
-      var onCollision = ((CurrentLevel || {}).actions || {})[sprite.data.collisionCallback];
-      if (onCollision) {
-        onCollision.apply(WRAPPER, arguments);
-      } else {
-        console.warn('CANT FIND CALLBACK FOR COLLISION', arguments)
+      if (this.startHandlers[type]) {
+        this.startHandlers[type].apply(this, arguments)
       }
-    }
-  }
 
-  function onPlayerCollisionEnd(sprite, direction) {
-    var type = sprite.type;
-    if (onPlayerCollisionWithEnd[type]) {
-      onPlayerCollisionWithEnd[type].apply(this, arguments)
-    }
+      if (sprite.data.sound) {
+        SoundManager.setVolume(sprite.data.sound, sprite.data.volume);
+        SoundManager.play(sprite.data.sound);
+      }
 
-    if (sprite.data.sound) {
-      var sounds = {},
-          soundToStop = sprite.data.sound,
-          collisions = Player.sprite.collisions,
-          collisionSprite;
+      if (sprite.data.collisionCallback) {
+        var onCollision = ((CurrentLevel || {}).actions || {})[sprite.data.collisionCallback];
+        if (onCollision) {
+          onCollision.apply(WRAPPER, arguments);
+        } else {
+          console.warn('CANT FIND CALLBACK FOR COLLISION', arguments)
+        }
+      }
+    },
 
-      for (var id in collisions) {
-        collisionSprite = collisions[id].sprite;
+    onEnd: function onPlayerCollisionEnd(sprite, direction) {
+      var type = sprite.type;
 
-        if (collisionSprite.data.sound && collisionSprite.data.sound === soundToStop) {
-          SoundManager.setVolume(soundToStop, collisionSprite.data.volume);
+      if (this.endHandlers[type]) {
+        this.endHandlers[type].apply(this, arguments)
+      }
+
+      if (sprite.data.sound) {
+        var sounds = {},
+            soundToStop = sprite.data.sound,
+            collisions = Player.sprite.collisions,
+            collisionSprite;
+
+        for (var id in collisions) {
+          collisionSprite = collisions[id].sprite;
+
+          if (collisionSprite.data.sound && collisionSprite.data.sound === soundToStop) {
+            SoundManager.setVolume(soundToStop, collisionSprite.data.volume);
+            return;
+          }
+        }
+
+        SoundManager.stop(sprite.data.sound);
+      }
+    },
+
+    // handler for start of collisions per type
+    startHandlers: {
+      'finish': function onPlayerCollisionWithFinish(sprite, direction) {
+        if (!/LEVEL_EDITOR/.test(URL)) {
+          LevelHandler.finish();
+        }
+      },
+      'death': function onPlayerCollisionWithDeath(sprite, direction) {
+        Player.disableControl();
+        Player.stopAllMovement();
+
+        var volume = 1.05;
+        function lowerVolume() {
+          volume -= 0.015;
+
+          if (volume <= 0) {
+            SoundManager.stop('water');
+            window.setTimeout(function() {
+              playerDie(DEATHS.POISON);
+            }, 250);
+          } else {
+            SoundManager.setVolume('water', volume);
+            window.setTimeout(lowerVolume, 30);
+          }
+        }
+        lowerVolume();
+
+      },
+      'score': function onPlayerCollisionWithScore(sprite, direction) {
+        // remove the collected point from the game
+        sprite.layer.removeSprite(sprite);
+
+        var keyLevel = 'level-' + LevelHandler.currentIndex,
+            playerTotalScore = Player.get('totalScore') || 0
+            playerScorePerLevel = Player.get('scorePerLevel') || {},
+            playerLevelScore = playerScorePerLevel[keyLevel] || {},
+            levelScores = LevelHandler.currentData.scores || [];
+
+        // make sure the player score map for this level is complete
+        // with 'false' for uncollected points
+        for (var i = 0, score; score = levelScores[i++];) {
+          playerLevelScore[score.id] = playerLevelScore[score.id] || false;
+        }
+
+        // play the collecting sound - before checking if its been collected before
+        // we want sound indication if the point doesn't count towards the player's
+        // total score
+        SoundManager.play('score');
+
+        // if the player already collected this point - nothing to do
+        if (playerLevelScore[sprite.id]) {
           return;
         }
-      }
 
-      SoundManager.stop(sprite.data.sound);
-    }
-  }
+        // set the currently earned point to true (collected)
+        playerLevelScore[sprite.id] = true;
 
-  // general collisions handler
-  var onPlayerCollisionWithStart = {
-    'finish': function onPlayerCollisionWithFinish(sprite, direction) {
-      if (!/LEVEL_EDITOR/.test(URL)) {
-        finishLevel();
+        // copy the data back to the main level score map
+        playerScorePerLevel[keyLevel] = playerLevelScore;
+
+        // and save for the user
+        Player.set('scorePerLevel', playerScorePerLevel);
+
+        // update the player's total score (sum of all collected points throughout the levels)
+        // TODO: maybe remove and just count the 'scorePerLevel' whenever we need?
+        Player.set('totalScore', ++playerTotalScore);
+
+        window.dispatchEvent(new CustomEvent('playerScore', {
+          'detail': {
+            'scoreId': sprite.id
+          }
+        }));
       }
     },
-    'death': function onPlayerCollisionWithDeath(sprite, direction) {
-      Player.disableControl();
-      Player.stopAllMovement();
 
-      var volume = 1.05;
-      function lowerVolume() {
-        volume -= 0.015;
-
-        if (volume <= 0) {
-          SoundManager.stop('water');
-          window.setTimeout(function() {
-            restartLevel(DEATHS.POISON);
-          }, 250);
-        } else {
-          SoundManager.setVolume('water', volume);
-          window.setTimeout(lowerVolume, 30);
-        }
-      }
-      lowerVolume();
-
-    },
-    'score': function onPlayerCollisionWithScore(sprite, direction) {
-      // remove the collected point from the game
-      sprite.layer.removeSprite(sprite);
-
-      var keyLevel = 'level-' + currentLevel,
-          playerTotalScore = Player.get('totalScore') || 0
-          playerScorePerLevel = Player.get('scorePerLevel') || {},
-          playerLevelScore = playerScorePerLevel[keyLevel] || {},
-          levelScores = currentLevelData.scores || [];
-
-      // make sure the player score map for this level is complete
-      // with 'false' for uncollected points
-      for (var i = 0, score; score = levelScores[i++];) {
-        playerLevelScore[score.id] = playerLevelScore[score.id] || false;
-      }
-
-      // play the collecting sound - before checking if its been collected before
-      // we want sound indication if the point doesn't count towards the player's
-      // total score
-      SoundManager.play('score');
-
-      // if the player already collected this point - nothing to do
-      if (playerLevelScore[sprite.id]) {
-        return;
-      }
-
-      // set the currently earned point to true (collected)
-      playerLevelScore[sprite.id] = true;
-
-      // copy the data back to the main level score map
-      playerScorePerLevel[keyLevel] = playerLevelScore;
-
-      // and save for the user
-      Player.set('scorePerLevel', playerScorePerLevel);
-
-      // update the player's total score (sum of all collected points throughout the levels)
-      // TODO: maybe remove and just count the 'scorePerLevel' whenever we need?
-      Player.set('totalScore', ++playerTotalScore);
-
-      window.dispatchEvent(new CustomEvent('playerScore', {
-        'detail': {
-          'scoreId': sprite.id
-        }
-      }));
-    }
+    // handler for end of collisions per type
+    endHandlers: {}
   };
 
-  var onPlayerCollisionWithEnd = {
-
-  };
-
-  function createPlatform(spriteData, ignoreFrame) {
+  function createPlatform(spriteData, frame) {
     var data = getSpriteData(spriteData, {
       'id': 'platform_' + Math.random(),
       'x': 0,
@@ -878,9 +952,13 @@
       'friction': new Vector(DEFAULT_PLATFORM_FRICTION_X, DEFAULT_PLATFORM_FRICTION_Y)
     });
 
-    if (!ignoreFrame) {
-      data.x += currentLevelData.frameWidth.left;
-      data.y += currentLevelData.frameWidth.top;
+    if (frame === undefined) {
+      frame = LevelHandler.currentData.frameWidth;
+    }
+
+    if (typeof frame === 'object') {
+      data.x += frame.left;
+      data.y += frame.top;
     }
 
     var sprite = new Sprite(data);
@@ -898,8 +976,8 @@
       'friction': new Vector(DEFAULT_MOVABLE_FRICTION_X, DEFAULT_MOVABLE_FRICTION_Y)
     });
 
-    data.x += currentLevelData.frameWidth.left;
-    data.y += currentLevelData.frameWidth.top;
+    data.x += LevelHandler.currentData.frameWidth.left;
+    data.y += LevelHandler.currentData.frameWidth.top;
 
     var sprite = new Sprite(data);
     layerObjects.addSprite(sprite);
@@ -916,8 +994,8 @@
       'friction': new Vector(0, 1)
     });
     
-    data.x += currentLevelData.frameWidth.left;
-    data.y += currentLevelData.frameWidth.top;
+    data.x += LevelHandler.currentData.frameWidth.left;
+    data.y += LevelHandler.currentData.frameWidth.top;
 
     var sprite = new Sprite(data);
 
@@ -1164,7 +1242,7 @@
       },
 
       onLevelReady: function onLevelReady() {
-        var levelScores = currentLevelData.scores || [],
+        var levelScores = LevelHandler.currentData.scores || [],
             html = '';
 
         for (var i = 0, score; score = levelScores[i++];) {
@@ -1178,7 +1256,7 @@
 
       showCollectedScores: function showCollectedScores() {
         var playerScorePerLevel = Player.get('scorePerLevel') || {},
-            playerLevelScore = playerScorePerLevel['level-' + currentLevel] || {},
+            playerLevelScore = playerScorePerLevel['level-' + LevelHandler.currentIndex] || {},
             elScore;
 
         for (var id in playerLevelScore) {
@@ -1206,7 +1284,7 @@
         this.elTotal.innerHTML = Player.get('totalScore');
       }
     }
-  }
+  };
 
   function onKeyIntroTutorial(e) {
     if (Player.isMovingRight || Player.isMovingLeft || Player.isJumping) {
@@ -1269,13 +1347,13 @@
     }
 
     // if player is limited by something - show a message
-    if (currentLevelData.rotationLimit) {
-      var max = currentLevelData.rotationLimit.max,
-          min = currentLevelData.rotationLimit.min;
+    if (LevelHandler.currentData.rotationLimit) {
+      var max = LevelHandler.currentData.rotationLimit.max,
+          min = LevelHandler.currentData.rotationLimit.min;
 
       if (
-          (max !== undefined && newAngle > currentLevelData.rotationLimit.max) ||
-          (min !== undefined && newAngle < currentLevelData.rotationLimit.min)
+          (max !== undefined && newAngle > LevelHandler.currentData.rotationLimit.max) ||
+          (min !== undefined && newAngle < LevelHandler.currentData.rotationLimit.min)
          ) {
         showCantRotateMessage();
         return;
@@ -1355,11 +1433,11 @@
         playerSprite.topLeft.y > game.height ||
         playerSprite.bottomRight.x < 0 ||
         playerSprite.topLeft.x > game.width) {
-      restartLevel(DEATHS.OUT_OF_BOUNDS);
+      playerDie(DEATHS.OUT_OF_BOUNDS);
     }
   }
 
-  loadGameConfig();
+  begin();
 
   // for death areas
   var Bubbles = {
@@ -1468,9 +1546,7 @@
   // this is just an object used to expose some internal methods and objects
   // used as a scope inside level scripts
   var WRAPPER = {
-    loadLevel: loadLevel,
-    initLevel: initLevel,
-    hideLevel: hideLevel,
+    LevelHandler: LevelHandler,
     player: Player,
     createPlatform: createPlatform,
     createMovable: createMovable,
@@ -1478,7 +1554,6 @@
     setPlayerAllowedRotation: setPlayerAllowedRotation,
     playerRotateGravity: playerRotateGravity,
     rotateGravity: rotateGravity,
-    finishLevel: finishLevel,
     layerBackground: layerBackground,
     layerObjects: layerObjects,
     layerPlayer: layerPlayer

@@ -97,6 +97,16 @@ utils = (function() {
                r2.y + r2.height < r1.y);
     },
 
+    json: function json(url, callback) {
+      var request = new XMLHttpRequest();
+      request.open('GET', url, true);
+      request.responseType = 'json';
+      request.onload = function onGameConfigLoad() {
+        callback(request.response);
+      };
+      request.send();
+    },
+
     Storage: {
       get: function get(key, callback) {
         var value = localStorage[key];

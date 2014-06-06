@@ -212,7 +212,7 @@ var MainMenu = (function() {
         elText.parentNode.removeChild(elText);
       });
 
-      data.onSelect && data.onSelect();
+      data.onSelect && data.onSelect(elText);
     },
 
     createHTML: function createHTML() {

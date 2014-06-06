@@ -6,6 +6,7 @@
   "menu-subtitle": "By <a href='http://evyatar.amitay.me/' target='_blank'>Evyatar Amitay</a>",
   "menu-option-new": "New Game",
   "menu-option-continue": "Continue <span>(level {{level}})</span>",
+  "menu-option-select-level": "Select Level...",
   "menu-option-sound": "Sound Enabled",
   "menu-option-volume": "Volume",
   "menu-option-controls": "Controls",
