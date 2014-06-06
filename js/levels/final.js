@@ -28,12 +28,14 @@
       !x && (x = Math.round(Math.random() * (WIDTH - SIZE - 20)));
 
       var sprite = wrapper.createCollectible({
-            'id': 'score',
-            'x': x,
-            'height': SIZE,
-            'width': SIZE,
-            'type': 'score'
-          });
+        'id': 'score',
+        'x': x,
+        'height': SIZE,
+        'width': SIZE,
+        'type': 'score'
+      });
+
+      wrapper.layerObjects.addSprite(sprite);
 
       sprite.onCollisionWith(Player.sprite, this.onCollision);
     },
@@ -43,7 +45,7 @@
         return;
       }
 
-      this.createScore();
+      window.setTimeout(this.createScore.bind(this), 120);
     }
   };
 

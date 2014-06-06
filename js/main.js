@@ -241,68 +241,10 @@
     }
   }
 
-  function drawLevelThumbnail(level, elCanvas) {
-    var width = 120,
-        height = 120;
-
-    elCanvas.width = width;
-    elCanvas.height = height;
-
-    utils.json('data/levels/' + level + '.json', function onLevelLoad(levelData) {
-      elCanvas.style.background = levelData.background;
-
-      var context = elCanvas.getContext('2d'),
-          platforms = levelData.platforms || [],
-          ratioHeight = height / levelData.size.height,
-          ratioWidth = width / levelData.size.width,
-          frameWidth = levelData.frame || 0;
-
-      if (ratioHeight > ratioWidth) {
-        ratioHeight = ratioWidth;
-        elCanvas.height = levelData.size.height * ratioHeight;
-      } else {
-        ratioWidth = ratioHeight;
-      }
-
-      if (typeof frameWidth === 'number') {
-        frameWidth = {
-          'top': frameWidth,
-          'bottom': frameWidth,
-          'left': frameWidth,
-          'right': frameWidth
-        };
-      }
-
-      var frameCSS = 'box-shadow: ' +
-          '0 ' + frameWidth.top*ratioHeight  + 'px 0 0 rgba(0, 0, 0, 1) inset,' +
-          frameWidth.left*ratioWidth  + 'px 0 0 0 rgba(0, 0, 0, 1) inset,' +
-          '0 ' + -frameWidth.bottom*ratioHeight  + 'px 0 0 rgba(0, 0, 0, 1) inset,' +
-          -frameWidth.right*ratioWidth  + 'px 0 0 0 rgba(0, 0, 0, 1) inset;';
-
-      elCanvas.style.cssText += frameCSS;
-
-      for (var i = 0, platform, platformData = {}; platform = platforms[i++];) {
-        var sprite = createPlatform(platform, frameWidth);
-        sprite.layer.removeSprite(sprite);
-
-        sprite.width *= ratioWidth;
-        sprite.height *= ratioHeight;
-        sprite.set(sprite.topLeft.x * ratioWidth, sprite.topLeft.y * ratioHeight);
-
-        sprite.draw(context);
-      }
-    })
-  }
-
   var MenuHandler = {
     init: function init() {
       this._tick = this.tick.bind(this);
       this._onResize = this.onResize.bind(this);
-
-      var htmlLevels = '<ul class="levels">';
-      for (var i = 0; i < NUMBER_OF_LEVELS; i++) {
-        htmlLevels += '<li data-level="' + (i + 1) + '"></li>';
-      }
 
       MainMenu.init({
         'elContainer': document.body,
@@ -317,7 +259,7 @@
           {
             'id': 'select-level',
             'type': 'text',
-            'value': htmlLevels,
+            'value': '',
             'onSelect': this.options.onSelectLevel
           },
           {'type': 'separator'},
@@ -409,17 +351,7 @@
       onSelectLevel: function onSelectLevel(el) {
         SoundManager.play('menu');
 
-        var playerLevel = Player.get('maxLevel');
-        for (var i = 1, elLevel; i <= playerLevel; i++) {
-          elLevel = el.querySelector('[data-level = "' + i + '"]');
-
-          if (elLevel.dataset.loaded) {
-            continue;
-          }
-
-          elLevel.innerHTML = '<canvas></canvas>';
-          drawLevelThumbnail(i, elLevel.querySelector('canvas'));
-        }
+        LevelSelector.draw(el);
       },
 
       onSound: function onSound(value) {
@@ -529,6 +461,156 @@
     }
   };
 
+  var LevelSelector = {
+    levelsToLoad: 0,
+
+    el: null,
+    elLevels: null,
+    WIDTH: 120,
+    HEIGHT: 120,
+
+    // make sure we have all the levels printed here
+    // we run this loop on every show - in case the player has finished some
+    // levels since the last time
+    draw: function draw(el) {
+      if (!this.elLevels) {
+        this.elLevels = document.createElement('ul');
+        this.elLevels.className = 'levels';
+      }
+
+      this.el = el;
+
+      this.levelsToLoad = Player.get('maxLevel');
+
+      for (var i = 1, elLevel; i <= this.levelsToLoad; i++) {
+        elLevel = this.elLevels.querySelector('[data-level = "' + i + '"]');
+        if (elLevel) {
+          continue;
+        }
+
+        elLevel = document.createElement('li');
+        elLevel.dataset.level = i;
+        elLevel.addEventListener('mousedown', this.onLevelClick.bind(this));
+
+        elLevel.innerHTML = '<canvas></canvas>';
+        this.drawLevelThumbnail(i, elLevel.querySelector('canvas'), this.onLevelDrawn.bind(this));
+
+        this.elLevels.appendChild(elLevel);
+      }
+
+      el.appendChild(this.elLevels);
+    },
+
+    onLevelDrawn: function onLevelDrawn(level, elCanvas) {
+      this.levelsToLoad--;
+      if (this.levelsToLoad <= 0) {
+        //this.positionLevels();
+      }
+    },
+
+    positionLevels: function positionLevels() {
+      var elLevels = this.el.querySelectorAll('[data-level]');
+
+      for (var i = 0, elLevel; elLevel = elLevels[i++];) {
+        var finishData = elLevel.dataset,
+            finishY = finishData.finishY * 1,
+            finishX = finishData.finishX * 1,
+            finishWidth = finishData.finishWidth * 1,
+            finishHeight = finishData.finishHeight * 1,
+            x = elLevel.offsetLeft,
+            y = elLevel.offsetTop,
+            elNextLevel = elLevels[i];
+
+        if (elNextLevel) {
+          elNextLevel.style.top = (y + finishY) + 'px';
+          elNextLevel.style.left = (x + finishX + finishWidth) + 'px';
+        }
+      }
+    },
+
+    onLevelClick: function onLevelClick(e) {
+      window.dispatchEvent(new CustomEvent('menuLevelClick', {
+        'detail': {
+          'level': e.target.dataset.level
+        }
+      }));
+    },
+
+    drawLevelThumbnail: function drawLevelThumbnail(level, elCanvas, onDone) {
+      var self = this,
+          el = elCanvas.parentNode;
+
+      elCanvas.width = self.WIDTH;
+      elCanvas.height = self.HEIGHT;
+
+      utils.json('data/levels/' + level + '.json', function onLevelLoad(levelData) {
+        elCanvas.style.background = levelData.background;
+
+        var context = elCanvas.getContext('2d'),
+            platforms = levelData.platforms || [],
+            ratioHeight = self.HEIGHT / levelData.size.height,
+            ratioWidth = self.WIDTH / levelData.size.width,
+            frameWidth = levelData.frame || 0;
+
+        if (ratioHeight > ratioWidth) {
+          ratioHeight = ratioWidth;
+          elCanvas.height = levelData.size.height * ratioHeight;
+        } else {
+          ratioWidth = ratioHeight;
+        }
+
+        if (typeof frameWidth === 'number') {
+          frameWidth = {
+            'top': frameWidth,
+            'bottom': frameWidth,
+            'left': frameWidth,
+            'right': frameWidth
+          };
+        }
+
+        var frameCSS = 'box-shadow: ' +
+            '0 ' + frameWidth.top*ratioHeight  + 'px 0 0 rgba(0, 0, 0, 1) inset,' +
+            frameWidth.left*ratioWidth  + 'px 0 0 0 rgba(0, 0, 0, 1) inset,' +
+            '0 ' + -frameWidth.bottom*ratioHeight  + 'px 0 0 rgba(0, 0, 0, 1) inset,' +
+            -frameWidth.right*ratioWidth  + 'px 0 0 0 rgba(0, 0, 0, 1) inset;';
+
+        elCanvas.style.cssText += frameCSS;
+
+        for (var i = 0, platform, platformData = {}; platform = platforms[i++];) {
+          var sprite = createPlatform(platform, frameWidth);
+
+          sprite.width *= ratioWidth;
+          sprite.height *= ratioHeight;
+          sprite.set(sprite.topLeft.x * ratioWidth, sprite.topLeft.y * ratioHeight);
+
+          sprite.draw(context);
+        }
+
+        var finishArea = createCollectible({
+          'x': levelData.finish.x,
+          'y': levelData.finish.y,
+          'width': levelData.finish.width,
+          'height': levelData.finish.height,
+          'background': DEFAULT_FINISH_COLOR,
+          'type': 'finish'
+        }, frameWidth);
+
+        finishArea.width *= ratioWidth;
+        finishArea.height *= ratioHeight;
+        finishArea.set(finishArea.topLeft.x * ratioWidth, finishArea.topLeft.y * ratioHeight);
+
+        finishArea.draw(context);
+
+        el.dataset.finishX = finishArea.topLeft.x;
+        el.dataset.finishY = finishArea.topLeft.y;
+        el.dataset.finishWidth = finishArea.width;
+        el.dataset.finishHeight = finishArea.height;
+
+        onDone && onDone(level, elCanvas);
+      });
+    }
+  };
+
   var LevelHandler = {
     currentIndex: 1,
     currentData: null,
@@ -536,7 +618,9 @@
 
     init: function init() {
       // when a level is ready - start the game loop
-      window.addEventListener('levelReady', this.onLevelReady);
+      window.addEventListener('levelReady', this.onLevelReady.bind(this));
+      window.addEventListener('menuLevelClick', this.onMenuLevelClick.bind(this));
+
     },
 
     next: function next() {
@@ -698,21 +782,21 @@
       /* --------------- PLATFORMS --------------- */
       if (levelData.platforms) {
         for (var i = 0, spriteData; spriteData = levelData.platforms[i++];) {
-          createPlatform(spriteData);
+          layerBackground.addSprite(createPlatform(spriteData));
         }
       }
 
       /* --------------- MOVABLES --------------- */
       if (levelData.movables) {
         for (var i = 0, spriteData; spriteData = levelData.movables[i++];) {
-          createMovable(spriteData);
+          layerObjects.addSprite(createMovable(spriteData));
         }
       }
 
       /* --------------- COLLECTIBLES --------------- */
       if (levelData.collectibles) {
         for (var i = 0, spriteData; spriteData = levelData.collectibles[i++];) {
-          createCollectible(spriteData);
+          layerObjects.addSprite(createCollectible(spriteData));
         }
       }
 
@@ -722,7 +806,7 @@
         for (var i = 0, spriteData; spriteData = levelData.scores[i++];) {
           spriteData.id = 'score_' + i;
           spriteData.type = 'score';
-          createCollectible(spriteData);
+          layerObjects.addSprite(createCollectible(spriteData));
         }
       }
 
@@ -763,6 +847,11 @@
       }
     },
 
+    onMenuLevelClick: function onMenuLevelClick(e) {
+      var level = e.detail.level;
+      this.load(level);
+    },
+
     // an event called when a level is ready to begin
     // if a level loads an external script - it should fire this event
     onLevelReady: function onLevelReady(e) {
@@ -774,6 +863,7 @@
 
       window.setTimeout(function() {
         game.start();
+        MainMenu.hide();
 
         window.dispatchEvent(new CustomEvent('gameStart', {
           'detail': {
@@ -950,23 +1040,12 @@
       'y': 0,
       'type': 'platform',
       'friction': new Vector(DEFAULT_PLATFORM_FRICTION_X, DEFAULT_PLATFORM_FRICTION_Y)
-    });
+    }, frame);
 
-    if (frame === undefined) {
-      frame = LevelHandler.currentData.frameWidth;
-    }
-
-    if (typeof frame === 'object') {
-      data.x += frame.left;
-      data.y += frame.top;
-    }
-
-    var sprite = new Sprite(data);
-    layerBackground.addSprite(sprite);
-    return sprite;
+    return new Sprite(data);
   }
 
-  function createMovable(spriteData, frameWidth) {
+  function createMovable(spriteData, frame) {
     var data = getSpriteData(spriteData, {
       'id': 'movable_' + Math.random(),
       'x': 0,
@@ -974,17 +1053,12 @@
       'type': 'movable',
       'maxVelocity': new Vector(4, 50000),
       'friction': new Vector(DEFAULT_MOVABLE_FRICTION_X, DEFAULT_MOVABLE_FRICTION_Y)
-    });
+    }, frame);
 
-    data.x += LevelHandler.currentData.frameWidth.left;
-    data.y += LevelHandler.currentData.frameWidth.top;
-
-    var sprite = new Sprite(data);
-    layerObjects.addSprite(sprite);
-    return sprite;
+    return new Sprite(data);;
   }
 
-  function createCollectible(spriteData, frameWidth) {
+  function createCollectible(spriteData, frame) {
     var data = getSpriteData(spriteData, {
       'id': 'collectible_' + Math.random(),
       'x': 0,
@@ -992,17 +1066,16 @@
       'type': 'collectible',
       'collisionable': true,
       'friction': new Vector(0, 1)
-    });
-    
-    data.x += LevelHandler.currentData.frameWidth.left;
-    data.y += LevelHandler.currentData.frameWidth.top;
+    }, frame);
 
     var sprite = new Sprite(data);
 
     if (data.type === 'death') {
+      // change the "death" area methods to add the bubbling
       sprite.update = Bubbles.update;
       sprite.draw = Bubbles.draw;
 
+      // if we have a death sound - automatically create ambient around the death area
       if (DEATH_AREA_SOUND) {
         for (var i = 1, sizeStep; i <= DEATH_SOUND_NUMBER_OF_STEPS; i++) {
           sizeStep = DEATH_SOUND_DISTANCE_STEP * i;
@@ -1024,8 +1097,6 @@
         }
       }
     }
-
-    layerObjects.addSprite(sprite);
 
     return sprite;
   }
@@ -1104,7 +1175,7 @@
     }
 
     for (var i = 0, data; data = platforms[i++];) {
-      createPlatform(data, true);
+      layerBackground.addSprite(createPlatform(data, true));
     }
   }
 
@@ -1124,7 +1195,7 @@
 
     layerObjects.addSprite(finishLight);
 
-    createCollectible(finishData, frameWidth);
+    layerObjects.addSprite(createCollectible(finishData, frameWidth));
   }
 
   function showCantRotateMessage() {
@@ -1140,8 +1211,7 @@
     });
   }
 
-
-  function getSpriteData(data, defaults) {
+  function getSpriteData(data, defaults, frame) {
     var newData = {};
 
     // take the defaults passed to the function
@@ -1160,12 +1230,21 @@
       }
     }
 
-    // lastly override everything with the actual data for the sprite
+    // override everything with the actual data for the sprite
     fillWith(newData, {}, data);
+
+    // lastly add the frame size to the sprite position
+    if (frame === undefined) {
+      frame = LevelHandler.currentData.frameWidth;
+    }
+
+    if (typeof frame === 'object') {
+      newData.x += frame.left;
+      newData.y += frame.top;
+    }
 
     return newData;
   }
-
 
   var UIControls = {
     elButtons: [],
@@ -1437,8 +1516,6 @@
     }
   }
 
-  begin();
-
   // for death areas
   var Bubbles = {
     update: function updateBubble(dt) {
@@ -1558,4 +1635,6 @@
     layerObjects: layerObjects,
     layerPlayer: layerPlayer
   };
+
+  begin();
 }());

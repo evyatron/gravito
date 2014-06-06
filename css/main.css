@@ -555,13 +555,18 @@ a {
       background: rgba(255, 255, 255, .1);
     }
     #menu .text-select-level li {
+      /*position: absolute;*/
       display: inline-block;
       margin: 0;
       -webkit-transition: all 400ms ease-in-out;
       transition: all 400ms ease-in-out;
     }
+    #menu .text-select-level li:first-child {
+      top: 10px;
+      left: 10px;
+    }
       #menu .text-select-level li canvas {
-        
+        pointer-events: none;
       }
     #menu .text-select-level li:hover {
       
