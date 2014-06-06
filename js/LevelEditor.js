@@ -97,8 +97,8 @@ var LevelEditor = (function() {
   }
 
   function initLevel() {
-    game.hideLevel();
-    game.initLevel(levelData);
+    game.LevelHandler.hide();
+    game.LevelHandler.create(levelData);
   }
 
   function cancelGravity() {
@@ -268,34 +268,37 @@ var LevelEditor = (function() {
   }
 
   function spawnPlatform() {
-    game.createPlatform({
+    var sprite = game.createPlatform({
       'id': 'new_platform_' + Date.now(),
       'x': game.game.width / 2,
       'y': game.game.height / 2,
       'width': DEFAULT_PLATFORM.width,
       'height': DEFAULT_PLATFORM.height
     });
+    game.layerBackground.addSprite(sprite);
     updateLevelData();
   }
 
   function spawnMovable() {
-    game.createMovable({
+    var sprite = game.createMovable({
       'id': 'new_movable_' + Date.now(),
       'x': game.game.width / 2,
       'y': game.game.height / 2,
       'width': DEFAULT_MOVABLE.width,
       'height': DEFAULT_MOVABLE.height
     });
+    game.layerObjects.addSprite(sprite);
     updateLevelData();
   }
 
   function spawnScore() {
-    game.createCollectible({
+    var sprite = game.createCollectible({
       'id': 'new_score_' + Date.now(),
       'type': 'score',
       'x': game.game.width / 2,
       'y': game.game.height / 2
     });
+    game.layerObjects.addSprite(sprite);
     updateLevelData();
   }
 
