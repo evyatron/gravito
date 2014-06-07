@@ -19,11 +19,16 @@ var LevelEditor = (function() {
         'player': {
         },
         'finish': {
-          'x': 0,
-          'y': 0,
+          'x': CONFIG.WIDTH - 20,
+          'y': CONFIG.HEIGHT - 70,
           'width': 10,
           'height': 50
         },
+        "rotationLimit": {
+          "min": 0,
+          "max": 0,
+        },
+
         "platforms": [],
         "movables": [],
         "collectibles": [],
@@ -62,10 +67,12 @@ var LevelEditor = (function() {
         'frame_top',
         'frame_bottom',
         'frame_left',
-        'frame_right'
+        'frame_right', 'frame_right_finish_top', 'frame_right_finish_bottom', 'frame_right_finish_behind'
       ];
 
   function init(options) {
+    document.title += ' - Level Editor';
+
     game = options.game;
     elUI = options.elUI;
 
@@ -77,6 +84,8 @@ var LevelEditor = (function() {
     el.querySelector('.size').addEventListener('keyup', onSizeKeyPress);
     el.querySelector('.width').addEventListener('blur', updateLevelProperties);
     el.querySelector('.height').addEventListener('blur', updateLevelProperties);
+    el.querySelector('.rotation-min').addEventListener('blur', updateLevelProperties);
+    el.querySelector('.rotation-max').addEventListener('blur', updateLevelProperties);
     el.querySelector('.background').addEventListener('change', updateLevelProperties);
     el.querySelector('.play').addEventListener('click', play);
     el.querySelector('.stop').addEventListener('click', stop);
@@ -85,12 +94,33 @@ var LevelEditor = (function() {
     el.querySelector('.button-movable').addEventListener('click', spawnMovable);
     el.querySelector('.button-score').addEventListener('click', spawnScore);
 
+    el.querySelector('.show-json').addEventListener('click', showJSON);
+
     window.addEventListener('gameStart', function onFirstGameStart(e) {
       window.removeEventListener('gameStart', onFirstGameStart);
       cancelGravity();
     });
 
     document.body.classList.add('editor');
+  }
+
+  function showJSON() {
+    var json = JSON.parse(JSON.stringify(levelData)),
+        w = window.open('_blank', 'about:blank'),
+        doc = w.document;
+
+    delete json.frameWidth;
+
+    if (json.frame.top === json.frame.left &&
+        json.frame.left === json.frame.right && 
+        json.frame.right === json.frame.bottom) {
+      json.frame = json.frame.top;
+    }
+
+    json = JSON.stringify(json, undefined, 2),
+
+    doc.write('<pre>' + json + '</pre>');
+    doc.title = 'Level';
   }
 
   function begin() {
@@ -140,15 +170,25 @@ var LevelEditor = (function() {
   }
 
   function play() {
+    if (running) {
+      return;
+    }
+
     restoreGravity();
     initLevel();
     running = true;
+    document.body.classList.add('editor-running');
   }
 
   function stop() {
+    if (!running) {
+      return;
+    }
+
     cancelGravity();
     initLevel();
     running = false;
+    document.body.classList.remove('editor-running');
   }
 
   function updateLevelData() {
@@ -250,7 +290,11 @@ var LevelEditor = (function() {
     };
     levelData.player = {
       'x': Player.sprite.topLeft.x,
-      'y': Player.sprite.topLeft.y,
+      'y': Player.sprite.topLeft.y
+    };
+    levelData.rotationLimit = {
+      'min': el.querySelector('.rotation-min').value * 1,
+      'max': el.querySelector('.rotation-max').value * 1
     };
 
     boundXYToLevel(Player.sprite, levelData.player);
@@ -433,25 +477,50 @@ var LevelEditor = (function() {
                         'x' +
                         '<input type="number" class="height" value="' + CONFIG.HEIGHT + '" />' +
                       '</label>' +
-                   '</div>' +
-                   '<div class="bg">' +
+                    '</div>' +
+                    '<div class="bg">' +
                       '<label>' +
                         '<b>Background:</b>' +
                         '<input type="color" class="background" value="#ffffff" />' +
                       '</label>' +
-                   '</div>' +
-                   '<div class="game">' +
-                    '<button class="play">Play</button>' +
-                    '<button class="stop">Stop</button>' +
-                   '</div>' +
-                   '<ul class="controls">' +
-                    '<li class="button-platform"><span class="key">Z</span><span>Platform</span></li>' +
-                    '<li class="button-movable"><span class="key">X</span><span>Movable</span></li>' +
-                    '<li class="button-score"><span class="key">C</span><span>Score</span></li>' +
-                    '<li class="button-resize"><span class="key">Shift</span><span>Resize</span></li>' +
-                    '<li class="button-snap"><span class="key">Ctrl</span><span>Snap 10</span></li>' +
-                   '</ul>' +
-                   '<ul class="holding-stats"></ul>';
+                    '</div>' +
+                    '<div class="rotation">' +
+                      '<label>' +
+                        '<b>Rotation Min:</b>' +
+                        '<select class="rotation-min">' +
+                          '<option value="0">0</option>' +
+                          '<option value="-90">-90</option>' +
+                          '<option value="-180">-180</option>' +
+                          '<option value="-360">-360</option>' +
+                        '</select>' +
+                      '</label>' +
+                    '</div>' +
+                    '<div class="rotation">' +
+                      '<label>' +
+                        '<b>Rotation Max:</b>' +
+                        '<select class="rotation-max">' +
+                          '<option value="0">0</option>' +
+                          '<option value="90">90</option>' +
+                          '<option value="180">180</option>' +
+                          '<option value="360">360</option>' +
+                        '</select>' +
+                      '</label>' +
+                    '</div>' +
+                    '<div class="game">' +
+                      '<button class="play">Play</button>' +
+                      '<button class="stop">Stop</button>' +
+                    '</div>' +
+                    '<ul class="controls">' +
+                      '<li class="button-platform"><span class="key">Z</span><span>Platform</span></li>' +
+                      '<li class="button-movable"><span class="key">X</span><span>Movable</span></li>' +
+                      '<li class="button-score"><span class="key">C</span><span>Score</span></li>' +
+                      '<li class="button-resize"><span class="key">Shift</span><span>Resize</span></li>' +
+                      '<li class="button-snap"><span class="key">Ctrl</span><span>Snap 10</span></li>' +
+                    '</ul>' +
+                    '<ul class="holding-stats"></ul>' +
+                    '<div class="export">' +
+                      '<button class="show-json">Show JSON</button>' +
+                    '</div>';
 
 
     elCurrentHolding = el.querySelector('.holding-stats');

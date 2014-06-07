@@ -596,7 +596,26 @@ a {
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 1);
 }
 .editor #controls {
-  height: 160px;
+  height: 170px;
+}
+
+#controls:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 600;
+  opacity: 0;
+  pointer-events: none;
+  background: rgba(0, 0, 0, .7);
+  -webkit-transition: all 160ms ease-in-out;
+  transition: all 160ms ease-in-out;
+}
+.editor-running #controls:before {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 #controls #editor {
@@ -620,7 +639,7 @@ a {
       #editor > div label b {
         display: inline-block;
         vertical-align: middle;
-        width: 80px;
+        width: 100px;
       }
       #editor > div label input {
         vertical-align: middle;
@@ -632,19 +651,20 @@ a {
       #editor .size label input {
         width: 40px;
       }
+      #editor .rotation label select {
+        width: 50px;
+      }
   #editor .game {
     position: absolute;
     bottom: 100%;
-    left: 0;
-    right: 0;
+    left: -5px;
     margin-bottom: 4px;
     padding: 0;
-    text-align: center;
   }
-    #editor .game button {
-      padding: 4px 14px;
-      margin: 0 5px;
-    }
+  #editor button {
+    padding: 4px 14px;
+    margin: 0 5px;
+  }
 
   #editor .controls {
     position: absolute;
@@ -691,6 +711,13 @@ a {
   #editor .holding-stats label {
     display: inline-block;
     width: 80px;
+  }
+
+  #editor .show-json {
+    position: absolute;
+    bottom: 100%;
+    right: -5px;
+    margin-bottom: 4px;
   }
 
 

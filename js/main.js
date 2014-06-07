@@ -1152,18 +1152,21 @@
 
       if (utils.rectIntersect(finishData, data)) {
         platforms.push({
+          'id': 'frame_right_finish_top',
           'x': game.width - frameWidth.right,
           'y': frameWidth.top,
           'width': frameWidth.right,
           'height': finishData.y
         });
         platforms.push({
+          'id': 'frame_right_finish_bottom',
           'x': game.width - frameWidth.right,
           'y': finishData.y + finishData.height + frameWidth.top,
           'width': frameWidth.right,
           'height': game.height - (finishData.y + finishData.height + frameWidth.top)
         });
         platforms.push({
+          'id': 'frame_right_finish_behind',
           'x': finishData.x + finishData.width + frameWidth.left,
           'y': finishData.y + frameWidth.top,
           'width': frameWidth.right,

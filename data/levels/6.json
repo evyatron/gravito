@@ -1,0 +1,47 @@
+{
+  "frame": 10,
+  "background": "",
+  "size": {
+    "width": 800,
+    "height": 600
+  },
+  "player": {
+    "x": 10,
+    "y": 570
+  },
+  "finish": {
+    "x": 780,
+    "y": 530,
+    "width": 10,
+    "height": 50
+  },
+  "rotationLimit": {
+    "min": -360,
+    "max": 360
+  },
+
+  "platforms": [
+    {
+      "x": 110,
+      "y": 549,
+      "width": 120,
+      "height": 10
+    },
+    {
+      "x": 201,
+      "y": 498,
+      "width": 60,
+      "height": 10
+    }
+  ],
+  "movables": [],
+  "collectibles": [],
+  "scores": [
+    {
+      "x": 329,
+      "y": 435,
+      "id": "score_1",
+      "type": "score"
+    }
+  ]
+}
