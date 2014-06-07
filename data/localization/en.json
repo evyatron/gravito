@@ -26,6 +26,10 @@
   ],
 
   "level-2": null,
+  "level-2-dialog-1": [
+    "That's....Far.",
+    "How am I supposed to get all the way over there??"
+  ],
 
   "level-3": [
     "NEED TO ADD A LEVEL - explain points to collect (??)"
@@ -36,23 +40,23 @@
     "Ugh! What's that smell??",
     "I think it's coming from that green stuff over there."
   ],
+  "level-4-dialog-before-death": "{d:1500}Easy now.....",
+  "level-4-dialog-after-death": "{d:1000}Phew!",
+  "level-4-dialog-death": "{d:2000}Damn",
 
-  "level-5": [
-    "...Oh great."
-  ],
+  "level-5": "...Oh great.",
 
   "level-6": [
-    "Well the good news are it seems to be getting brighter in here.",
-    "So I'm probably on the right track.",
+    "Phew.",
+    "Well at least it seems to be getting brighter, so I'm probably on the right track.",
     "Gotta keep going!"
   ],
 
-
-  "level-": [
-    "Ugh, it's so bright in here!"
+  "level-7": [
   ],
 
-  "level-9": [
+
+  "level-BEFORE-FINAL-NEED-NUMBER": [
     "Now that's more like it.",
     "Hey I think I can see my bed through there!",
     "I can do it!"

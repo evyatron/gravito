@@ -82,6 +82,16 @@
       "data": {
         "collisionCallback": "onCollectRotate1"
       }
+    },
+    {
+      "type": "text",
+      "x": 110,
+      "y": 0,
+      "width": 40,
+      "height": 70,
+      "data": {
+        "text": "level-2-dialog-1"
+      }
     }
   ]
 }

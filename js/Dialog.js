@@ -26,8 +26,11 @@ Dialog = (function() {
       var texts = options.text,
           id = options.id || 'dialog';
 
-      if (document.getElementById('dialog-' + id)) {
-        return;
+      if (this.el) {
+        if (this.el.id === 'dialog-' + id) {
+          return;
+        }
+        this.hide();
       }
 
       if (!Array.isArray(texts)) {
@@ -87,9 +90,14 @@ Dialog = (function() {
     },
 
     nextStep: function nextStep() {
+      this.hide();
+      this.showText();
+    },
+
+    hide: function hide() {
       this.el && this.el.parentNode.removeChild(this.el);
       this.el = null;
-      this.showText();
+      window.clearTimeout(this.timeoutNextStep);
     },
 
     onKeyPress: function onKeyPress(e) {

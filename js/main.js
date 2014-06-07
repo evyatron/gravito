@@ -885,6 +885,7 @@
   }
 
   function playerDie(cause) {
+    Dialog.hide();
     LevelHandler.restart();
 
     window.dispatchEvent(new CustomEvent('player-die', {
@@ -916,6 +917,25 @@
       if (sprite.data.sound) {
         SoundManager.setVolume(sprite.data.sound, sprite.data.volume);
         SoundManager.play(sprite.data.sound);
+      }
+
+      if (sprite.data.text) {
+        var text = utils.l10n.get(sprite.data.text),
+            timesToShow = sprite.data.textTimes;
+
+        if (timesToShow === undefined) {
+          timesToShow = 1;
+        }
+
+        if (timesToShow) {
+          sprite.data.textTimes = timesToShow - 1;
+
+          Dialog.show({
+            'id': sprite.data.text,
+            'sprite': Player.sprite,
+            'text': text
+          });
+        }
       }
 
       if (sprite.data.collisionCallback) {
