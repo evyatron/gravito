@@ -42,7 +42,7 @@
   ],
   "level-4-dialog-before-death": "{d:1500}Easy now.....",
   "level-4-dialog-after-death": "{d:1000}Phew!",
-  "level-4-dialog-death": "{d:2000}Damn",
+  "level-4-dialog-death": "{d:5000}Damn",
 
   "level-5": "...Oh great.",
 
