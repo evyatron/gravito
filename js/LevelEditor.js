@@ -54,6 +54,7 @@ var LevelEditor = (function() {
       running = false,
 
       IS_SHIFT_DOWN = false,
+      IS_CTRL_DOWN = false,
 
       SPRITE_IDS_TO_EXCLUDE = [
         'player',
@@ -333,6 +334,9 @@ var LevelEditor = (function() {
       case 16: // Shift
         IS_SHIFT_DOWN = true;
         break;
+      case 17: // Ctrl
+        IS_CTRL_DOWN = true;
+        break;
     }
   }
 
@@ -340,6 +344,9 @@ var LevelEditor = (function() {
     switch (e.keyCode) {
       case 16: // Shift
         IS_SHIFT_DOWN = false;
+        break;
+      case 17: // Ctrl
+        IS_CTRL_DOWN = false;
         break;
       case 46: // Del
         deleteHeldSprite();
@@ -377,23 +384,27 @@ var LevelEditor = (function() {
   function onMouseMove(e) {
     var diffX = e.pageX - mouseStartX,
         diffY = e.pageY - mouseStartY,
-        size = {
-          'width': spriteStartWidth,
-          'height': spriteStartHeight
-        },
         position = {
           'x': spriteStartX,
           'y': spriteStartY
         };
     
     if (IS_SHIFT_DOWN) {
-      size.width += diffX;
-      size.height += diffY;
-      holding.width = size.width;
-      holding.height = size.height;
+      holding.width = spriteStartWidth + diffX;
+      holding.height = spriteStartHeight + diffY;
+
+      if (IS_CTRL_DOWN) {
+        holding.width -= holding.width % 10;
+        holding.height -= holding.height % 10;
+      }
     } else {
       position.x += diffX
       position.y += diffY
+
+      if (IS_CTRL_DOWN) {
+        position.x -= position.x % 10;
+        position.y -= position.y % 10;
+      }
 
       boundXYToLevel(holding, position);
       holding.set(position.x, position.y);
@@ -437,6 +448,8 @@ var LevelEditor = (function() {
                     '<li class="button-platform"><span class="key">Z</span><span>Platform</span></li>' +
                     '<li class="button-movable"><span class="key">X</span><span>Movable</span></li>' +
                     '<li class="button-score"><span class="key">C</span><span>Score</span></li>' +
+                    '<li class="button-resize"><span class="key">Shift</span><span>Resize</span></li>' +
+                    '<li class="button-snap"><span class="key">Ctrl</span><span>Snap 10</span></li>' +
                    '</ul>' +
                    '<ul class="holding-stats"></ul>';
 
