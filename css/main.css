@@ -682,8 +682,7 @@ a {
     #editor .controls li:hover {
       background: rgba(255, 255, 255, .3);
     }
-    #editor .controls li.button-resize,
-    #editor .controls li.button-snap {
+    #editor .controls li.button-resize {
       background: transparent;
       cursor: default;
     }
@@ -694,6 +693,24 @@ a {
     #editor .controls span.key {
       margin-right: 4px;
       line-height: 24px;
+    }
+
+  #editor .snap {
+    position: absolute;
+    top: 10px;
+    right: 112px;
+    padding: 5px;
+    background: rgba(0, 0, 0, .1);
+    border-radius: 5px;
+  }
+    #editor .snap * {
+      display: inline-block;
+      vertical-align: middle;
+    }
+    #editor .snap span {
+      position: relative;
+      top: -1px;
+      margin-left: 5px;
     }
 
 #editor .holding-stats {

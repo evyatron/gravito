@@ -45,6 +45,11 @@ var LevelEditor = (function() {
         'height': 20
       },
 
+      DEFAULT_TEXT = {
+        'width': 50,
+        'height': 50
+      },
+
       sprites = [],
 
       spriteStartX = 0,
@@ -60,6 +65,8 @@ var LevelEditor = (function() {
 
       IS_SHIFT_DOWN = false,
       IS_CTRL_DOWN = false,
+
+      IS_SNAP = false,
 
       SPRITE_IDS_TO_EXCLUDE = [
         'player',
@@ -87,12 +94,15 @@ var LevelEditor = (function() {
     el.querySelector('.rotation-min').addEventListener('blur', updateLevelProperties);
     el.querySelector('.rotation-max').addEventListener('blur', updateLevelProperties);
     el.querySelector('.background').addEventListener('change', updateLevelProperties);
+    el.querySelector('.is-snap').addEventListener('change', onSnapChange);
+
     el.querySelector('.play').addEventListener('click', play);
     el.querySelector('.stop').addEventListener('click', stop);
 
     el.querySelector('.button-platform').addEventListener('click', spawnPlatform);
     el.querySelector('.button-movable').addEventListener('click', spawnMovable);
     el.querySelector('.button-score').addEventListener('click', spawnScore);
+    el.querySelector('.button-text').addEventListener('click', spawnText);
 
     el.querySelector('.show-json').addEventListener('click', showJSON);
 
@@ -102,6 +112,12 @@ var LevelEditor = (function() {
     });
 
     document.body.classList.add('editor');
+    onSnapChange();
+  }
+
+  function onSnapChange() {
+    var elInput = el.querySelector('.is-snap');
+    IS_SNAP = elInput.checked;
   }
 
   function showJSON() {
@@ -221,23 +237,32 @@ var LevelEditor = (function() {
       var type = sprite.type,
           data = {
             'x': sprite.topLeft.x - levelData.frame.left,
-            'y': sprite.topLeft.y - levelData.frame.top
+            'y': sprite.topLeft.y - levelData.frame.top,
+            'width': sprite.width,
+            'height': sprite.height
           };
 
       switch (type) {
         case 'score':
+          delete data.width;
+          delete data.height;
           scores.push(data);
           break;
         case 'platform':
-          data.width = sprite.width;
-          data.height = sprite.height;
           platforms.push(data);
           break;
         case 'movable':
-          data.width = sprite.width;
-          data.height = sprite.height;
           movables.push(data);
           break;
+        case 'text':
+          data.type = sprite.type;
+          data.data = {
+            'text': '[ENTER TEXT ID]'
+          };
+          collectibles.push(data);
+          break;
+        default:
+          collectibles.push(data);
       }
     }
 
@@ -347,6 +372,19 @@ var LevelEditor = (function() {
     updateLevelData();
   }
 
+  function spawnText() {
+    var sprite = game.createCollectible({
+      'id': 'new_text_' + Date.now(),
+      'type': 'text',
+      'x': game.game.width / 2,
+      'y': game.game.height / 2,
+      'width': DEFAULT_TEXT.width,
+      'height': DEFAULT_TEXT.height
+    });
+    game.layerObjects.addSprite(sprite);
+    updateLevelData();
+  }
+
   function updateCurrentlyHoldingInformation() {
     elCurrentHolding.innerHTML = 
       '<li><label>x:</label>' + holding.topLeft.x + '</li>' +
@@ -395,16 +433,14 @@ var LevelEditor = (function() {
       case 46: // Del
         deleteHeldSprite();
         break;
-      case 90: //Z
+      case 49: // 1
         spawnPlatform();
         break;
-      case 88: //X
+      case 50: // 2
         spawnMovable();
         break;
-      case 67: //C
+      case 51: // 3
         spawnScore();
-        break;
-      case 86: //V
         break;
     }
   }
@@ -428,6 +464,7 @@ var LevelEditor = (function() {
   function onMouseMove(e) {
     var diffX = e.pageX - mouseStartX,
         diffY = e.pageY - mouseStartY,
+        snap = IS_SNAP || IS_CTRL_DOWN,
         position = {
           'x': spriteStartX,
           'y': spriteStartY
@@ -437,7 +474,7 @@ var LevelEditor = (function() {
       holding.width = spriteStartWidth + diffX;
       holding.height = spriteStartHeight + diffY;
 
-      if (IS_CTRL_DOWN) {
+      if (snap) {
         holding.width -= holding.width % 10;
         holding.height -= holding.height % 10;
       }
@@ -445,7 +482,7 @@ var LevelEditor = (function() {
       position.x += diffX
       position.y += diffY
 
-      if (IS_CTRL_DOWN) {
+      if (snap) {
         position.x -= position.x % 10;
         position.y -= position.y % 10;
       }
@@ -506,18 +543,24 @@ var LevelEditor = (function() {
                         '</select>' +
                       '</label>' +
                     '</div>' +
+                    '<ul class="controls">' +
+                      '<li class="button-platform"><span class="key">1</span><span>Platform</span></li>' +
+                      '<li class="button-movable"><span class="key">2</span><span>Movable</span></li>' +
+                      '<li class="button-score"><span class="key">3</span><span>Score</span></li>' +
+                      '<li class="button-text"><span class="key">4</span><span>Text</span></li>' +
+                      '<li class="button-resize"><span class="key">Shift</span><span>Resize</span></li>' +
+                    '</ul>' +
+                    '<div class="snap">' +
+                      '<label for="is-snap">' +
+                        '<input type="checkbox" id="is-snap" class="is-snap" checked />' +
+                        '<span>Snap to Grid</span>' +
+                      '</label>' +
+                    '</div>' +
+                    '<ul class="holding-stats"></ul>' +
                     '<div class="game">' +
                       '<button class="play">Play</button>' +
                       '<button class="stop">Stop</button>' +
                     '</div>' +
-                    '<ul class="controls">' +
-                      '<li class="button-platform"><span class="key">Z</span><span>Platform</span></li>' +
-                      '<li class="button-movable"><span class="key">X</span><span>Movable</span></li>' +
-                      '<li class="button-score"><span class="key">C</span><span>Score</span></li>' +
-                      '<li class="button-resize"><span class="key">Shift</span><span>Resize</span></li>' +
-                      '<li class="button-snap"><span class="key">Ctrl</span><span>Snap 10</span></li>' +
-                    '</ul>' +
-                    '<ul class="holding-stats"></ul>' +
                     '<div class="export">' +
                       '<button class="show-json">Show JSON</button>' +
                     '</div>';
