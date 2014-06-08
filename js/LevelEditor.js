@@ -137,6 +137,14 @@ var LevelEditor = (function() {
 
     doc.write('<pre>' + json + '</pre>');
     doc.title = 'Level';
+
+    // automatically select the entire content
+    var selection = w.getSelection(),
+        range = doc.createRange();
+
+    range.selectNodeContents(doc.body);
+    selection.removeAllRanges();
+    selection.addRange(range);
   }
 
   function begin() {
@@ -544,13 +552,13 @@ var LevelEditor = (function() {
                       '</label>' +
                     '</div>' +
                     '<ul class="controls">' +
-                      '<li class="button-platform"><span class="key">1</span><span>Platform</span></li>' +
-                      '<li class="button-movable"><span class="key">2</span><span>Movable</span></li>' +
-                      '<li class="button-score"><span class="key">3</span><span>Score</span></li>' +
-                      '<li class="button-text"><span class="key">4</span><span>Text</span></li>' +
-                      '<li class="button-resize"><span class="key">Shift</span><span>Resize</span></li>' +
+                      '<li class="button-platform" title="Create a platform"><span class="key">1</span><span>Platform</span></li>' +
+                      '<li class="button-movable" title="Create a movable object"><span class="key">2</span><span>Movable</span></li>' +
+                      '<li class="button-score" title="Create a score (collectible with type score)"><span class="key">3</span><span>Score</span></li>' +
+                      '<li class="button-text" title="Create a text trigger area (collectible with type text)"><span class="key">4</span><span>Text</span></li>' +
+                      '<li class="button-resize" title="Hold SHIFT key while dragging to resize sprite"><span class="key">Shift</span><span>Resize</span></li>' +
                     '</ul>' +
-                    '<div class="snap">' +
+                    '<div class="snap" title="Snap sprites to 10x">' +
                       '<label for="is-snap">' +
                         '<input type="checkbox" id="is-snap" class="is-snap" checked />' +
                         '<span>Snap to Grid</span>' +
