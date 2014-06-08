@@ -214,6 +214,10 @@
     }
   }
 
+  function disableDeathAreaSound() {
+    DEATH_AREA_SOUND = '';
+  }
+
   function onPlayerDie(e) {
     var cause = (e.detail || {}).cause,
         key = 'tutorial-die-' + cause,
@@ -1651,6 +1655,7 @@
     createPlatform: createPlatform,
     createMovable: createMovable,
     createCollectible: createCollectible,
+    disableDeathAreaSound: disableDeathAreaSound,
     setPlayerAllowedRotation: setPlayerAllowedRotation,
     playerRotateGravity: playerRotateGravity,
     rotateGravity: rotateGravity,

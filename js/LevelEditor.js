@@ -50,6 +50,11 @@ var LevelEditor = (function() {
         'height': 50
       },
 
+      DEFAULT_DEATH = {
+        'width': 200,
+        'height': 100
+      },
+
       spriteStartX = 0,
       spriteStartY = 0,
       spriteStartWidth = 0,
@@ -81,6 +86,8 @@ var LevelEditor = (function() {
     game = options.game;
     elUI = options.elUI;
 
+    game.disableDeathAreaSound();
+
     initUI();
 
     window.addEventListener('mousedown', onMouseDown);
@@ -101,6 +108,7 @@ var LevelEditor = (function() {
     el.querySelector('.button-movable').addEventListener('click', spawnMovable);
     el.querySelector('.button-score').addEventListener('click', spawnScore);
     el.querySelector('.button-text').addEventListener('click', spawnText);
+    el.querySelector('.button-death').addEventListener('click', spawnDeath);
 
     el.querySelector('.json-export').addEventListener('click', showJSON);
     el.querySelector('.json-import').addEventListener('click', loadFromJSON);
@@ -295,6 +303,10 @@ var LevelEditor = (function() {
         case 'movable':
           movables.push(data);
           break;
+        case 'death':
+          data.type = sprite.type;
+          collectibles.push(data);
+          break;
         case 'text':
           data.type = sprite.type;
           data.data = {
@@ -426,6 +438,20 @@ var LevelEditor = (function() {
     updateLevelData();
   }
 
+  function spawnDeath() {
+    var sprite = game.createCollectible({
+      'id': 'new_death_' + Date.now(),
+      'type': 'death',
+      'x': game.game.width / 2,
+      'y': game.game.height / 2,
+      'width': DEFAULT_DEATH.width,
+      'height': DEFAULT_DEATH.height
+    });
+    game.layerObjects.addSprite(sprite);
+    console.log(sprite)
+    updateLevelData();
+  }
+
   function updateCurrentlyHoldingInformation() {
     elCurrentHolding.innerHTML = 
       '<li><label>x:</label>' + holding.topLeft.x + '</li>' +
@@ -482,6 +508,12 @@ var LevelEditor = (function() {
         break;
       case 51: // 3
         spawnScore();
+        break;
+      case 51: // 4
+        spawnText();
+        break;
+      case 52: // 5
+        spawnDeath();
         break;
     }
   }
@@ -589,6 +621,7 @@ var LevelEditor = (function() {
                       '<li class="button-movable" title="Create a movable object"><span class="key">2</span><span>Movable</span></li>' +
                       '<li class="button-score" title="Create a score (collectible with type score)"><span class="key">3</span><span>Score</span></li>' +
                       '<li class="button-text" title="Create a text trigger area (collectible with type text)"><span class="key">4</span><span>Text</span></li>' +
+                      '<li class="button-death" title="Create a death area (collectible with type death)"><span class="key">5</span><span>Death</span></li>' +
                       '<li class="button-resize" title="Hold SHIFT key while dragging to resize sprite"><span class="key">Shift</span><span>Resize</span></li>' +
                     '</ul>' +
                     '<div class="snap" title="Snap sprites to 10x">' +

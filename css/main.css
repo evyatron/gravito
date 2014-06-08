@@ -678,7 +678,7 @@ a {
     list-style-type: none;
   }
     #editor .controls li {
-      padding: 3px 7px;
+      padding: 2px 7px;
       cursor: pointer;
     }
     #editor .controls li:hover {
@@ -694,7 +694,8 @@ a {
     }
     #editor .controls span.key {
       margin-right: 4px;
-      line-height: 24px;
+      height: 20px;
+      line-height: 20px;
     }
 
   #editor .snap {
