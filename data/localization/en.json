@@ -2,7 +2,7 @@
   "NOTE": "This is a plain-text file with ALL OF THE GAMES' TEXT",
   "NOTE": "As such, it will contain MANY SPOILERS and should really not be viewed by anyone",
 
-  "menu-title": "[GAME]",
+  "menu-title": "[ALICE]",
   "menu-subtitle": "By <a href='http://evyatar.amitay.me/' target='_blank'>Evyatar Amitay</a>",
   "menu-option-new": "New Game",
   "menu-option-continue": "Continue <span>(level {{level}})</span>",
@@ -46,13 +46,18 @@
 
   "level-5": "...Oh great.",
 
-  "level-6": [
+  "level-": [
     "Phew.",
     "Well at least it seems to be getting brighter, so I'm probably on the right track.",
     "Gotta keep going!"
   ],
 
-  "level-7": [
+  "level-": [
+    "WHEN GETTING 180 DEVICE",
+    "How exactly am I supposed to get all the way up there??"
+  ],
+
+  "level-": [
   ],
 
 
@@ -94,6 +99,15 @@
     "{m:gravityCCW}{d:2500}",
     "{d:1800}Yeap. That's it.",
     "Oh I'm going to enjoy this!"
+  ],
+  "gravity-2": [
+    "Hey this looks familiar...Maybe if I.....",
+    "*Tinkering*",
+    "Come on! Just a little bit more....",
+    "Got it! It connects perfectly (after enough persuasion) to that other device I found!",
+    "So let's see what this new button does...",
+    "{m:gravityFlip}",
+    "Woooooooo!"
   ],
 
   "tutorial-die-poison": [

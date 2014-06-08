@@ -397,7 +397,7 @@ a {
     left: 89px;
     font: 300 0.8em monospace;
     line-height: 1;
-    letter-spacing: 0.028em;
+    letter-spacing: 0.035em;
     text-transform: lowercase;
     opacity: .3;
     z-index: 150;
@@ -409,7 +409,7 @@ a {
       left: 0;
       height: 1px;
       background: #fff;
-      width: 266px;
+      width: 269px;
     }
     #menu h2 a {
       text-decoration: none;

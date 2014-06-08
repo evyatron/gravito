@@ -1,6 +1,6 @@
-gravito
+[ALICE].
 =======
 
 Gravity-Control JavaScript Game
 
-http://evyatar.amitay.me/playground/gravito/
+http://evyatar.amitay.me/playground/alice/
