@@ -50,8 +50,6 @@ var LevelEditor = (function() {
         'height': 50
       },
 
-      sprites = [],
-
       spriteStartX = 0,
       spriteStartY = 0,
       spriteStartWidth = 0,
@@ -104,7 +102,8 @@ var LevelEditor = (function() {
     el.querySelector('.button-score').addEventListener('click', spawnScore);
     el.querySelector('.button-text').addEventListener('click', spawnText);
 
-    el.querySelector('.show-json').addEventListener('click', showJSON);
+    el.querySelector('.json-export').addEventListener('click', showJSON);
+    el.querySelector('.json-import').addEventListener('click', loadFromJSON);
 
     window.addEventListener('gameStart', function onFirstGameStart(e) {
       window.removeEventListener('gameStart', onFirstGameStart);
@@ -147,6 +146,39 @@ var LevelEditor = (function() {
     selection.addRange(range);
   }
 
+  function loadFromJSON() {
+    var jsonString = prompt('Pelase enter level\'s JSON:'),
+        json;
+
+    if (!jsonString) {
+      return;
+    }
+
+    try {
+      json = JSON.parse(jsonString);
+    } catch(ex) {
+      console.error('Invalid JSON!', ex, jsonString);
+    }
+
+    if (json) {
+      loadData(json);
+    }
+  }
+
+  function loadData(json) {
+    levelData = json;
+
+    el.querySelector('.width').value = levelData.size.width;
+    el.querySelector('.height').value = levelData.size.height;
+    
+    el.querySelector('.rotation-min').value = levelData.rotationLimit.min;
+    el.querySelector('.rotation-max').value = levelData.rotationLimit.max;
+
+    el.querySelector('.background').value = levelData.background;
+
+    initLevel();
+  }
+
   function begin() {
     initLevel();
   }
@@ -185,14 +217,6 @@ var LevelEditor = (function() {
     updateCurrentlyHoldingInformation();
   }
 
-  function drop() {
-    holding = null;
-  }
-
-  function place() {
-
-  }
-
   function play() {
     if (running) {
       return;
@@ -220,6 +244,15 @@ var LevelEditor = (function() {
       'x': Player.sprite.topLeft.x,
       'y': Player.sprite.topLeft.y,
     };
+
+    if (typeof levelData.frame === 'number') {
+      levelData.frame = {
+        'top': levelData.frame,
+        'left': levelData.frame,
+        'right': levelData.frame,
+        'bottom': levelData.frame
+      };
+    }
 
     var finishSprite = game.game.getSpriteById('finish');
     levelData.finish.x = finishSprite.topLeft.x - levelData.frame.left;
@@ -306,7 +339,7 @@ var LevelEditor = (function() {
                   .concat(game.game.layers[0].sprites);
 
     for (var i = 0, sprite; sprite = sprites[i++];) {
-      if (SPRITE_IDS_TO_EXCLUDE.indexOf(sprite.id) !== -1) {
+      if (sprite.id !== 'finish' && SPRITE_IDS_TO_EXCLUDE.indexOf(sprite.id) !== -1) {
         continue;
       }
 
@@ -569,8 +602,9 @@ var LevelEditor = (function() {
                       '<button class="play">Play</button>' +
                       '<button class="stop">Stop</button>' +
                     '</div>' +
-                    '<div class="export">' +
-                      '<button class="show-json">Show JSON</button>' +
+                    '<div class="json">' +
+                      '<button class="json-import">Import</button>' +
+                      '<button class="json-export">Export</button>' +
                     '</div>';
 
 

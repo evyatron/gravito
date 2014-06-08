@@ -654,17 +654,19 @@ a {
       #editor .rotation label select {
         width: 50px;
       }
+  #editor button {
+    padding: 4px 14px;
+  }
   #editor .game {
     position: absolute;
     bottom: 100%;
-    left: -5px;
+    left: 0;
     margin-bottom: 4px;
     padding: 0;
   }
-  #editor button {
-    padding: 4px 14px;
-    margin: 0 5px;
-  }
+    #editor .game button {
+      margin-right: 5px;
+    }
 
   #editor .controls {
     position: absolute;
@@ -730,13 +732,16 @@ a {
     width: 80px;
   }
 
-  #editor .show-json {
+  #editor .json {
     position: absolute;
     bottom: 100%;
-    right: -5px;
+    right: 0;
+    padding: 0;
     margin-bottom: 4px;
   }
-
+    #editor .json button {
+      margin-left: 5px;
+    }
 
 
 
