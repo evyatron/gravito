@@ -537,7 +537,7 @@ var LevelEditor = (function() {
   function onMouseMove(e) {
     var diffX = e.pageX - mouseStartX,
         diffY = e.pageY - mouseStartY,
-        snap = IS_SNAP || IS_CTRL_DOWN,
+        snap = (IS_SNAP && !IS_CTRL_DOWN) || (!IS_SNAP && IS_CTRL_DOWN),
         position = {
           'x': spriteStartX,
           'y': spriteStartY
