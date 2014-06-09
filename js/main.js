@@ -461,7 +461,23 @@
 
       elCanvas.width = this.sprite.width = elBubbling.offsetWidth;
       elCanvas.height = this.sprite.height = elBubbling.offsetHeight;
-      this.sprite.topLeft.y = this.sprite.height - 10;
+
+      this.sprite.topLeft = {
+        x: 0,
+        y: this.sprite.height - 10
+      };
+      this.sprite.topRight = {
+        x: this.sprite.topLeft.x + this.sprite.width,
+        y: this.sprite.topLeft.y
+      };
+      this.sprite.bottomLeft = {
+        x: 0,
+        y: this.sprite.topLeft.y + 10
+      };
+      this.sprite.bottomRight = {
+        x: this.sprite.topRight.x,
+        y: this.sprite.bottomLeft.y
+      };
     }
   };
 
@@ -1564,7 +1580,8 @@
 
       //console.log(utils.random(Bubbles.GENERATION_MIN, Bubbles.GENERATION_MAX))
 
-      var bubbles = this.bubblesConfig.bubbles;
+      var bubbles = this.bubblesConfig.bubbles,
+          gravityDirection = window.GRAVITY_DIRECTION;
 
       // normal bubbles generation
       this.bubblesConfig.timeSinceGeneration += dt;
@@ -1594,9 +1611,15 @@
             i--;
           }
         } else {
-          bubble.y -= bubble.speed * dt;
+          // move bubbles according to gravity
+          var newSpeed = gravityDirection.scale(bubble.speed * dt);
+          bubble.y -= newSpeed.y;
+          bubble.x -= newSpeed.x;
 
-          if (bubble.y < this.topLeft.y - bubble.margin) {
+          if (bubble.y < this.topLeft.y - bubble.margin ||
+              bubble.y > this.bottomLeft.y + bubble.margin ||
+              bubble.x > this.topRight.x + bubble.margin ||
+              bubble.x < this.topLeft.x - bubble.margin) {
             bubble.pop = true;
           }
         }
