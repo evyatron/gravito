@@ -1164,13 +1164,39 @@
     }
 
     if (frameWidth.bottom) {
-      platforms.push({
+      data = {
         'id': 'frame_bottom',
         'x': 0,
         'y': game.height - frameWidth.bottom,
         'width': game.width,
         'height': frameWidth.bottom
-      });
+      };
+
+      if (!utils.rectIntersect(finishData, data)) {
+        platforms.push(data);
+      } else {
+        platforms.push({
+          'id': 'frame_bottom_finish_left',
+          'x': 0,
+          'y': data.y,
+          'width': finishData.x + frameWidth.left,
+          'height': data.height
+        });
+        platforms.push({
+          'id': 'frame_bottom_finish_right',
+          'x': finishData.x + frameWidth.left + finishData.width,
+          'y': data.y,
+          'width': game.width - (finishData.x + frameWidth.left + finishData.width),
+          'height': data.height
+        });
+        platforms.push({
+          'id': 'frame_bottom_finish_behind',
+          'x': finishData.x + frameWidth.left,
+          'y': data.y + finishData.height,
+          'width': finishData.width,
+          'height': frameWidth.bottom
+        });
+      }
     }
 
     if (frameWidth.left) {
@@ -1182,11 +1208,7 @@
         'height': game.height
       };
 
-      if (finishData.width > finishData.height && utils.rectIntersect(finishData, data)) {
-
-      } else {
-        platforms.push(data);
-      }
+      platforms.push(data);
     }
 
     if (frameWidth.right) {
@@ -1198,7 +1220,9 @@
         'height': game.height
       };
 
-      if (utils.rectIntersect(finishData, data)) {
+      if (!utils.rectIntersect(finishData, data)) {
+        platforms.push(data);
+      } else {
         platforms.push({
           'id': 'frame_right_finish_top',
           'x': game.width - frameWidth.right,
@@ -1220,8 +1244,6 @@
           'width': frameWidth.right,
           'height': finishData.height
         });
-      } else {
-        platforms.push(data);
       }
     }
 

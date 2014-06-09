@@ -75,7 +75,7 @@ var LevelEditor = (function() {
         'player',
         'finish', 'finish-light',
         'frame_top',
-        'frame_bottom',
+        'frame_bottom', 'frame_bottom_finish_left', 'frame_bottom_finish_right', 'frame_bottom_finish_behind',
         'frame_left',
         'frame_right', 'frame_right_finish_top', 'frame_right_finish_bottom', 'frame_right_finish_behind'
       ];
