@@ -96,12 +96,31 @@ a {
   position: absolute;
   bottom: 0;
   left: 50%;
-  width: 500px;
-  margin-left: -250px;
-  height: 80px;
+  width: 1000px;
+  margin-left: -500px;
+  height: 160px;
   background: rgba(255, 255, 255, .1);
-  border-radius: 6px 6px 0 0;
+  border-radius: 12px 12px 0 0;
+  -webkit-transform-origin: 50% 100%;
+  transform-origin: 50% 100%;
 }
+#controls {
+  -webkit-transform: scale(0.5);
+  transform: scale(0.5);
+}
+body:-webkit-full-screen #controls {
+  -webkit-transform: scale(1);
+  transform: scale(1);
+}
+body:-moz-full-screen #controls {
+  -webkit-transform: scale(1);
+  transform: scale(1);
+}
+body:full-screen #controls {
+  -webkit-transform: scale(1);
+  transform: scale(1);
+}
+
   #controls > div {
     position: absolute;
     top: 0;
@@ -122,14 +141,14 @@ a {
   }
 
   #controls .gravity {
-    top: 10px;
-    left: 26px;
-    width: 60px;
-    height: 60px;
+    top: 20px;
+    left: 52px;
+    width: 120px;
+    height: 120px;
     z-index: 100;
     overflow: hidden;
     background: #444;
-    box-shadow: 0 0 0 2px rgba(0, 0, 0, 1);
+    box-shadow: 0 0 0 4px rgba(0, 0, 0, 1);
     /* weird values to give it a wonky look */
     border-radius: 47%/57% 49% 48% 40%;
     -webkit-transform: rotate(45deg);
@@ -137,13 +156,13 @@ a {
   }
     #controls .gravity .needle {
       position: absolute;
-      top: 15px;
-      left: 15px;
+      top: 30px;
+      left: 30px;
       width: 0;
       height: 0;
       z-index: 100;
       pointer-events: none;
-      border: 25px solid transparent;
+      border: 50px solid transparent;
       border-bottom-color: rgba(255, 255, 255, .4);
       border-right-color: rgba(255, 255, 255, .4);
       /* same duration as #canvases above */
@@ -162,23 +181,23 @@ a {
     }
     .rotation--90 #controls .gravity .needle,
     .rotation-270 #controls .gravity .needle {
-      top: 15px;
-      left: -5px;
+      top: 30px;
+      left: -10px;
     }
     .rotation--180 #controls .gravity .needle,
     .rotation-180 #controls .gravity .needle {
-      top: -5px;
-      left: -5px;
+      top: -10px;
+      left: -10px;
     }
     .rotation--270 #controls .gravity .needle,
     .rotation-90 #controls .gravity .needle {
       top: 0;
-      left: 15px;
+      left: 30px;
     }
     #controls .rotate-gravity {
       position: absolute;
-      height: 50px;
-      width: 20px;
+      height: 100px;
+      width: 40px;
       font-size: 0;
       pointer-events: auto;
       cursor: pointer;
@@ -188,37 +207,37 @@ a {
       transform: rotate(-45deg);
     }
     #controls #gravity-rotate-left {
-      left: -10px;
-      bottom: -10px;
+      left: -20px;
+      bottom: -20px;
       -webkit-transform: rotate(-45deg) scale(-1, 1);
       transform: rotate(-45deg) scale(-1, 1);
     }
     #controls #gravity-rotate-right {
-      left: 10px;
-      bottom: 10px;
+      left: 20px;
+      bottom: 20px;
     }
     #controls .rotate-gravity:before,
     #controls .rotate-gravity:after {
       content: '';
       position: absolute;
       left: 0;
-      border: 2px solid rgba(255, 255, 255, .4);
+      border: 4px solid rgba(255, 255, 255, .4);
       border-radius: 50%/0% 50%;
-      border-width: 2px 0 0 2px;
+      border-width: 4px 0 0 4px;
     }
     #controls .rotate-gravity:before {
-      bottom: 5px;
-      width: 7px;
-      height: 20px;
-      border-width: 2px 2px 0 0;
-      border-radius: 0 15px 0 0;
+      bottom: 10px;
+      width: 14px;
+      height: 40px;
+      border-width: 4px 4px 0 0;
+      border-radius: 0 30px 0 0;
       -webkit-transform: rotate(8deg);
       transform: rotate(8deg);
     }
     #controls .rotate-gravity:after {
-      bottom: 22px;
-      width: 5px;
-      height: 5px;
+      bottom: 44px;
+      width: 10px;
+      height: 10px;
       -webkit-transform: rotate(-16deg);
       transform: rotate(-16deg);
     }
@@ -228,16 +247,16 @@ a {
     }
 
   #controls .movement {
-    top: 10px;
-    right: 10px;
+    top: 20px;
+    right: 20px;
   }
     #controls .movement b {
       float: left;
-      width: 30px;
-      height: 30px;
-      font: 300 20px monospace;
+      width: 60px;
+      height: 60px;
+      font: 300 40px monospace;
       text-align: center;
-      line-height: 27px;
+      line-height: 54px;
       cursor: pointer;
       border-radius: 50%/60% 49% 47% 48%;
       background: #555;
@@ -248,24 +267,24 @@ a {
       background: #666;
     }
     #controls .movement #move-right {
-      margin-left: 2px;
+      margin-left: 4px;
     }
     #controls .movement #move-jump {
       display: block;
       float: none;
-      margin: 0 auto 2px auto;
+      margin: 0 auto 8px auto;
     }
     #controls .movement b.active {
       line-height: 29px;
-      text-indent: 1px;
-      box-shadow: 1px 1px 0 0 rgba(0, 0, 0, .7) inset,
-                  0 0 0 2px rgba(0, 0, 0, 1);
+      text-indent: 2px;
+      box-shadow: 2px 2px 0 0 rgba(0, 0, 0, .7) inset,
+                  0 0 0 4px rgba(0, 0, 0, 1);
       background: #444;
     }
 
   #levelScores {
     position: absolute;
-    top: 2px;
+    top: 13px;
     left: 0;
     right: 0;
     text-align: center;
@@ -274,31 +293,31 @@ a {
   }
     #levelScores li {
       display: inline-block;
-      width: 8px;
-      height: 8px;
-      margin: 0 6px;
+      width: 17px;
+      height: 17px;
+      margin: 0 12px;
       background: rgba(0, 0, 0, .1);
-      box-shadow: 0 0 0 4px rgba(255, 255, 255, .1);
+      box-shadow: 0 0 0 8px rgba(255, 255, 255, .1);
       -webkit-transition: all 400ms ease-in;
       transition: all 400ms ease-in;
     }
     #levelScores li.picked {
       background: rgba(190, 120, 0, 1);
-      box-shadow: 0 0 0 4px rgba(240, 210, 140, .15);
+      box-shadow: 0 0 0 8px rgba(240, 210, 140, .15);
     }
 
   #totalScore {
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 100px;
-    height: 34px;
-    line-height: 34px;
+    width: 200px;
+    height: 68px;
+    line-height: 68px;
     text-align: center;
-    font-size: 33px;
-    margin: -17px 0 0 -50px;
+    font-size: 66px;
+    margin: -34px 0 0 -100px;
     background: rgba(255, 255, 255, .7);
-    border-radius: 5px;
+    border-radius: 10px;
   }
     #totalScore b {
       font-weight: 300;
