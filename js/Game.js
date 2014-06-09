@@ -186,7 +186,8 @@ Game = (function() {
             'right': 'left'
           },
 
-          i = 0, layer, sprite, spriteWith, collision, appliedFriction;
+          i = 0, layer, sprite, spriteWith,
+          collision, appliedFriction, appliedDensity;
 
 
       // limit tick interval to 60FPS
@@ -210,6 +211,7 @@ Game = (function() {
       for (i = 0; sprite = colliders[i++];) {
         sprite.resting = false;
         appliedFriction = false;
+        appliedDensity = {};
 
         if (sprite.id === 'player') {
           Log.title('collisions');
@@ -233,7 +235,10 @@ Game = (function() {
           sprite.collide(spriteWith, collision);
 
           if (!spriteWith.solid) {
-            sprite.velocity = sprite.velocity.scale(spriteWith.density);
+            if (!appliedDensity[spriteWith.type]) {
+              appliedDensity[spriteWith.type] = true;
+              sprite.velocity = sprite.velocity.scale(spriteWith.density);
+            }
             continue;
           }
 

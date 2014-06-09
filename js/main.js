@@ -986,10 +986,18 @@
         }
       },
       'death': function onPlayerCollisionWithDeath(sprite, direction) {
+        if (this.dying) {
+          return;
+        }
+
+        var self = this;
+
+        this.dying = true;
+
         Player.disableControl();
         Player.stopAllMovement();
 
-        var volume = 1.05;
+        var volume = 1;
         function lowerVolume() {
           volume -= 0.015;
 
@@ -997,6 +1005,7 @@
             SoundManager.stop('water');
             window.setTimeout(function() {
               playerDie(DEATHS.POISON);
+              self.dying = false;
             }, 250);
           } else {
             SoundManager.setVolume('water', volume);
@@ -1004,7 +1013,6 @@
           }
         }
         lowerVolume();
-
       },
       'score': function onPlayerCollisionWithScore(sprite, direction) {
         // remove the collected point from the game
