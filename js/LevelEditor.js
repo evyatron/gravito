@@ -390,6 +390,22 @@ var LevelEditor = (function() {
     position.y = Math.max(position.y, 0);
   }
 
+  function checkSpawnPlatform() {
+    IS_SHIFT_DOWN && spawnPlatform();
+  }
+  function checkSpawnMovable() {
+    IS_SHIFT_DOWN && spawnMovable();
+  }
+  function checkSpawnScore() {
+    IS_SHIFT_DOWN && spawnScore();
+  }
+  function checkSpawnText() {
+    IS_SHIFT_DOWN && spawnText();
+  }
+  function checkSpawnDeath() {
+    IS_SHIFT_DOWN && spawnDeath();
+  }
+
   function spawnPlatform() {
     var sprite = game.createPlatform({
       'id': 'new_platform_' + Date.now(),
@@ -501,19 +517,19 @@ var LevelEditor = (function() {
         deleteHeldSprite();
         break;
       case 49: // 1
-        spawnPlatform();
+        checkSpawnPlatform();
         break;
       case 50: // 2
-        spawnMovable();
+        checkSpawnMovable();
         break;
       case 51: // 3
-        spawnScore();
+        checkSpawnScore();
         break;
       case 51: // 4
-        spawnText();
+        checkSpawnText();
         break;
       case 52: // 5
-        spawnDeath();
+        checkSpawnDeath();
         break;
     }
   }
