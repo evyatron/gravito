@@ -1583,6 +1583,10 @@
       var bubbles = this.bubblesConfig.bubbles,
           gravityDirection = window.GRAVITY_DIRECTION;
 
+          if (gravityDirection.x === 0 && gravityDirection.y === 0) {
+            return;
+          }
+
       // normal bubbles generation
       this.bubblesConfig.timeSinceGeneration += dt;
       if (this.bubblesConfig.timeSinceGeneration >= this.bubblesConfig.timeToGenerate) {
