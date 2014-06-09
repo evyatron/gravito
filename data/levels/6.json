@@ -1,46 +1,108 @@
 {
   "frame": 10,
-  "background": "",
+  "background": "#ffffff",
   "size": {
-    "width": 800,
-    "height": 600
+    "width": 400,
+    "height": 499
   },
   "player": {
-    "x": 10,
-    "y": 570
+    "x": 20,
+    "y": 210
   },
   "finish": {
-    "x": 780,
-    "y": 530,
-    "width": 10,
-    "height": 50
+    "x": 310,
+    "y": 479,
+    "width": 70,
+    "height": 10
   },
   "rotationLimit": {
-    "min": -360,
-    "max": 360
+    "min": -90,
+    "max": 0
   },
-
   "platforms": [
     {
-      "x": 110,
-      "y": 549,
-      "width": 120,
+      "x": 0,
+      "y": 223,
+      "width": 80,
       "height": 10
     },
     {
-      "x": 201,
-      "y": 498,
-      "width": 60,
-      "height": 10
+      "x": 50,
+      "y": 0,
+      "width": 10,
+      "height": 60
+    },
+    {
+      "x": 110,
+      "y": 30,
+      "width": 10,
+      "height": 40
+    },
+    {
+      "x": 120,
+      "y": 100,
+      "width": 50,
+      "height": 20
+    },
+    {
+      "x": 240,
+      "y": 0,
+      "width": 10,
+      "height": 30
+    },
+    {
+      "x": 290,
+      "y": 90,
+      "width": 30,
+      "height": 50
+    },
+    {
+      "x": 300,
+      "y": 320,
+      "width": 10,
+      "height": 160
+    },
+    {
+      "x": 200,
+      "y": 50,
+      "width": 20,
+      "height": 20
+    },
+    {
+      "x": 240,
+      "y": 150,
+      "width": 20,
+      "height": 80
     }
   ],
   "movables": [],
-  "collectibles": [],
+  "collectibles": [
+    {
+      "x": 0,
+      "y": 323,
+      "width": 300,
+      "height": 157,
+      "type": "death"
+    },
+    {
+      "x": 0,
+      "y": 233,
+      "width": 77,
+      "height": 90,
+      "type": "death"
+    }
+  ],
   "scores": [
     {
-      "x": 329,
-      "y": 435,
+      "x": 230,
+      "y": 200,
       "id": "score_1",
+      "type": "score"
+    },
+    {
+      "x": 320,
+      "y": 400,
+      "id": "score_2",
       "type": "score"
     }
   ]
