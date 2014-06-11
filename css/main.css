@@ -615,7 +615,15 @@ body:full-screen #controls {
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 1);
 }
 .editor #controls {
+  width: 500px;
   height: 170px;
+  margin-left: -250px;
+  border: 1px solid #000;
+  border-bottom-width: 0;
+  box-shadow: 0 0 5px 1px rgba(0, 0, 0, .5);
+  border-radius: 0;
+  -webkit-transform: scale(1);
+  transform: scale(1);
 }
 
 #controls:before {
@@ -647,7 +655,7 @@ body:full-screen #controls {
   opacity: 1;
   pointer-events: inherit;
   z-index: 500;
-  background: rgba(255, 255, 255, 1);
+  background: linear-gradient(to bottom, #fff, #ccc);
 }
   #editor > div {
     padding: 5px;

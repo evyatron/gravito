@@ -142,34 +142,45 @@ var LevelEditor = (function() {
 
     json = JSON.stringify(json, undefined, 2),
 
-    doc.write('<pre>' + json + '</pre>');
+    doc.write('<pre contenteditable>' + json + '</pre>');
     doc.title = 'Level';
 
     // automatically select the entire content
     var selection = w.getSelection(),
         range = doc.createRange();
 
-    range.selectNodeContents(doc.body);
+    range.selectNodeContents(doc.body.firstChild);
     selection.removeAllRanges();
     selection.addRange(range);
   }
 
   function loadFromJSON() {
-    var jsonString = prompt('Pelase enter level\'s JSON:'),
+    var jsonString = prompt("Enter JSON content or level number to load:"),
         json;
 
     if (!jsonString) {
       return;
     }
 
-    try {
-      json = JSON.parse(jsonString);
-    } catch(ex) {
-      console.error('Invalid JSON!', ex, jsonString);
-    }
+    if (jsonString * 1 == jsonString) {
+      utils.json('data/levels/' + jsonString + '.json', function(data) {
+        if (data) {
+          loadData(data);
+        } else {
+          console.error('Invalid level', data);
+          alert('Invalid level!')
+        }
+      });
+    } else {
+      try {
+        json = JSON.parse(jsonString);
+      } catch(ex) {
+        console.error('Invalid JSON!', ex, jsonString);
+      }
 
-    if (json) {
-      loadData(json);
+      if (json) {
+        loadData(json);
+      }
     }
   }
 
@@ -179,8 +190,8 @@ var LevelEditor = (function() {
     el.querySelector('.width').value = levelData.size.width;
     el.querySelector('.height').value = levelData.size.height;
     
-    el.querySelector('.rotation-min').value = levelData.rotationLimit.min;
-    el.querySelector('.rotation-max').value = levelData.rotationLimit.max;
+    el.querySelector('.rotation-min').value = levelData.rotationLimit && levelData.rotationLimit.min || 0;
+    el.querySelector('.rotation-max').value = levelData.rotationLimit && levelData.rotationLimit.max || 0;
 
     el.querySelector('.background').value = levelData.background;
 
