@@ -80,7 +80,7 @@
       "borderColor": "rgba(0, 138, 0, 1)",
       "borderSize": 4,
       "data": {
-        "collisionCallback": "onCollectRotate1"
+        "collisionCallback": "onCollectRotateHalf"
       }
     },
     {

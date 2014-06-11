@@ -136,6 +136,7 @@
 
     WRAPPER.game = game;
     window.game = game;
+    window.main = WRAPPER;
 
     // create all sprite layers - background, player, etc.
     layerBackground = new Layer({
@@ -1358,21 +1359,12 @@
     },
 
     onKeyPress: function onKeyPress(e) {
-      var keyCode = e.keyCode;
-      switch (keyCode) {
+      switch (e.keyCode) {
         case 68: // A
           playerRotateGravity(-90);
           break;
         case 65: // D
           playerRotateGravity(90);
-          break;
-        case 70: //F
-          layerObjects.addSprite(new Movable({
-            x: Player.sprite.topLeft.x,
-            y: Player.sprite.topLeft.y,
-            width: Player.sprite.width,
-            height: Player.sprite.height
-          }));
           break;
       }
     },

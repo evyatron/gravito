@@ -1,7 +1,7 @@
 (function() {
   var Level = {
     'actions': {
-      'onCollectRotateHalf': function onCollectRotateHalf(sprite, direction) {
+      'onCollectRotateFull': function onCollectRotateFull(sprite, direction) {
         var game = this;
 
         // remove the device from the game
@@ -14,19 +14,14 @@
         // show the dialog
         Dialog.show({
           'id': 'gravity1',
-          'text': utils.l10n.get('gravity-half'),
+          'text': utils.l10n.get('gravity-full'),
           'sprite': Player.sprite,
           'onMethod': function onMethod(method, onDone) {
-            if (method === 'gravityCCW') {
-              game.rotateGravity(-90);
-              window.setTimeout(onDone, 2000);
-            } else if (method === 'gravityCW') {
-              game.rotateGravity(90);
-              window.setTimeout(onDone, 1800);
-            }
+            game.rotateGravity(90);
+            window.setTimeout(onDone, 2000);
           },
           'onEnd': function onDialogEnd() {
-            game.setPlayerAllowedRotation(90);
+            game.setPlayerAllowedRotation(360);
             Player.enableControl();
           }
         });
