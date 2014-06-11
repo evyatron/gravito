@@ -119,7 +119,13 @@ var LevelEditor = (function() {
     });
 
     document.body.classList.add('editor');
+    toggleGrid();
+
     onSnapChange();
+  }
+
+  function toggleGrid() {
+    document.body.classList.toggle('show-grid');
   }
 
   function onSnapChange() {
@@ -518,6 +524,9 @@ var LevelEditor = (function() {
 
   function onKeyUp(e) {
     switch (e.keyCode) {
+      case 9: // Tab
+        toggleGrid();
+        break;
       case 16: // Shift
         IS_SHIFT_DOWN = false;
         break;
