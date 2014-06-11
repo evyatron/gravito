@@ -17,7 +17,7 @@
           'text': utils.l10n.get('gravity-full'),
           'sprite': Player.sprite,
           'onMethod': function onMethod(method, onDone) {
-            game.rotateGravity(90);
+            game.rotateGravity(-90);
             window.setTimeout(onDone, 2000);
           },
           'onEnd': function onDialogEnd() {

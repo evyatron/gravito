@@ -46,6 +46,9 @@ Sprite = (function() {
 
       fillWith(this, options);
 
+      this.width = Math.max(this.width, 0);
+      this.height = Math.max(this.height, 0);
+
       if (!this.id) {
         this.id = 'Sprite_' + Date.now() + '_' + Math.round(Math.random() * 1000);
       }

@@ -331,7 +331,16 @@ var LevelEditor = (function() {
           };
           collectibles.push(data);
           break;
+        case 'collectible':
+          data.id = sprite.id;
+          data.background = sprite.background;
+          data.borderColor = sprite.borderColor;
+          data.borderSize = sprite.borderSize;
+          data.data = sprite.data;
+          collectibles.push(data);
+          break;
         default:
+          data.type = sprite.type;
           collectibles.push(data);
       }
     }
@@ -580,8 +589,8 @@ var LevelEditor = (function() {
         };
     
     if (IS_SHIFT_DOWN) {
-      holding.width = spriteStartWidth + diffX;
-      holding.height = spriteStartHeight + diffY;
+      holding.width = Math.max(spriteStartWidth + diffX, 0);
+      holding.height = Math.max(spriteStartHeight + diffY, 0);
 
       if (snap) {
         holding.width -= holding.width % 10;
