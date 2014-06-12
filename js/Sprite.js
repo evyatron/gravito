@@ -210,7 +210,7 @@ Sprite = (function() {
 
       var force = this.velocity.scale(-1);
 
-      if (this.gravity && !this.resting) {
+      if (this.gravity) {
         force = force.add(window.GRAVITY);
       }
 
@@ -326,18 +326,18 @@ Sprite = (function() {
           hHeights = this.halfHeight + sprite.halfHeight;
 
       // if the x and y vector are less than the half width or half height, they we must be inside the object, causing a collision
-      if (Math.abs(vX) <= hWidths && Math.abs(vY) <= hHeights) {
+      if (Math.abs(vX) < hWidths && Math.abs(vY) < hHeights) {
         var oX = hWidths - Math.abs(vX),
             oY = hHeights - Math.abs(vY);
 
-        if (oX >= oY) {
-          if (vY >= 0) {
+        if (oX > oY) {
+          if (vY > 0) {
             return 'top';
           } else {
             return 'bottom';
           }
         } else {
-          if (vX >= 0) {
+          if (vX > 0) {
             return 'left';
           } else {
             return 'right';

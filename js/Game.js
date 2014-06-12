@@ -225,7 +225,7 @@ Game = (function() {
 
           collision = sprite.collidesWith(spriteWith, dt);
 
-          // no collision - don't resolve
+          // no collision - nothing to resolve
           if (!collision) {
             continue;
           }
@@ -254,7 +254,7 @@ Game = (function() {
           }
 
           if (collision === 'bottom') {
-            sprite.set(null, spriteWith.topLeft.y - sprite.height);
+            sprite.set(null, spriteWith.topLeft.y - sprite.height + 0.01);
 
             if (restOnBottom) {
               sprite.velocity.y = -sprite.velocity.y * Math.min((spriteWith.bounce.top + sprite.bounce.bottom)/2, 0.4);
@@ -266,7 +266,7 @@ Game = (function() {
               }
             }
           } else if (collision === 'top') {
-            sprite.set(null, spriteWith.bottomLeft.y);
+            sprite.set(null, spriteWith.bottomLeft.y - 0.01);
 
             if (restOnTop) {
               sprite.velocity.y = -sprite.velocity.y * (spriteWith.bounce.bottom + sprite.bounce.top)/2;
@@ -278,7 +278,7 @@ Game = (function() {
               }
             }
           } else if (collision === 'left') {
-            sprite.set(spriteWith.topRight.x, null);
+            sprite.set(spriteWith.topRight.x - 0.01, null);
             
             if (restOnLeft) {
               sprite.velocity.x = -sprite.velocity.x * (spriteWith.bounce.right + sprite.bounce.left)/2;
@@ -290,7 +290,7 @@ Game = (function() {
               }
             }
           } else if (collision === 'right') {
-            sprite.set(spriteWith.topLeft.x - sprite.width, null);
+            sprite.set(spriteWith.topLeft.x - sprite.width + 0.01, null);
 
             if (restOnRight) {
               sprite.velocity.x = -sprite.velocity.x * (spriteWith.bounce.left + sprite.bounce.right)/2;
