@@ -1119,7 +1119,7 @@
 
     var sprite = new Sprite(data);
 
-    if (data.type === 'death') {
+    if (sprite.data.bubbles) {
       // change the "death" area methods to add the bubbling
       sprite.update = Bubbles.update;
       sprite.draw = Bubbles.draw;
