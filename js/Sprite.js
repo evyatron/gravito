@@ -6,6 +6,7 @@ Sprite = (function() {
     this.height = 0;
     this.mass = 1;
     this.density = 1;
+    this.boundingMargin = 0;
 
     this.data = {};
 
@@ -322,8 +323,8 @@ Sprite = (function() {
       var vX = (this.topLeft.x + this.halfWidth) - (sprite.topLeft.x + sprite.halfWidth),
           vY = (this.topLeft.y + this.halfHeight) - (sprite.topLeft.y + sprite.halfHeight),
           // add the half widths and half heights of the objects
-          hWidths = this.halfWidth + sprite.halfWidth,
-          hHeights = this.halfHeight + sprite.halfHeight;
+          hWidths = this.halfWidth + sprite.halfWidth, // - this.boundingMargin,
+          hHeights = this.halfHeight + sprite.halfHeight; // - this.boundingMargin;
 
       // if the x and y vector are less than the half width or half height, they we must be inside the object, causing a collision
       if (Math.abs(vX) < hWidths && Math.abs(vY) < hHeights) {

@@ -9,6 +9,7 @@ window.Player = (function() {
         'movable': true,
         'gravity': true,
         'bounce': 0,
+        'boundingMargin': 2,
         'solid': true,
         'maxVelocity': new Vector(4, 500000),
         'velocity': new Vector(0, 0),
