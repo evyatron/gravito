@@ -1126,21 +1126,26 @@
 
       // if we have a death sound - automatically create ambient around the death area
       if (DEATH_AREA_SOUND) {
+        var deathWidth = data.width,
+            deathHeight = data.height,
+            deathX = data.x,
+            deathY = data.y;
+
         for (var i = 1, sizeStep; i <= DEATH_SOUND_NUMBER_OF_STEPS; i++) {
           sizeStep = DEATH_SOUND_DISTANCE_STEP * i;
 
           var spriteData = getSpriteData({
             'x': data.x - sizeStep,
             'y': data.y - sizeStep,
-            'width': data.width + sizeStep * 2,
-            'height': data.height + sizeStep * 2,
+            'width': deathWidth + sizeStep * 2,
+            'height': deathHeight + sizeStep * 2,
             'type': 'death-ambient',
             'collisionable': true,
             'data': {
               'sound': DEATH_AREA_SOUND,
               'volume': 1 - (i / (DEATH_SOUND_NUMBER_OF_STEPS + 1))
             }
-          });
+          }, null, false);
 
           layerObjects.addSprite(new Sprite(spriteData));
         }
@@ -1650,8 +1655,6 @@
     // note that this is still all under a single sprite!
     draw: function drawBubble(context) {
       var pos = this.topLeft;
-
-      context.clearRect(0, 0, this.width, this.height);
 
       context.fillStyle = this.background;
       context.fillRect(Math.round(pos.x), Math.round(pos.y), this.width, this.height);
