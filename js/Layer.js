@@ -75,10 +75,10 @@ Layer = (function() {
       }
 
       var sprites = this.sprites,
-          context = this.context;
+          context = this.context,
+          canvas = context.canvas;
 
-      context.clearRect(0, 0, this.context.canvas.width, this.context.canvas.height)
-
+      context.clearRect(0, 0, canvas.width, canvas.height);
       for (var i = 0, sprite; sprite = sprites[i++];) {
         sprite.draw(context, dt);
       }
