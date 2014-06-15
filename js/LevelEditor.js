@@ -490,7 +490,6 @@ var LevelEditor = (function() {
       'height': DEFAULT_DEATH.height
     });
     game.layerObjects.addSprite(sprite);
-    console.log(sprite)
     updateLevelData();
   }
 
