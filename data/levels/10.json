@@ -1,0 +1,114 @@
+{
+  "frame": 10,
+  "background": "#ffffff",
+  "size": {
+    "width": 600,
+    "height": 600
+  },
+  "player": {
+    "x": 30,
+    "y": 80
+  },
+  "finish": {
+    "x": 580,
+    "y": 450,
+    "width": 10,
+    "height": 50
+  },
+  "rotationLimit": {
+    "min": 0,
+    "max": 0
+  },
+  "platforms": [
+    {
+      "x": 0,
+      "y": 100,
+      "width": 140,
+      "height": 30
+    },
+    {
+      "x": 110,
+      "y": 130,
+      "width": 30,
+      "height": 390
+    },
+    {
+      "x": 250,
+      "y": 70,
+      "width": 120,
+      "height": 20,
+      "script": {
+        "move": {
+          "y": {
+            "to": 570,
+            "speed": 110
+          }
+        }
+      }
+    },
+    {
+      "x": 620,
+      "y": 50,
+      "width": 60,
+      "height": 20
+    },
+    {
+      "x": 450,
+      "y": 500,
+      "width": 130,
+      "height": 20
+    },
+    {
+      "x": 140,
+      "y": 500,
+      "width": 30,
+      "height": 20
+    }
+  ],
+  "movables": [],
+  "collectibles": [
+    {
+      "x": 0,
+      "y": 230,
+      "width": 110,
+      "height": 350,
+      "type": "death"
+    },
+    {
+      "x": 110,
+      "y": 520,
+      "width": 470,
+      "height": 60,
+      "type": "death"
+    },
+    {
+      "x": 10,
+      "y": 210,
+      "width": 20,
+      "height": 20,
+      "type": "death"
+    },
+    {
+      "x": 70,
+      "y": 220,
+      "width": 20,
+      "height": 10,
+      "type": "death"
+    },
+    {
+      "x": 100,
+      "y": 220,
+      "width": 10,
+      "height": 10,
+      "type": "death"
+    },
+    {
+      "x": 0,
+      "y": 220,
+      "width": 10,
+      "height": 10,
+      "type": "death"
+    }
+  ],
+  "scores": []
+}

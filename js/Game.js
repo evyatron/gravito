@@ -84,7 +84,7 @@ Game = (function() {
       if (spriteAdded.collisionable) {
         this.collisionables.push(spriteAdded);
 
-        if (spriteAdded.movable) {
+        if (spriteAdded.movable || spriteAdded.script.move) {
           this.colliders.push(spriteAdded);
         }
       }
@@ -318,6 +318,11 @@ Game = (function() {
             if (!appliedFriction && gravity === collision) {
               appliedFriction = true;
               sprite.velocity[movementAxis] -= sprite.velocity[movementAxis] * spriteWith.friction[movementAxis];
+
+              // if moving - move the object on top
+              if (spriteWith.velocity[movementAxis]) {
+                sprite.velocity[movementAxis] = spriteWith.velocity[movementAxis];
+              }
             }
 
             if (Math.abs(sprite.velocity[gravityAxis]) <= Math.abs(GRAVITY[gravityAxis] * dt)) {
