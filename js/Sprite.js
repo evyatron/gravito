@@ -9,6 +9,7 @@ Sprite = (function() {
     this.boundingMargin = 0;
 
     this.data = {};
+    this.script = {};
 
     this.isPlayer = false;
 
@@ -74,6 +75,11 @@ Sprite = (function() {
       this.bottomRight = new Vector(this.topLeft.x + this.width, this.topLeft.y + this.height);
       this.bottomLeft = new Vector(this.topLeft.x, this.topLeft.y + this.height);
 
+      this.originalPosition = {
+        'x': this.topLeft.x,
+        'y': this.topLeft.y
+      };
+
       this.halfWidth = this.width / 2;
       this.halfHeight = this.height / 2;
 
@@ -117,8 +123,8 @@ Sprite = (function() {
     },
 
     move: function move(vector) {
-      var x = vector.x,
-          y = vector.y;
+      var x = vector.x || 0,
+          y = vector.y || 0;
 
       this.topLeft.x += x;
       this.topLeft.y += y;

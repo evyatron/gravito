@@ -399,10 +399,12 @@
       }
 
       var now = Date.now(),
-          dt = (now - this.lastUpdate) / 1000;
+          dt = (now - this.lastUpdate) / 1000,
+          context = this.context;
 
+      context.clearRect(0, 0, context.canvas.width, context.canvas.height);
       this.sprite.update(dt);
-      this.sprite.draw(this.context);
+      this.sprite.draw(context);
 
       this.lastUpdate = now;
       this.raf = window.requestAnimationFrame(this._tick);
@@ -1091,7 +1093,11 @@
       'friction': new Vector(DEFAULT_PLATFORM_FRICTION_X, DEFAULT_PLATFORM_FRICTION_Y)
     }, frame);
 
-    return new Sprite(data);
+    if ((data.script || {}).move) {
+      return new SpriteMoving(data);
+    } else {
+      return new Sprite(data);
+    }
   }
 
   function createMovable(spriteData, frame) {
@@ -1596,8 +1602,6 @@
         timeToGenerateMega: 0,
         bubbles: []
       });
-
-      //console.log(utils.random(Bubbles.GENERATION_MIN, Bubbles.GENERATION_MAX))
 
       var bubbles = this.bubblesConfig.bubbles,
           gravityDirection = window.GRAVITY_DIRECTION;

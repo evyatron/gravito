@@ -141,14 +141,24 @@
   ],
   "levels": [
     "tutorial, just steps to reach the next level",
+    "...",
     "get *gravity controller* - need to reach the top but no stairs, need to rotate",
-    "*poison pools*",
+    "...",
+    "*points* - need to give reason to collect",
+    "...",
+    "*poison pools* - easy to jump over",
+    "...",
     "*holes* - play with gravity",
+    "...",
     "*movables* - need to push to block a hole",
+    "...",
     "normal maze with all elements",
-    "*slippery platforms* - holes with slippery platforms in between"
-  ],
-  "design": [
-    "create UI representation of gravity device (and name)"
+    "...",
+    "get *second gravity* controller for full rotation",
+    "...",
+    "*slippery platforms* - holes with slippery platforms in between",
+    "...",
+    "before final level, cut scene with text - waking up in bed, getting up, etc... going outside and-",
+    "FINAL LEVEL - single line, respawn points for fun"
   ]
 }
